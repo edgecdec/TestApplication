@@ -19,6 +19,7 @@ interface GameCardProps {
   userPicks?: Record<string, string>;
   focused?: boolean;
   onFocus?: (gameId: string) => void;
+  highlightTeam?: string;
 }
 
 function teamClass(team: string | null, pick: string | null, result: string | null): string {
@@ -45,6 +46,7 @@ export default function GameCard({
   userPicks,
   focused,
   onFocus,
+  highlightTeam,
 }: GameCardProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = REGION_COLORS[region as RegionName] ?? "#6b7280";
@@ -77,9 +79,13 @@ export default function GameCard({
     }
   }
 
+  const teamMatches = highlightTeam
+    ? (topTeam?.toLowerCase().includes(highlightTeam) || bottomTeam?.toLowerCase().includes(highlightTeam))
+    : false;
+
   return (
     <div
-      className={`border rounded bg-white shadow-sm w-40 overflow-hidden relative${focused ? " ring-2 ring-blue-400 ring-offset-1" : ""}`}
+      className={`border rounded bg-white shadow-sm w-40 overflow-hidden relative${focused ? " ring-2 ring-blue-400 ring-offset-1" : ""}${teamMatches ? " ring-2 ring-yellow-400 ring-offset-1" : ""}`}
       style={{ borderLeftColor: color, borderLeftWidth: 3 }}
       data-game-id={gameId}
       onClick={() => onFocus?.(gameId)}

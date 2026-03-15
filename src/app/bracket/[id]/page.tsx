@@ -102,6 +102,8 @@ function BracketView({ data }: { data: LoadedData }) {
   const router = useRouter();
   const bracketRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const [teamSearch, setTeamSearch] = useState("");
+  const highlightTeam = teamSearch.trim().toLowerCase() || undefined;
   // Memoize initialPicks so the reference is stable across renders (prevents infinite re-render loop)
   const initialPicks: Picks = useMemo(() => JSON.parse(data.bracket.picks), [data.bracket.picks]);
   const { picks, tiebreaker, dirty, saving, error, lastSavedAt, makePick, bulkSetPicks, updateTiebreaker, save, undo, redo, canUndo, canRedo } = useBracketPicks({
@@ -135,6 +137,20 @@ function BracketView({ data }: { data: LoadedData }) {
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-bold">🏀 {data.bracket.name}</h1>
           <LockCountdown lockTime={data.tournament.lock_time} />
+        </div>
+        <div className="flex items-center gap-2 no-print">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="🔍 Find team…"
+              value={teamSearch}
+              onChange={(e) => setTeamSearch(e.target.value)}
+              className="w-36 border rounded px-2 py-1 text-xs dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+            {teamSearch && (
+              <button onClick={() => setTeamSearch("")} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">✕</button>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 no-print">
           {error && <span className="text-red-600 text-xs">{error}</span>}
@@ -228,6 +244,7 @@ function BracketView({ data }: { data: LoadedData }) {
             locked={data.locked}
             distribution={data.distribution}
             seedLookup={seedLookup}
+            highlightTeam={highlightTeam}
           />
         </div>
       ) : (
@@ -247,6 +264,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   seedLookup={seedLookup}
                   focusedGameId={focusedGameId}
                   onFocusGame={setFocusedGameId}
+                  highlightTeam={highlightTeam}
                 />
               </div>
               <FinalFour
@@ -259,6 +277,7 @@ function BracketView({ data }: { data: LoadedData }) {
                 seedLookup={seedLookup}
                 focusedGameId={focusedGameId}
                 onFocusGame={setFocusedGameId}
+                highlightTeam={highlightTeam}
               />
               <div className="flex-1">
                 <RegionBracket
@@ -273,6 +292,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   seedLookup={seedLookup}
                   focusedGameId={focusedGameId}
                   onFocusGame={setFocusedGameId}
+                  highlightTeam={highlightTeam}
                 />
               </div>
             </div>
@@ -290,6 +310,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   seedLookup={seedLookup}
                   focusedGameId={focusedGameId}
                   onFocusGame={setFocusedGameId}
+                  highlightTeam={highlightTeam}
                 />
               </div>
               <div style={{ minWidth: 160 }} />
@@ -306,6 +327,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   seedLookup={seedLookup}
                   focusedGameId={focusedGameId}
                   onFocusGame={setFocusedGameId}
+                  highlightTeam={highlightTeam}
                 />
               </div>
             </div>

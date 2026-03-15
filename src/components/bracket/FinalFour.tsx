@@ -17,9 +17,10 @@ interface FinalFourProps {
   userPicks?: Picks;
   focusedGameId?: string | null;
   onFocusGame?: (gameId: string) => void;
+  highlightTeam?: string;
 }
 
-export default function FinalFour({ regions, picks, results, onPick, locked, distribution, seedLookup, userPicks, focusedGameId, onFocusGame }: FinalFourProps) {
+export default function FinalFour({ regions, picks, results, onPick, locked, distribution, seedLookup, userPicks, focusedGameId, onFocusGame, highlightTeam }: FinalFourProps) {
   const ff0 = gameId("ff", 4, 0);
   const ff1 = gameId("ff", 4, 1);
   const champ = gameId("ff", 5, 0);
@@ -45,6 +46,7 @@ export default function FinalFour({ regions, picks, results, onPick, locked, dis
         userPicks={userPicks}
         focused={focusedGameId === ff0}
         onFocus={onFocusGame}
+        highlightTeam={highlightTeam}
       />
       <div className="flex flex-col items-center gap-1 my-1">
         <div className="text-xs font-bold text-yellow-600">🏆 Championship</div>
@@ -62,6 +64,7 @@ export default function FinalFour({ regions, picks, results, onPick, locked, dis
           userPicks={userPicks}
           focused={focusedGameId === champ}
           onFocus={onFocusGame}
+          highlightTeam={highlightTeam}
         />
         {picks[champ] && (
           <div className="text-center mt-1 px-3 py-1 bg-yellow-100 rounded text-sm font-bold text-yellow-800 border border-yellow-300 flex items-center gap-1 justify-center">
@@ -83,6 +86,7 @@ export default function FinalFour({ regions, picks, results, onPick, locked, dis
         userPicks={userPicks}
         focused={focusedGameId === ff1}
         onFocus={onFocusGame}
+        highlightTeam={highlightTeam}
       />
     </div>
   );

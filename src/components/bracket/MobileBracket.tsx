@@ -19,6 +19,7 @@ interface MobileBracketProps {
   distribution?: PickDistribution;
   seedLookup?: Record<string, number>;
   userPicks?: Picks;
+  highlightTeam?: string;
 }
 
 type TabId = typeof REGIONS[number] | "FinalFour";
@@ -27,7 +28,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "FinalFour" as TabId, label: "Final Four" },
 ];
 
-export default function MobileBracket({ regions, picks, results, onPick, locked, distribution, seedLookup, userPicks }: MobileBracketProps) {
+export default function MobileBracket({ regions, picks, results, onPick, locked, distribution, seedLookup, userPicks, highlightTeam }: MobileBracketProps) {
   const [activeTab, setActiveTab] = useState<TabId>(REGIONS[0]);
 
   return (
@@ -62,6 +63,7 @@ export default function MobileBracket({ regions, picks, results, onPick, locked,
           distribution={distribution}
           seedLookup={seedLookup}
           userPicks={userPicks}
+          highlightTeam={highlightTeam}
         />
       ) : (
         <FinalFourMobileView
@@ -73,6 +75,7 @@ export default function MobileBracket({ regions, picks, results, onPick, locked,
           distribution={distribution}
           seedLookup={seedLookup}
           userPicks={userPicks}
+          highlightTeam={highlightTeam}
         />
       )}
     </div>
@@ -80,11 +83,11 @@ export default function MobileBracket({ regions, picks, results, onPick, locked,
 }
 
 function RegionMobileView({
-  region, regions, picks, results, onPick, locked, distribution, seedLookup, userPicks,
+  region, regions, picks, results, onPick, locked, distribution, seedLookup, userPicks, highlightTeam,
 }: {
   region: string; regions: RegionData[]; picks: Picks; results: Results;
   onPick: (g: string, t: string) => void; locked: boolean; distribution?: PickDistribution;
-  seedLookup?: Record<string, number>; userPicks?: Picks;
+  seedLookup?: Record<string, number>; userPicks?: Picks; highlightTeam?: string;
 }) {
   return (
     <div className="space-y-4">
@@ -109,6 +112,7 @@ function RegionMobileView({
                   distribution={distribution?.[gId]}
                   seedLookup={seedLookup}
                   userPicks={userPicks}
+                  highlightTeam={highlightTeam}
                 />
               );
             })}
@@ -120,11 +124,11 @@ function RegionMobileView({
 }
 
 function FinalFourMobileView({
-  regions, picks, results, onPick, locked, distribution, seedLookup, userPicks,
+  regions, picks, results, onPick, locked, distribution, seedLookup, userPicks, highlightTeam,
 }: {
   regions: RegionData[]; picks: Picks; results: Results;
   onPick: (g: string, t: string) => void; locked: boolean; distribution?: PickDistribution;
-  seedLookup?: Record<string, number>; userPicks?: Picks;
+  seedLookup?: Record<string, number>; userPicks?: Picks; highlightTeam?: string;
 }) {
   const ff0 = gameId("ff", 4, 0);
   const ff1 = gameId("ff", 4, 1);
@@ -156,6 +160,7 @@ function FinalFourMobileView({
                 distribution={distribution?.[gId]}
                 seedLookup={seedLookup}
                 userPicks={userPicks}
+                highlightTeam={highlightTeam}
               />
             </div>
           </div>
