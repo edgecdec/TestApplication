@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface AuthFormProps {
   mode: "login" | "register";
@@ -13,12 +13,15 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/dashboard";
 
   const isLogin = mode === "login";
   const title = isLogin ? "Log In" : "Register";
   const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
   const altText = isLogin ? "Don't have an account?" : "Already have an account?";
-  const altLink = isLogin ? "/register" : "/login";
+  const redirectParam = redirect !== "/dashboard" ? `?redirect=${encodeURIComponent(redirect)}` : "";
+  const altLink = (isLogin ? "/register" : "/login") + redirectParam;
   const altLabel = isLogin ? "Register" : "Log In";
 
   async function handleSubmit(e: FormEvent) {
@@ -40,7 +43,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         return;
       }
 
-      router.push("/dashboard");
+      router.push(redirect);
     } catch {
       setError("Network error. Please try again.");
     } finally {

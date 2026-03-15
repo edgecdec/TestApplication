@@ -1,0 +1,255 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import type { Group, ScoringSettings } from "@/types/group";
+import type { BracketRow } from "@/types/tournament";
+import { ROUND_NAMES, EVERYONE_GROUP_NAME } from "@/lib/bracket-constants";
+
+interface GroupDetail extends Group {
+  member_count: number;
+  creator_name: string;
+}
+
+interface UserInfo {
+  id: number;
+  username: string;
+  isAdmin: boolean;
+}
+
+interface BracketWithUser extends BracketRow {
+  username: string;
+}
+
+type Tab = "brackets" | "settings";
+
+export default function GroupDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [group, setGroup] = useState<GroupDetail | null>(null);
+  const [brackets, setBrackets] = useState<BracketWithUser[]>([]);
+  const [myBrackets, setMyBrackets] = useState<BracketRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<Tab>("brackets");
+  const [scoring, setScoring] = useState<ScoringSettings | null>(null);
+  const [maxBrackets, setMaxBrackets] = useState(1);
+  const [saving, setSaving] = useState(false);
+  const [addingBracketId, setAddingBracketId] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      const meRes = await fetch("/api/auth/me");
+      if (!meRes.ok) { router.push("/login"); return; }
+      const meData = await meRes.json();
+      setUser(meData.user);
+
+      const [gRes, bRes, myRes] = await Promise.all([
+        fetch(`/api/groups/${id}`),
+        fetch(`/api/groups/${id}/brackets`),
+        fetch("/api/brackets"),
+      ]);
+
+      if (gRes.ok) {
+        const gData = await gRes.json();
+        const g = gData.group as GroupDetail;
+        setGroup(g);
+        const parsed: ScoringSettings = typeof g.scoring_settings === "string" ? JSON.parse(g.scoring_settings) : g.scoring_settings;
+        setScoring(parsed);
+        setMaxBrackets(g.max_brackets);
+      }
+      if (bRes.ok) {
+        const bData = await bRes.json();
+        setBrackets(bData.brackets ?? []);
+      }
+      if (myRes.ok) {
+        const myData = await myRes.json();
+        setMyBrackets(myData.brackets ?? []);
+      }
+      setLoading(false);
+    }
+    load();
+  }, [id, router]);
+
+  const canEdit = group && user && (group.created_by === user.id || user.isAdmin);
+  const isEveryone = group?.name === EVERYONE_GROUP_NAME;
+  const inviteUrl = group ? `${typeof window !== "undefined" ? window.location.origin : ""}/join/${group.invite_code}` : "";
+
+  async function handleAddBracket(bracketId: number) {
+    setAddingBracketId(bracketId);
+    const res = await fetch(`/api/groups/${id}/brackets`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bracket_id: bracketId }),
+    });
+    if (res.ok) {
+      const bRes = await fetch(`/api/groups/${id}/brackets`);
+      if (bRes.ok) setBrackets((await bRes.json()).brackets ?? []);
+    } else {
+      const err = await res.json();
+      alert(err.error || "Failed to add bracket");
+    }
+    setAddingBracketId(null);
+  }
+
+  async function handleRemoveBracket(bracketId: number) {
+    if (!confirm("Remove this bracket from the group?")) return;
+    const res = await fetch(`/api/groups/${id}/brackets`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bracket_id: bracketId }),
+    });
+    if (res.ok) {
+      setBrackets((prev) => prev.filter((b) => b.id !== bracketId));
+    }
+  }
+
+  async function handleSaveSettings() {
+    if (!scoring) return;
+    setSaving(true);
+    await fetch(`/api/groups/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets }),
+    });
+    setSaving(false);
+  }
+
+  if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  if (!group || !user) return <main className="p-8"><p>Group not found.</p></main>;
+
+  const bracketIdsInGroup = new Set(brackets.map((b) => b.id));
+  const addableBrackets = myBrackets.filter((b) => !bracketIdsInGroup.has(b.id));
+
+  return (
+    <main className="min-h-screen p-8 max-w-3xl mx-auto">
+      <button onClick={() => router.push("/groups")} className="text-sm text-blue-600 hover:underline mb-4 inline-block">← All Groups</button>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold">{group.name}</h1>
+        {isEveryone && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Global</span>}
+      </div>
+      <p className="text-sm text-gray-500 mb-4">Created by {group.creator_name} · {group.member_count} member{group.member_count !== 1 ? "s" : ""}</p>
+
+      {!isEveryone && (
+        <div className="bg-gray-100 rounded-lg p-3 mb-6 flex items-center gap-2">
+          <span className="text-sm font-medium">Invite Link:</span>
+          <code className="text-sm bg-white px-2 py-1 rounded border flex-1 truncate">{inviteUrl}</code>
+          <button onClick={() => navigator.clipboard.writeText(inviteUrl)} className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            Copy
+          </button>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 border-b">
+        {(["brackets", "settings"] as const).map((t) => (
+          <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm font-medium border-b-2 transition ${tab === t ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+            {t === "brackets" ? "Brackets" : "Settings"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "brackets" && (
+        <div>
+          {/* Add bracket */}
+          {addableBrackets.length > 0 && (
+            <div className="bg-white rounded-lg shadow p-4 mb-4">
+              <h3 className="text-sm font-medium mb-2">Add Your Bracket</h3>
+              <div className="space-y-2">
+                {addableBrackets.map((b) => (
+                  <div key={b.id} className="flex items-center justify-between">
+                    <span className="text-sm">{b.name}</span>
+                    <button onClick={() => handleAddBracket(b.id)} disabled={addingBracketId === b.id} className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition disabled:opacity-50">
+                      {addingBracketId === b.id ? "Adding..." : "Add"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Group brackets / leaderboard */}
+          {brackets.length === 0 ? (
+            <div className="bg-white rounded-lg shadow p-6 text-gray-500">No brackets in this group yet.</div>
+          ) : (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="text-left px-4 py-2 font-medium">#</th>
+                    <th className="text-left px-4 py-2 font-medium">Bracket</th>
+                    <th className="text-left px-4 py-2 font-medium">User</th>
+                    {canEdit && <th className="px-4 py-2"></th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {brackets.map((b, i) => (
+                    <tr key={b.id} className="border-t hover:bg-gray-50">
+                      <td className="px-4 py-2 text-gray-400">{i + 1}</td>
+                      <td className="px-4 py-2">
+                        <button onClick={() => router.push(`/bracket/${b.id}`)} className="text-blue-600 hover:underline">{b.name}</button>
+                      </td>
+                      <td className="px-4 py-2 text-gray-600">{b.username}</td>
+                      {canEdit && (
+                        <td className="px-4 py-2 text-right">
+                          <button onClick={() => handleRemoveBracket(b.id)} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "settings" && scoring && (
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          {!canEdit && <p className="text-sm text-gray-500 mb-2">Only the group creator can edit settings.</p>}
+          <div>
+            <label className="block text-sm font-medium mb-1">Max Brackets Per User</label>
+            <select value={maxBrackets} onChange={(e) => setMaxBrackets(Number(e.target.value))} disabled={!canEdit} className="border rounded px-3 py-2 disabled:opacity-50">
+              {[1, 2, 3, 5, 10].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Points Per Round</label>
+            <div className="grid grid-cols-6 gap-2">
+              {ROUND_NAMES.map((rn, i) => (
+                <div key={rn}>
+                  <label className="text-xs text-gray-500">{rn}</label>
+                  <input type="number" min={0} value={scoring.pointsPerRound[i]} disabled={!canEdit} onChange={(e) => {
+                    const next = [...scoring.pointsPerRound];
+                    next[i] = Number(e.target.value);
+                    setScoring({ ...scoring, pointsPerRound: next });
+                  }} className="w-full border rounded px-2 py-1 text-sm disabled:opacity-50" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Upset Bonus Per Round</label>
+            <div className="grid grid-cols-6 gap-2">
+              {ROUND_NAMES.map((rn, i) => (
+                <div key={rn}>
+                  <label className="text-xs text-gray-500">{rn}</label>
+                  <input type="number" min={0} value={scoring.upsetBonusPerRound[i]} disabled={!canEdit} onChange={(e) => {
+                    const next = [...scoring.upsetBonusPerRound];
+                    next[i] = Number(e.target.value);
+                    setScoring({ ...scoring, upsetBonusPerRound: next });
+                  }} className="w-full border rounded px-2 py-1 text-sm disabled:opacity-50" />
+                </div>
+              ))}
+            </div>
+          </div>
+          {canEdit && (
+            <button onClick={handleSaveSettings} disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50">
+              {saving ? "Saving..." : "Save Settings"}
+            </button>
+          )}
+        </div>
+      )}
+    </main>
+  );
+}

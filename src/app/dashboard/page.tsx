@@ -77,9 +77,14 @@ export default function DashboardPage() {
             )}
           </p>
         </div>
-        <button onClick={handleLogout} className="px-4 py-2 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 transition">
-          Log Out
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => router.push("/groups")} className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition">
+            My Groups
+          </button>
+          <button onClick={handleLogout} className="px-4 py-2 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+            Log Out
+          </button>
+        </div>
       </div>
 
       {/* Tournaments */}

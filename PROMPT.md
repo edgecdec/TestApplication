@@ -28,8 +28,9 @@ Read other specs (@specs/overview.md, @specs/bracket.md, @specs/groups.md, @spec
 6. Write or update tests. Add comments explaining WHAT the test verifies and WHY.
 7. `npx next build` — must pass.
 8. `git add -A && git commit -m "descriptive message" && git push`
-9. Bug fixed? DELETE the line from bugs.md. Task done? Mark [x] in PLAN.md. Commit.
-10. If you discover a bug during work, add it to bugs.md immediately.
+9. Restart dev server: run `bash dev.sh` — this kills any existing server and starts fresh on port 3333. Returns immediately. Then verify: `sleep 5 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3333` must return 200.
+10. Bug fixed? DELETE the line from bugs.md. Task done? Mark [x] in PLAN.md. Commit.
+11. If you discover a bug during work, add it to bugs.md immediately.
 
 ## When All Tasks Are Done
 If PLAN.md has no incomplete tasks:
