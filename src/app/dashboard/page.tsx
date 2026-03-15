@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Tournament, Bracket } from "@/types/tournament";
+import LiveScores from "@/components/LiveScores";
+import EspnSyncButton from "@/components/EspnSyncButton";
 
 interface UserInfo {
   id: number;
@@ -87,6 +89,12 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Live Scores */}
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <h2 className="text-sm font-semibold text-gray-700 mb-2">📺 Live Scores</h2>
+        <LiveScores />
+      </div>
+
       {/* Tournaments */}
       {tournaments.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-6">
@@ -99,12 +107,15 @@ export default function DashboardPage() {
             <div key={t.id} className="bg-white rounded-lg shadow p-6 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">{t.name} ({t.year})</h2>
-                <button
-                  onClick={() => createBracket(t.id)}
-                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                >
-                  + New Bracket
-                </button>
+                <div className="flex items-center gap-2">
+                  {user.isAdmin && <EspnSyncButton tournamentId={t.id} />}
+                  <button
+                    onClick={() => createBracket(t.id)}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                  >
+                    + New Bracket
+                  </button>
+                </div>
               </div>
               {myBrackets.length === 0 ? (
                 <p className="text-gray-400 text-sm">No brackets yet. Create one to start picking!</p>
