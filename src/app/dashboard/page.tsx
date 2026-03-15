@@ -6,6 +6,7 @@ import type { Tournament, Bracket } from "@/types/tournament";
 import LiveScores from "@/components/LiveScores";
 import EspnSyncButton from "@/components/EspnSyncButton";
 import BracketProgress from "@/components/BracketProgress";
+import LockCountdown from "@/components/LockCountdown";
 
 interface UserInfo {
   id: number;
@@ -113,6 +114,7 @@ export default function DashboardPage() {
             <div key={t.id} className="bg-white rounded-lg shadow p-6 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">{t.name} ({t.year})</h2>
+                <LockCountdown lockTime={t.lock_time} />
                 <div className="flex items-center gap-2">
                   {user.isAdmin && <EspnSyncButton tournamentId={t.id} />}
                   <button

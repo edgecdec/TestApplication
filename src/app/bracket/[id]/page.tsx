@@ -10,6 +10,7 @@ import { useBracketPicks } from "@/hooks/useBracketPicks";
 import { generateAutofill, type AutofillMode } from "@/lib/autofill";
 import { parseBracketData } from "@/lib/bracket-utils";
 import AutofillDropdown from "@/components/bracket/AutofillDropdown";
+import LockCountdown from "@/components/LockCountdown";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results } from "@/types/bracket";
 
@@ -103,9 +104,7 @@ function BracketView({ data }: { data: LoadedData }) {
             ← Dashboard
           </button>
           <h1 className="text-lg font-bold">🏀 {data.bracket.name}</h1>
-          {data.locked && (
-            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">Locked</span>
-          )}
+          <LockCountdown lockTime={data.tournament.lock_time} />
         </div>
         <div className="flex items-center gap-3">
           {error && <span className="text-red-600 text-xs">{error}</span>}
