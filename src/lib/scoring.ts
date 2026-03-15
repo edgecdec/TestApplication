@@ -1,7 +1,7 @@
 import type { RegionData } from "@/types/tournament";
 import type { Picks, Results } from "@/types/bracket";
 import type { ScoringSettings } from "@/types/group";
-import type { RoundScore, BracketScore } from "@/types/scoring";
+import type { RoundScore, BracketScore, PickDetail } from "@/types/scoring";
 import { ROUND_NAMES, REGIONS } from "@/lib/bracket-constants";
 import { gameId, buildR64Matchups, gamesInRound } from "@/lib/bracket-utils";
 
@@ -143,4 +143,54 @@ export function scoreBracket(
     : null;
 
   return { bracketId, bracketName, username, userId, total, rounds, tiebreaker, tiebreakerDiff };
+}
+
+/**
+ * Return per-game scoring details for a bracket.
+ * Only includes games where the user made a pick AND a result exists.
+ */
+export function scorePicksDetailed(
+  picks: Picks,
+  results: Results,
+  settings: ScoringSettings,
+  regions: RegionData[]
+): PickDetail[] {
+  const teamSeedMap = buildTeamSeedMap(regions);
+  const details: PickDetail[] = [];
+
+  for (let round = 0; round < NUM_ROUNDS; round++) {
+    const gameIds = allGameIdsForRound(round);
+    const roundPoints = settings.pointsPerRound[round] ?? 0;
+    const bonusMultiplier = settings.upsetBonusPerRound[round] ?? 0;
+
+    for (const gId of gameIds) {
+      const pick = picks[gId];
+      if (!pick) continue;
+      const result = results[gId] ?? null;
+      const isCorrect = result !== null && pick === result;
+      let bonus = 0;
+
+      if (isCorrect && bonusMultiplier > 0) {
+        const winnerSeed = teamSeedMap.get(result);
+        const [teamA, teamB] = getTeamsInGame(gId, results, regions);
+        const loser = teamA === result ? teamB : teamA;
+        const loserSeed = loser ? teamSeedMap.get(loser) : undefined;
+        if (winnerSeed != null && loserSeed != null && winnerSeed > loserSeed) {
+          bonus = bonusMultiplier * (winnerSeed - loserSeed);
+        }
+      }
+
+      details.push({
+        gameId: gId,
+        round,
+        pick,
+        result,
+        correct: isCorrect,
+        basePoints: isCorrect ? roundPoints : 0,
+        upsetBonus: isCorrect ? bonus : 0,
+      });
+    }
+  }
+
+  return details;
 }

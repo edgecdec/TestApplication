@@ -174,7 +174,7 @@ export default function GroupDetailPage() {
       </div>
 
       {tab === "leaderboard" && (
-        <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} />
+        <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} />
       )}
 
       {tab === "brackets" && (

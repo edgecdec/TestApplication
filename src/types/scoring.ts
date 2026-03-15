@@ -4,6 +4,16 @@ export interface RoundScore {
   upsetBonus: number;
 }
 
+export interface PickDetail {
+  gameId: string;
+  round: number;
+  pick: string;
+  result: string | null;
+  correct: boolean;
+  basePoints: number;
+  upsetBonus: number;
+}
+
 export interface BracketScore {
   bracketId: number;
   bracketName: string;
