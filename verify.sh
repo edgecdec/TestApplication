@@ -71,10 +71,8 @@ check_api() {
 echo "🔍 Verifying all pages and API routes..."
 echo ""
 
-# Login as testbot
-curl -s -c /tmp/verify-cookie.txt -X POST "$BASE/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d "{\"username\":\"${TESTBOT_USER:-testbot}\",\"password\":\"${TESTBOT_PASS:-testpass}\"}" > /dev/null 2>&1
+# Login as testbot via dev auto-login (no password needed in dev)
+curl -s -L -c /tmp/verify-cookie.txt "$BASE/api/auth/dev-login?username=${TESTBOT_USER:-testbot}&redirect=/dashboard" > /dev/null 2>&1
 
 echo "--- Public Pages ---"
 check "$BASE" "Homepage /"
@@ -159,10 +157,8 @@ check_auth "$BASE/api/notifications" "GET /api/notifications"
 
 echo ""
 echo "--- Admin API ---"
-# Login as admin for admin endpoints
-curl -s -c /tmp/verify-admin-cookie.txt -X POST "$BASE/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d "{\"username\":\"${ADMIN_USER:-ralphbot}\",\"password\":\"${ADMIN_PASS:-adminpass}\"}" > /dev/null 2>&1
+# Login as admin via dev auto-login
+curl -s -L -c /tmp/verify-admin-cookie.txt "$BASE/api/auth/dev-login?username=${ADMIN_USER:-ralphbot}&redirect=/dashboard" > /dev/null 2>&1
 
 CHECKED=$((CHECKED + 1))
 ADMIN_STATUS=$(curl -s -b /tmp/verify-admin-cookie.txt -o /dev/null -w "%{http_code}" "$BASE/api/admin/users")

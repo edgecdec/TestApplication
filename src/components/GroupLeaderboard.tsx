@@ -9,6 +9,7 @@ import HeadToHeadDialog from "@/components/HeadToHeadDialog";
 import TeamLogo from "@/components/TeamLogo";
 import StreakBadge from "@/components/StreakBadge";
 import { leaderboardToCSV, downloadCSV } from "@/lib/csv-export";
+import { leaderboardToText } from "@/lib/standings-text";
 
 type SortKey = "rank" | "total" | "maxPossible" | "bestPossibleFinish" | "correctPicks" | "tiebreaker" | "percentile" | `round-${number}`;
 
@@ -41,6 +42,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
   const [search, setSearch] = useState("");
   const [h2hIds, setH2hIds] = useState<number[]>([]);
   const [showH2h, setShowH2h] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   function toggleH2h(bracketId: number) {
     setH2hIds((prev) => {
@@ -130,6 +132,19 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
           title="Export leaderboard as CSV"
         >
           📥 Export CSV
+        </button>
+        <button
+          onClick={() => {
+            const text = leaderboardToText(entries, groupName);
+            navigator.clipboard.writeText(text).then(() => {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            });
+          }}
+          className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition whitespace-nowrap"
+          title="Copy standings to clipboard"
+        >
+          {copied ? "✅ Copied!" : "📋 Copy Standings"}
         </button>
       </div>
       <div className="bg-white rounded-lg shadow overflow-x-auto">

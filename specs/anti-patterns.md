@@ -64,6 +64,17 @@
 - After making a pick, verify the NEXT round's slot updated — don't just check if the click happened, check if the team appeared in the next matchup.
 - Test the FULL flow: pick teams through all 6 rounds to championship, then save. Don't stop after one click.
 - Check the browser console for errors — "Maximum update depth exceeded" means infinite re-render loop, which is a CRITICAL bug even if the page appears to load.
+- NEVER go through the login page in Nova Act tests — it wastes time. Instead, get a cookie first with curl, then pass it to NovaAct. Pattern:
+  ```python
+  import subprocess, http.cookiejar
+  # Get auth cookie via curl
+  subprocess.run(['bash', '-c', 'source ~/.config/testapp-creds.env && curl -s -c /tmp/nova-cookie.txt -X POST http://localhost:3333/api/auth/login -H "Content-Type: application/json" -d \'{"username":"\'$TESTBOT_USER\'","password":"\'$TESTBOT_PASS\'"}\''], check=True)
+  # Start Nova Act directly on the target page with the cookie
+  with NovaAct(starting_page="http://localhost:3333/bracket/1", ignore_https_errors=True, cookies_file="/tmp/nova-cookie.txt") as nova:
+      # Already logged in, no login steps needed
+      nova.act("Click on Duke")
+  ```
+  If NovaAct doesn't support cookies_file, use the `user_data_dir` approach or just login once at the very start of the script and reuse the session for all checks — do NOT login before each individual check.
 
 ## Infinite Re-render Prevention
 - NEVER create new object/array references inside useEffect dependencies — use useMemo/useCallback

@@ -31,7 +31,7 @@ Read other specs (@specs/overview.md, @specs/bracket.md, @specs/groups.md, @spec
 9. Run `bash verify.sh` — ALL checks must pass. If any fail, fix before proceeding.
 10. For UI features (pages, components, interactions): write a temporary Nova Act test script to verify the feature works in a real browser. Save it as `/tmp/test_feature.py`. The script should:
     - `source ~/.config/marchmadness.env` must be run before executing
-    - To skip the login screen: first run `bash test-login.sh` to get a cookie file, then start Nova Act on the target page directly (e.g. `http://localhost:3333/bracket/1`) and pass cookies. Or login once at the start of the test and reuse the session.
+    - To skip the login screen: login ONCE at the very start of the Nova Act session, then navigate to all target pages within the same `with NovaAct(...)` block. Do NOT create a new NovaAct session per check. Do NOT login before each check. One session, one login, multiple checks.
     - Use short, simple prompts (Nova Act has token limits — max 1 sentence per act() call)
     - Test DIFFERENT elements, not the same one repeatedly. If testing bracket picks, click different teams in different rounds.
     - Verify the FULL flow works end-to-end, not just one click.
