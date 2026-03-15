@@ -11,6 +11,16 @@ import LockCountdown from "@/components/LockCountdown";
 import PickReminderBanner from "@/components/PickReminderBanner";
 import ResultsBanner from "@/components/ResultsBanner";
 import TournamentProgress from "@/components/TournamentProgress";
+import BracketHealth from "@/components/BracketHealth";
+import type { RegionData } from "@/types/tournament";
+import type { Picks } from "@/types/bracket";
+import { parseBracketData } from "@/lib/bracket-utils";
+
+function safeParsePicks(raw: string | Record<string, string> | null | undefined): Picks {
+  if (!raw) return {};
+  if (typeof raw === "string") { try { return JSON.parse(raw); } catch { return {}; } }
+  return raw;
+}
 
 interface UserInfo {
   id: number;
@@ -168,6 +178,11 @@ export default function DashboardPage() {
                         </div>
                         <BracketProgress picks={b.picks} />
                         <BracketMiniSummary picks={b.picks} />
+                        <BracketHealth
+                          picks={safeParsePicks(b.picks)}
+                          results={safeParsePicks(t.results_data)}
+                          regions={parseBracketData(t.bracket_data)}
+                        />
                       </button>
                       {!isLocked && (
                         <div className="flex flex-col gap-1">
