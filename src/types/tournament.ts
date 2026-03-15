@@ -28,6 +28,7 @@ export interface Bracket {
   tiebreaker: number | null;
   is_second_chance: number;
   second_chance_round: number;
+  share_token: string | null;
   created_at: string;
   updated_at: string;
 }

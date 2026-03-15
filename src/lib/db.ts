@@ -184,4 +184,7 @@ function initSchema(db: Database.Database) {
   if (!bracketCols.some(c => c.name === "second_chance_round")) {
     db.exec("ALTER TABLE brackets ADD COLUMN second_chance_round INTEGER NOT NULL DEFAULT 0");
   }
+  if (!bracketCols.some(c => c.name === "share_token")) {
+    db.exec("ALTER TABLE brackets ADD COLUMN share_token TEXT");
+  }
 }

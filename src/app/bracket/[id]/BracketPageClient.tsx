@@ -14,6 +14,7 @@ import { generateAutofill, type AutofillMode } from "@/lib/autofill";
 import { parseBracketData } from "@/lib/bracket-utils";
 import AutofillDropdown from "@/components/bracket/AutofillDropdown";
 import ShareButton from "@/components/bracket/ShareButton";
+import PublicShareButton from "@/components/bracket/PublicShareButton";
 import LockCountdown from "@/components/LockCountdown";
 import AddToCalendarButton from "@/components/AddToCalendarButton";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -210,6 +211,7 @@ function BracketView({ data }: { data: LoadedData }) {
           {!isMobile && <ExportButton bracketRef={bracketRef} bracketName={data.bracket.name} />}
           {!isMobile && <PrintButton />}
           <ShareButton bracketName={data.bracket.name} bracketId={data.bracket.id} picks={picks} regions={data.regions} />
+          {data.isOwner && <PublicShareButton bracketId={data.bracket.id} />}
           {!data.locked && (
             <>
               <button
