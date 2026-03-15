@@ -1,6 +1,7 @@
 export interface Group {
   id: number;
   name: string;
+  description: string;
   invite_code: string;
   scoring_settings: string; // JSON: ScoringSettings
   max_brackets: number;

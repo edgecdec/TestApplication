@@ -104,4 +104,10 @@ function initSchema(db: Database.Database) {
   if (!cols.some(c => c.name === "results_updated_at")) {
     db.exec("ALTER TABLE tournaments ADD COLUMN results_updated_at TEXT");
   }
+
+  // Add description column to groups if missing (migration)
+  const groupCols = db.prepare("PRAGMA table_info(groups)").all() as { name: string }[];
+  if (!groupCols.some(c => c.name === "description")) {
+    db.exec("ALTER TABLE groups ADD COLUMN description TEXT NOT NULL DEFAULT ''");
+  }
 }

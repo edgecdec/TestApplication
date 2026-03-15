@@ -12,6 +12,7 @@ export default function GroupsPage() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [maxBrackets, setMaxBrackets] = useState(1);
   const [scoring, setScoring] = useState<ScoringSettings>({ ...DEFAULT_SCORING });
   const [creating, setCreating] = useState(false);
@@ -38,7 +39,7 @@ export default function GroupsPage() {
     const res = await fetch("/api/groups", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), max_brackets: maxBrackets, scoring_settings: scoring }),
+      body: JSON.stringify({ name: name.trim(), max_brackets: maxBrackets, scoring_settings: scoring, description: description.trim() }),
     });
     if (res.ok) {
       const data = await res.json();
@@ -66,6 +67,10 @@ export default function GroupsPage() {
           <div>
             <label className="block text-sm font-medium mb-1">Group Name</label>
             <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border rounded px-3 py-2" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Description <span className="text-gray-400 font-normal">(optional — pool rules, entry fee, payout, etc.)</span></label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full border rounded px-3 py-2 text-sm" placeholder="e.g. $20 buy-in, winner takes 70%, runner-up 30%. No changing picks after Thursday." />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Max Brackets Per User</label>

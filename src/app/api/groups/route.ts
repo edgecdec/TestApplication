@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { name, scoring_settings, max_brackets } = body;
+  const { name, scoring_settings, max_brackets, description } = body;
 
   if (!name || typeof name !== "string" || name.trim().length === 0) {
     return NextResponse.json({ error: "Group name is required" }, { status: 400 });
@@ -41,12 +41,13 @@ export async function POST(req: NextRequest) {
   const inviteCode = generateInviteCode();
 
   const result = db.prepare(
-    "INSERT INTO groups (name, invite_code, scoring_settings, max_brackets, created_by) VALUES (?, ?, ?, ?, ?)"
+    "INSERT INTO groups (name, invite_code, scoring_settings, max_brackets, description, created_by) VALUES (?, ?, ?, ?, ?, ?)"
   ).run(
     name.trim(),
     inviteCode,
     scoring_settings ? (typeof scoring_settings === "string" ? scoring_settings : JSON.stringify(scoring_settings)) : undefined,
     max_brackets || 1,
+    (description || "").trim(),
     user.id
   );
 

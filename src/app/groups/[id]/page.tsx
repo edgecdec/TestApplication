@@ -42,6 +42,7 @@ export default function GroupDetailPage() {
   const [tab, setTab] = useState<Tab>("leaderboard");
   const [scoring, setScoring] = useState<ScoringSettings | null>(null);
   const [maxBrackets, setMaxBrackets] = useState(1);
+  const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
   const [addingBracketId, setAddingBracketId] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -69,6 +70,7 @@ export default function GroupDetailPage() {
         const parsed: ScoringSettings = typeof g.scoring_settings === "string" ? JSON.parse(g.scoring_settings) : g.scoring_settings;
         setScoring(parsed);
         setMaxBrackets(g.max_brackets);
+        setDescription(g.description || "");
       }
       if (bRes.ok) {
         const bData = await bRes.json();
@@ -134,7 +136,7 @@ export default function GroupDetailPage() {
     await fetch(`/api/groups/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets }),
+      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets, description }),
     });
     setSaving(false);
   }
@@ -153,6 +155,12 @@ export default function GroupDetailPage() {
         {isEveryone && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Global</span>}
       </div>
       <p className="text-sm text-gray-500 mb-4">Created by {group.creator_name} · {group.member_count} member{group.member_count !== 1 ? "s" : ""}</p>
+
+      {group.description && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4 text-sm text-blue-800 dark:text-blue-200 whitespace-pre-wrap">
+          📋 {group.description}
+        </div>
+      )}
 
       <div className="mb-4 flex gap-2 flex-wrap">
         <button onClick={() => router.push(`/simulator/${id}`)} className="px-4 py-2 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition">
@@ -280,6 +288,10 @@ export default function GroupDetailPage() {
       {tab === "settings" && scoring && (
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           {!canEdit && <p className="text-sm text-gray-500 mb-2">Only the group creator can edit settings.</p>}
+          <div>
+            <label className="block text-sm font-medium mb-1">Description <span className="text-gray-400 font-normal">(pool rules, entry fee, payout, etc.)</span></label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} disabled={!canEdit} className="w-full border rounded px-3 py-2 text-sm disabled:opacity-50" placeholder="e.g. $20 buy-in, winner takes 70%, runner-up 30%." />
+          </div>
           <div>
             <label className="block text-sm font-medium mb-1">Max Brackets Per User</label>
             <select value={maxBrackets} onChange={(e) => setMaxBrackets(Number(e.target.value))} disabled={!canEdit} className="border rounded px-3 py-2 disabled:opacity-50">
