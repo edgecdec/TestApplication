@@ -10,6 +10,7 @@ import { useBracketPicks } from "@/hooks/useBracketPicks";
 import { generateAutofill, type AutofillMode } from "@/lib/autofill";
 import { parseBracketData } from "@/lib/bracket-utils";
 import AutofillDropdown from "@/components/bracket/AutofillDropdown";
+import ShareButton from "@/components/bracket/ShareButton";
 import LockCountdown from "@/components/LockCountdown";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results, PickDistribution } from "@/types/bracket";
@@ -139,6 +140,7 @@ function BracketView({ data }: { data: LoadedData }) {
             <span className="text-xs text-gray-500">TB: {tiebreaker}</span>
           )}
           <ExportButton bracketRef={bracketRef} bracketName={data.bracket.name} />
+          <ShareButton bracketName={data.bracket.name} bracketId={data.bracket.id} picks={picks} regions={data.regions} />
           {!data.locked && (
             <>
               <AutofillDropdown onSelect={handleAutofill} disabled={saving} />
