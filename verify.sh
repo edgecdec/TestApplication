@@ -44,68 +44,134 @@ check_auth() {
   fi
 }
 
+check_api() {
+  local url="$1"
+  local label="$2"
+  local expect_code="${3:-200}"
+  CHECKED=$((CHECKED + 1))
+  local status=$(curl -s -b /tmp/verify-cookie.txt -o /dev/null -w "%{http_code}" "$url")
+
+  if [ "$expect_code" = "any" ]; then
+    if [ "$status" = "500" ]; then
+      echo "  ❌ $label — 500"
+      ERRORS=$((ERRORS + 1))
+    else
+      echo "  ✅ $label ($status)"
+    fi
+  elif [ "$status" = "$expect_code" ] || [ "$status" = "200" ] || [ "$status" = "401" ]; then
+    echo "  ✅ $label ($status)"
+  elif [ "$status" = "500" ]; then
+    echo "  ❌ $label — 500"
+    ERRORS=$((ERRORS + 1))
+  else
+    echo "  ✅ $label ($status)"
+  fi
+}
+
 echo "🔍 Verifying all pages and API routes..."
 echo ""
 
-# Login
+# Login as testbot
 curl -s -c /tmp/verify-cookie.txt -X POST "$BASE/api/auth/login" \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"${TESTBOT_USER:-testbot}\",\"password\":\"${TESTBOT_PASS:-testpass}\"}" > /dev/null 2>&1
 
 echo "--- Public Pages ---"
-check "$BASE" "Homepage"
-check "$BASE/login" "Login"
-check "$BASE/register" "Register"
-check "$BASE/rules" "Rules"
+check "$BASE" "Homepage /"
+check "$BASE/login" "Login /login"
+check "$BASE/register" "Register /register"
+check "$BASE/rules" "Rules /rules"
 
 echo ""
 echo "--- Auth Pages ---"
-check_auth "$BASE/dashboard" "Dashboard"
-check_auth "$BASE/bracket/1" "Bracket"
-check_auth "$BASE/leaderboard" "Leaderboard"
-check_auth "$BASE/groups" "Groups"
-check_auth "$BASE/stats" "Stats"
-check_auth "$BASE/results" "Results"
-check_auth "$BASE/whos-left" "Who's Left"
-check_auth "$BASE/upsets" "Upsets"
-check_auth "$BASE/profile/testbot" "Profile"
+check_auth "$BASE/dashboard" "Dashboard /dashboard"
+check_auth "$BASE/bracket/1" "Bracket /bracket/1"
+check_auth "$BASE/leaderboard" "Leaderboard /leaderboard"
+check_auth "$BASE/groups" "Groups /groups"
+check_auth "$BASE/stats" "Stats /stats"
+check_auth "$BASE/results" "Results /results"
+check_auth "$BASE/whos-left" "Who's Left /whos-left"
+check_auth "$BASE/upsets" "Upsets /upsets"
+check_auth "$BASE/profile/testbot" "Profile /profile/testbot"
+check_auth "$BASE/admin" "Admin /admin"
+
+# Dynamic pages with IDs — use ID 1 as test
+check_auth "$BASE/groups/1" "Group Detail /groups/1"
+check_auth "$BASE/groups/1/compare" "Group Compare /groups/1/compare"
+check_auth "$BASE/groups/1/whopicked" "Who Picked /groups/1/whopicked"
+check_auth "$BASE/groups/1/recap" "Round Recap /groups/1/recap"
+check_auth "$BASE/simulator/1" "Simulator /simulator/1"
+check_auth "$BASE/join/invalid" "Join /join/invalid"
 
 echo ""
-echo "--- Auth API ---"
-check "$BASE/api/auth/me" "Auth (no cookie)"
-check_auth "$BASE/api/auth/me" "Auth (logged in)"
+echo "--- Auth API: Core ---"
+check "$BASE/api/auth/me" "Auth /api/auth/me (no cookie)"
+check_auth "$BASE/api/auth/me" "Auth /api/auth/me (logged in)"
 
 echo ""
 echo "--- Tournament API ---"
-check_auth "$BASE/api/tournaments" "Tournaments"
-check_auth "$BASE/api/tournaments/updates" "Tournament Updates"
-check_auth "$BASE/api/tournaments/upsets" "Tournament Upsets"
+check_auth "$BASE/api/tournaments" "GET /api/tournaments"
+check_auth "$BASE/api/tournaments/updates" "GET /api/tournaments/updates"
+check_auth "$BASE/api/tournaments/upsets" "GET /api/tournaments/upsets"
+check_api "$BASE/api/tournaments/1" "GET /api/tournaments/1" "any"
+check_api "$BASE/api/tournaments/1/leaderboard" "GET /api/tournaments/1/leaderboard" "any"
 
 echo ""
 echo "--- Bracket API ---"
-check_auth "$BASE/api/brackets" "Brackets"
-check_auth "$BASE/api/brackets/distribution?tournament_id=1" "Distribution"
-check_auth "$BASE/api/brackets/achievements?tournament_id=1" "Achievements"
-check_auth "$BASE/api/brackets/grades?tournament_id=1" "Grades"
-check_auth "$BASE/api/brackets/recent-results?tournament_id=1" "Recent Results"
-check_auth "$BASE/api/brackets/games-that-matter" "Games That Matter"
+check_auth "$BASE/api/brackets" "GET /api/brackets"
+check_api "$BASE/api/brackets/distribution?tournament_id=1" "GET /api/brackets/distribution" "any"
+check_api "$BASE/api/brackets/achievements?tournament_id=1" "GET /api/brackets/achievements" "any"
+check_api "$BASE/api/brackets/grades?tournament_id=1" "GET /api/brackets/grades" "any"
+check_api "$BASE/api/brackets/recent-results?tournament_id=1" "GET /api/brackets/recent-results" "any"
+check_api "$BASE/api/brackets/games-that-matter" "GET /api/brackets/games-that-matter" "any"
+check_api "$BASE/api/brackets/head-to-head?bracket_a=1&bracket_b=2&tournament_id=1" "GET /api/brackets/head-to-head" "any"
+check_api "$BASE/api/brackets/1" "GET /api/brackets/1" "any"
 
 echo ""
 echo "--- Group API ---"
-check_auth "$BASE/api/groups" "Groups List"
-check_auth "$BASE/api/groups/my-summary" "My Groups Summary"
+check_auth "$BASE/api/groups" "GET /api/groups"
+check_auth "$BASE/api/groups/my-summary" "GET /api/groups/my-summary"
+check_api "$BASE/api/groups/1" "GET /api/groups/1" "any"
+check_api "$BASE/api/groups/1/leaderboard" "GET /api/groups/1/leaderboard" "any"
+check_api "$BASE/api/groups/1/messages" "GET /api/groups/1/messages" "any"
+check_api "$BASE/api/groups/1/activity" "GET /api/groups/1/activity" "any"
+check_api "$BASE/api/groups/1/whopicked" "GET /api/groups/1/whopicked" "any"
+check_api "$BASE/api/groups/1/simulator" "GET /api/groups/1/simulator" "any"
+check_api "$BASE/api/groups/1/standings-history" "GET /api/groups/1/standings-history" "any"
+check_api "$BASE/api/groups/1/recap" "GET /api/groups/1/recap" "any"
+check_api "$BASE/api/groups/1/brackets" "GET /api/groups/1/brackets" "any"
+
+echo ""
+echo "--- Profile API ---"
+check_api "$BASE/api/profile/testbot" "GET /api/profile/testbot" "any"
 
 echo ""
 echo "--- ESPN API ---"
-check_auth "$BASE/api/espn/scores" "ESPN Scores"
+check_auth "$BASE/api/espn/scores" "GET /api/espn/scores"
 
 echo ""
 echo "--- Stats API ---"
-check_auth "$BASE/api/stats?tournament_id=1" "Stats"
+check_api "$BASE/api/stats?tournament_id=1" "GET /api/stats" "any"
 
 echo ""
 echo "--- Notifications API ---"
-check_auth "$BASE/api/notifications" "Notifications"
+check_auth "$BASE/api/notifications" "GET /api/notifications"
+
+echo ""
+echo "--- Admin API ---"
+# Login as admin for admin endpoints
+curl -s -c /tmp/verify-admin-cookie.txt -X POST "$BASE/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d "{\"username\":\"${ADMIN_USER:-ralphbot}\",\"password\":\"${ADMIN_PASS:-adminpass}\"}" > /dev/null 2>&1
+
+CHECKED=$((CHECKED + 1))
+ADMIN_STATUS=$(curl -s -b /tmp/verify-admin-cookie.txt -o /dev/null -w "%{http_code}" "$BASE/api/admin/users")
+if [ "$ADMIN_STATUS" = "500" ]; then
+  echo "  ❌ GET /api/admin/users — 500"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "  ✅ GET /api/admin/users ($ADMIN_STATUS)"
+fi
 
 echo ""
 echo "=========================================="

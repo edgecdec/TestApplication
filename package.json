@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev -p 3333",
     "build": "next build",
-    "start": "next start -p 3333"
+    "start": "next start -p 3333",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/scoring.test.ts tests/bracket-utils.test.ts tests/autofill.test.ts tests/grading.test.ts",
+    "test:integration": "vitest run tests/api-integration.test.ts"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.2.1",
@@ -28,6 +31,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/qrcode": "^1.5.6"
+    "@types/qrcode": "^1.5.6",
+    "vitest": "^4.1.0"
   }
 }
