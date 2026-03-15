@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import type { LeaderboardEntry } from "@/types/scoring";
 import { ROUND_NAMES } from "@/lib/bracket-constants";
 import ScoringBreakdownDialog from "@/components/ScoringBreakdownDialog";
+import HeadToHeadDialog from "@/components/HeadToHeadDialog";
 import TeamLogo from "@/components/TeamLogo";
 
 type SortKey = "rank" | "total" | "maxPossible" | "bestPossibleFinish" | "correctPicks" | "tiebreaker" | "percentile" | `round-${number}`;
+
+const MAX_H2H_SELECTIONS = 2;
 
 interface Props {
   entries: LeaderboardEntry[];
@@ -33,6 +36,16 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortAsc, setSortAsc] = useState(true);
   const [search, setSearch] = useState("");
+  const [h2hIds, setH2hIds] = useState<number[]>([]);
+  const [showH2h, setShowH2h] = useState(false);
+
+  function toggleH2h(bracketId: number) {
+    setH2hIds((prev) => {
+      if (prev.includes(bracketId)) return prev.filter((id) => id !== bracketId);
+      if (prev.length >= MAX_H2H_SELECTIONS) return [prev[1], bracketId];
+      return [...prev, bracketId];
+    });
+  }
 
   const filtered = useMemo(() => {
     if (!search.trim()) return entries;
@@ -82,7 +95,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
 
   return (
     <>
-      <div className="mb-3">
+      <div className="mb-3 flex items-center gap-2 flex-wrap">
         <input
           type="text"
           placeholder="Search by username or bracket name…"
@@ -91,13 +104,25 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
           className="w-full max-w-xs px-3 py-2 border rounded text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"
         />
         {search && (
-          <span className="ml-2 text-xs text-gray-500">{sorted.length} of {entries.length}</span>
+          <span className="text-xs text-gray-500">{sorted.length} of {entries.length}</span>
+        )}
+        {groupId && h2hIds.length === MAX_H2H_SELECTIONS && (
+          <button
+            onClick={() => setShowH2h(true)}
+            className="px-3 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition"
+          >
+            ⚔️ Head-to-Head
+          </button>
+        )}
+        {groupId && h2hIds.length > 0 && h2hIds.length < MAX_H2H_SELECTIONS && (
+          <span className="text-xs text-gray-500">Select {MAX_H2H_SELECTIONS - h2hIds.length} more to compare</span>
         )}
       </div>
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
+              {groupId && <th className="px-2 py-2 font-medium w-8" title="Select two brackets for head-to-head">⚔️</th>}
               <th className={`text-left ${thClass}`} onClick={() => handleSort("rank")}>#</th>
               <th className="text-left px-3 py-2 font-medium">Bracket</th>
               <th className="text-left px-3 py-2 font-medium">User</th>
@@ -116,7 +141,17 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
           </thead>
           <tbody>
             {sorted.map((e) => (
-              <tr key={e.bracketId} className="border-t hover:bg-gray-50">
+              <tr key={e.bracketId} className={`border-t hover:bg-gray-50 ${h2hIds.includes(e.bracketId) ? "bg-purple-50 dark:bg-purple-900/20" : ""}`}>
+                {groupId && (
+                  <td className="px-2 py-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={h2hIds.includes(e.bracketId)}
+                      onChange={() => toggleH2h(e.bracketId)}
+                      className="accent-purple-600"
+                    />
+                  </td>
+                )}
                 <td className="px-3 py-2 text-gray-400 font-medium">{e.rank}</td>
                 <td className="px-3 py-2">
                   <button
@@ -212,6 +247,15 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
           groupId={groupId}
           bracketId={selectedBracketId}
           onClose={() => setSelectedBracketId(null)}
+        />
+      )}
+
+      {showH2h && h2hIds.length === MAX_H2H_SELECTIONS && groupId && (
+        <HeadToHeadDialog
+          bracketIdA={h2hIds[0]}
+          bracketIdB={h2hIds[1]}
+          groupId={groupId}
+          onClose={() => setShowH2h(false)}
         />
       )}
     </>

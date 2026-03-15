@@ -60,3 +60,22 @@ export interface RecentResultItem {
     points: number;
   }[];
 }
+
+export interface HeadToHeadGame {
+  gameId: string;
+  round: number;
+  result: string;
+  pickA: string;
+  pickB: string;
+  correctA: boolean;
+  correctB: boolean;
+}
+
+export interface HeadToHeadResult {
+  bracketA: { id: number; name: string; username: string; total: number; championPick: string | null; correctPicks: number; maxPossible: number };
+  bracketB: { id: number; name: string; username: string; total: number; championPick: string | null; correctPicks: number; maxPossible: number };
+  winsA: number;
+  winsB: number;
+  ties: number;
+  games: HeadToHeadGame[];
+}
