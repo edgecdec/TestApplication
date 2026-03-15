@@ -33,3 +33,8 @@
 - NEVER duplicate logic — search for existing utilities/hooks/components first
 - NEVER create large monolithic files — split into small focused files
 - NEVER use `any` type — define proper types in src/types/
+
+## Data Parsing
+- bracket_data from the DB is a JSON string — ALWAYS JSON.parse() it before use
+- bracket_data structure is `{ regions: [...] }` — access `.regions` to get the array, don't pass the whole object where an array is expected
+- ALWAYS validate data shape before using it — check if it's a string (needs parsing), check if the expected property exists

@@ -140,9 +140,12 @@ export default function GroupDetailPage() {
       </div>
       <p className="text-sm text-gray-500 mb-4">Created by {group.creator_name} · {group.member_count} member{group.member_count !== 1 ? "s" : ""}</p>
 
-      <div className="mb-4">
+      <div className="mb-4 flex gap-2">
         <button onClick={() => router.push(`/simulator/${id}`)} className="px-4 py-2 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition">
           🔮 What-If Simulator
+        </button>
+        <button onClick={() => router.push(`/groups/${id}/compare`)} className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition">
+          📊 Compare Brackets
         </button>
       </div>
 
