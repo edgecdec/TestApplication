@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { REGION_COLORS, type RegionName } from "@/lib/bracket-constants";
 import TeamLogo from "@/components/TeamLogo";
+import { getSeedMatchupRate } from "@/lib/seed-matchup-history";
 
 interface GameCardProps {
   gameId: string;
@@ -13,6 +15,7 @@ interface GameCardProps {
   onPick: (gameId: string, team: string) => void;
   locked: boolean;
   distribution?: Record<string, number>;
+  seedLookup?: Record<string, number>;
 }
 
 function teamClass(team: string | null, pick: string | null, result: string | null): string {
@@ -20,7 +23,6 @@ function teamClass(team: string | null, pick: string | null, result: string | nu
   if (!team) return base + " text-gray-300 cursor-default";
   if (!pick) return base;
   if (pick !== team) return base;
-  // This team is the pick
   if (!result) return base + " font-bold bg-blue-50";
   if (result === team) return base + " font-bold bg-green-100 text-green-800";
   return base + " font-bold bg-red-100 text-red-800 line-through";
@@ -36,7 +38,9 @@ export default function GameCard({
   onPick,
   locked,
   distribution,
+  seedLookup,
 }: GameCardProps) {
+  const [showTooltip, setShowTooltip] = useState(false);
   const color = REGION_COLORS[region as RegionName] ?? "#6b7280";
 
   function handleClick(team: string | null) {
@@ -47,11 +51,31 @@ export default function GameCard({
   const topPct = topTeam ? distribution?.[topTeam] : undefined;
   const bottomPct = bottomTeam ? distribution?.[bottomTeam] : undefined;
 
+  // Compute seed matchup hint (only when unlocked and both teams present)
+  let matchupHint: string | null = null;
+  if (!locked && topTeam && bottomTeam && seedLookup) {
+    const topSeed = seedLookup[topTeam];
+    const bottomSeed = seedLookup[bottomTeam];
+    if (topSeed && bottomSeed && topSeed !== bottomSeed) {
+      const rate = getSeedMatchupRate(topSeed, bottomSeed);
+      if (rate) {
+        matchupHint = `#${rate.favoriteSeed} seeds beat #${rate.underdogSeed} seeds ${rate.favoriteRate}% of the time`;
+      }
+    }
+  }
+
   return (
     <div
-      className="border rounded bg-white shadow-sm w-40 overflow-hidden"
+      className="border rounded bg-white shadow-sm w-40 overflow-hidden relative"
       style={{ borderLeftColor: color, borderLeftWidth: 3 }}
+      onMouseEnter={() => matchupHint && setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
     >
+      {showTooltip && matchupHint && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-[10px] rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
+          📊 {matchupHint}
+        </div>
+      )}
       <div
         className={teamClass(topTeam, pick, result)}
         onClick={() => handleClick(topTeam)}

@@ -18,6 +18,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results, PickDistribution } from "@/types/bracket";
 import BracketInsights from "@/components/bracket/BracketInsights";
+import { buildTeamSeedMap } from "@/lib/scoring";
 
 interface LoadedData {
   bracket: Bracket;
@@ -107,6 +108,11 @@ function BracketView({ data }: { data: LoadedData }) {
     locked: data.locked,
   });
 
+  // Build seed lookup for matchup tooltips
+  const seedLookup: Record<string, number> = {};
+  const seedMap = buildTeamSeedMap(data.regions);
+  seedMap.forEach((seed, name) => { seedLookup[name] = seed; });
+
   function handleAutofill(mode: AutofillMode) {
     const filled = generateAutofill(mode, data.regions, picks);
     bulkSetPicks(filled);
@@ -191,6 +197,7 @@ function BracketView({ data }: { data: LoadedData }) {
             onPick={makePick}
             locked={data.locked}
             distribution={data.distribution}
+            seedLookup={seedLookup}
           />
         </div>
       ) : (
@@ -206,6 +213,7 @@ function BracketView({ data }: { data: LoadedData }) {
                 locked={data.locked}
                 side="left"
                 distribution={data.distribution}
+                seedLookup={seedLookup}
               />
               <FinalFour
                 regions={data.regions}
@@ -214,6 +222,7 @@ function BracketView({ data }: { data: LoadedData }) {
                 onPick={makePick}
                 locked={data.locked}
                 distribution={data.distribution}
+                seedLookup={seedLookup}
               />
               <RegionBracket
                 region={REGIONS[1]}
@@ -224,6 +233,7 @@ function BracketView({ data }: { data: LoadedData }) {
                 locked={data.locked}
                 side="right"
                 distribution={data.distribution}
+                seedLookup={seedLookup}
               />
             </div>
             <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start mt-8">
@@ -236,6 +246,7 @@ function BracketView({ data }: { data: LoadedData }) {
                 locked={data.locked}
                 side="left"
                 distribution={data.distribution}
+                seedLookup={seedLookup}
               />
               <div className="w-40" />
               <RegionBracket
@@ -247,6 +258,7 @@ function BracketView({ data }: { data: LoadedData }) {
                 locked={data.locked}
                 side="right"
                 distribution={data.distribution}
+                seedLookup={seedLookup}
               />
             </div>
           </div>

@@ -14,6 +14,7 @@ interface RegionBracketProps {
   locked: boolean;
   side: "left" | "right";
   distribution?: PickDistribution;
+  seedLookup?: Record<string, number>;
 }
 
 const ROUND_LABELS = ["R64", "R32", "Sweet 16", "Elite 8"];
@@ -27,6 +28,7 @@ export default function RegionBracket({
   locked,
   side,
   distribution,
+  seedLookup,
 }: RegionBracketProps) {
   const rounds = [0, 1, 2, 3];
   const orderedRounds = side === "left" ? rounds : [...rounds].reverse();
@@ -55,6 +57,7 @@ export default function RegionBracket({
                       onPick={onPick}
                       locked={locked}
                       distribution={distribution?.[gId]}
+                      seedLookup={seedLookup}
                     />
                   </div>
                 );

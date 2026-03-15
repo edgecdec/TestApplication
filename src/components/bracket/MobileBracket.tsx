@@ -9,7 +9,6 @@ import type { RegionData } from "@/types/tournament";
 import type { Picks, Results, PickDistribution } from "@/types/bracket";
 
 const REGION_ROUND_LABELS = ["R64", "R32", "Sweet 16", "Elite 8"];
-const FF_TABS = ["Final Four", "Championship"];
 
 interface MobileBracketProps {
   regions: RegionData[];
@@ -18,6 +17,7 @@ interface MobileBracketProps {
   onPick: (gameId: string, team: string) => void;
   locked: boolean;
   distribution?: PickDistribution;
+  seedLookup?: Record<string, number>;
 }
 
 type TabId = typeof REGIONS[number] | "FinalFour";
@@ -26,12 +26,11 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "FinalFour" as TabId, label: "Final Four" },
 ];
 
-export default function MobileBracket({ regions, picks, results, onPick, locked, distribution }: MobileBracketProps) {
+export default function MobileBracket({ regions, picks, results, onPick, locked, distribution, seedLookup }: MobileBracketProps) {
   const [activeTab, setActiveTab] = useState<TabId>(REGIONS[0]);
 
   return (
     <div>
-      {/* Tab bar */}
       <div className="flex overflow-x-auto border-b mb-3 gap-0 -mx-1">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -51,7 +50,6 @@ export default function MobileBracket({ regions, picks, results, onPick, locked,
         })}
       </div>
 
-      {/* Content */}
       {activeTab !== "FinalFour" ? (
         <RegionMobileView
           region={activeTab}
@@ -61,6 +59,7 @@ export default function MobileBracket({ regions, picks, results, onPick, locked,
           onPick={onPick}
           locked={locked}
           distribution={distribution}
+          seedLookup={seedLookup}
         />
       ) : (
         <FinalFourMobileView
@@ -70,6 +69,7 @@ export default function MobileBracket({ regions, picks, results, onPick, locked,
           onPick={onPick}
           locked={locked}
           distribution={distribution}
+          seedLookup={seedLookup}
         />
       )}
     </div>
@@ -77,10 +77,11 @@ export default function MobileBracket({ regions, picks, results, onPick, locked,
 }
 
 function RegionMobileView({
-  region, regions, picks, results, onPick, locked, distribution,
+  region, regions, picks, results, onPick, locked, distribution, seedLookup,
 }: {
   region: string; regions: RegionData[]; picks: Picks; results: Results;
   onPick: (g: string, t: string) => void; locked: boolean; distribution?: PickDistribution;
+  seedLookup?: Record<string, number>;
 }) {
   return (
     <div className="space-y-4">
@@ -103,6 +104,7 @@ function RegionMobileView({
                   onPick={onPick}
                   locked={locked}
                   distribution={distribution?.[gId]}
+                  seedLookup={seedLookup}
                 />
               );
             })}
@@ -114,10 +116,11 @@ function RegionMobileView({
 }
 
 function FinalFourMobileView({
-  regions, picks, results, onPick, locked, distribution,
+  regions, picks, results, onPick, locked, distribution, seedLookup,
 }: {
   regions: RegionData[]; picks: Picks; results: Results;
   onPick: (g: string, t: string) => void; locked: boolean; distribution?: PickDistribution;
+  seedLookup?: Record<string, number>;
 }) {
   const ff0 = gameId("ff", 4, 0);
   const ff1 = gameId("ff", 4, 1);
@@ -147,6 +150,7 @@ function FinalFourMobileView({
                 onPick={onPick}
                 locked={locked}
                 distribution={distribution?.[gId]}
+                seedLookup={seedLookup}
               />
             </div>
           </div>
