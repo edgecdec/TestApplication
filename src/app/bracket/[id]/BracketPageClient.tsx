@@ -23,6 +23,7 @@ import type { Picks, Results, PickDistribution } from "@/types/bracket";
 import BracketInsights from "@/components/bracket/BracketInsights";
 import BracketScoringSummary from "@/components/bracket/BracketScoringSummary";
 import PickListView from "@/components/bracket/PickListView";
+import BracketSwitcher from "@/components/bracket/BracketSwitcher";
 import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
 import { buildTeamSeedMap } from "@/lib/scoring";
 
@@ -149,6 +150,7 @@ function BracketView({ data }: { data: LoadedData }) {
           {data.isSecondChance && (
             <span className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-0.5 rounded">🔄 2nd Chance</span>
           )}
+          <BracketSwitcher currentBracketId={data.bracket.id} tournamentId={data.bracket.tournament_id} />
           <LockCountdown lockTime={data.tournament.lock_time} />
           <AddToCalendarButton lockTime={data.tournament.lock_time} />
         </div>
