@@ -17,4 +17,4 @@ Agent picks the top incomplete task. When all tasks are done, study competitor s
 - [x] Add bracket comparison overlay: one bracket showing multiple users' picks with colored indicators.
 - [x] Add pick agreement stats to comparison view: show fraction of selected brackets that agree on each game (e.g., "3/4") and highlight unanimous picks vs split picks with color coding.
 - [x] Add bracket completion progress: show a progress bar on dashboard and group pages indicating how many of 63 picks are filled per bracket, with a "Complete" badge when all picks are in. Helps friends see who still needs to finish before lock time.
-- [ ] Add lock countdown timer: show a live countdown to tournament lock_time on the dashboard and bracket edit page. Display "Locked" badge after lock time passes. Disable pick changes after lock. Helps friends know exactly how much time remains to finalize brackets.
+- [x] Add lock countdown timer: show a live countdown to tournament lock_time on the dashboard and bracket edit page. Display "Locked" badge after lock time passes. Disable pick changes after lock. Helps friends know exactly how much time remains to finalize brackets.
