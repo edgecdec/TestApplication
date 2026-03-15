@@ -1,0 +1,29 @@
+# Anti-Patterns — Read This First Every Loop
+
+## Deployment
+- NEVER push code that doesn't pass `npx next build` locally
+- When changing imports or moving files, verify build passes — macOS is case-insensitive but Linux servers are case-sensitive
+- When adding a new dependency, run `npx next build` to make sure it resolves
+
+## Code Quality
+- NEVER use dynamic `require()` inside route handlers — use top-level ES imports
+- NEVER use `ON CONFLICT` SQL without verifying the constraint exists in the schema
+- NEVER mark a bug as fixed without testing the exact scenario that caused it
+- When removing a DB constraint, update ALL SQL statements that reference it
+
+## Context Management
+- Do NOT read every file in the project — only read files relevant to the current task
+- Read the relevant spec file ONCE, then work from memory
+- Keep commits small and focused — one logical change per commit
+
+## Testing
+- Always test the specific thing you changed, not just the homepage
+- A 401 "Not authenticated" from an API is expected behavior, not a bug
+
+## React State
+- When using tabs/selectors, make sure displayed content actually changes with the selection
+- Props that seed useState only run once — if the prop changes, state won't update automatically. Use useEffect to sync.
+
+## Implementation
+- FULL implementations only. No placeholders. No stubs. No TODOs.
+- Search the codebase before implementing — don't assume something doesn't exist
