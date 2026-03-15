@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { scoreBracket } from "@/lib/scoring";
-import { parseBracketData } from "@/lib/bracket-utils";
+import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import type { ScoringSettings } from "@/types/group";
 import type { Bracket, Tournament, RegionData } from "@/types/tournament";
 import type { LeaderboardEntry } from "@/types/scoring";
 import type { Picks, Results } from "@/types/bracket";
+import { CHAMPIONSHIP_GAME_ID } from "@/lib/bracket-constants";
 
 interface BracketWithUser extends Bracket {
   username: string;
@@ -47,24 +48,24 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const regions: RegionData[] = parseBracketData(tournament.bracket_data);
   const results: Results = JSON.parse(tournament.results_data);
+  const eliminatedTeams = getEliminatedTeams(results, regions);
 
-  // Check if championship game has a result for tiebreaker
-  const champResult = results["ff-5-0"];
-  // actualTotal would be stored somewhere — for now we pass null
-  // (will be set when live scores are implemented)
   const actualTotal: number | null = null;
 
-  const scores = brackets.map((b) => {
+  const scored = brackets.map((b) => {
     const picks: Picks = JSON.parse(b.picks);
-    return scoreBracket(
+    const championPick = picks[CHAMPIONSHIP_GAME_ID] ?? null;
+    const busted = championPick !== null && eliminatedTeams.has(championPick);
+    const score = scoreBracket(
       b.id, b.name, b.username, b.user_id,
       picks, results, settings, regions,
       b.tiebreaker, actualTotal
     );
+    return { ...score, championPick, busted };
   });
 
   // Sort: highest total first, then by tiebreaker diff (lower is better)
-  scores.sort((a, b) => {
+  scored.sort((a, b) => {
     if (b.total !== a.total) return b.total - a.total;
     if (a.tiebreakerDiff != null && b.tiebreakerDiff != null) {
       return a.tiebreakerDiff - b.tiebreakerDiff;
@@ -75,18 +76,18 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   });
 
   // Assign ranks (tied scores get same rank)
-  const leaderboard: LeaderboardEntry[] = scores.map((s, i) => {
+  const leaderboard: LeaderboardEntry[] = scored.map((s, i) => {
     let rank = 1;
     if (i > 0) {
-      const prev = scores[i - 1];
+      const prev = scored[i - 1];
       if (s.total === prev.total && s.tiebreakerDiff === prev.tiebreakerDiff) {
         rank = (leaderboard[i - 1] as LeaderboardEntry).rank;
       } else {
         rank = i + 1;
       }
     }
-    const percentile = scores.length > 1
-      ? Math.round(((scores.length - rank) / (scores.length - 1)) * 100)
+    const percentile = scored.length > 1
+      ? Math.round(((scored.length - rank) / (scored.length - 1)) * 100)
       : 100;
 
     return { ...s, rank, percentile };

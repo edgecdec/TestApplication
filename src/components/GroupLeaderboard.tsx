@@ -29,6 +29,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
               <th className="text-left px-3 py-2 font-medium">#</th>
               <th className="text-left px-3 py-2 font-medium">Bracket</th>
               <th className="text-left px-3 py-2 font-medium">User</th>
+              <th className="text-left px-3 py-2 font-medium">Champion</th>
               <th className="text-right px-3 py-2 font-medium">Total</th>
               {ROUND_NAMES.map((rn) => (
                 <th key={rn} className="text-right px-3 py-2 font-medium text-xs">{rn}</th>
@@ -56,6 +57,16 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
                   >
                     {e.username}
                   </button>
+                </td>
+                <td className="px-3 py-2 text-sm whitespace-nowrap">
+                  {e.championPick ? (
+                    <span className={e.busted ? "text-gray-400 line-through" : ""}>
+                      {e.championPick}
+                      {e.busted && <span className="ml-1" title="Champion pick eliminated">💀</span>}
+                    </span>
+                  ) : (
+                    <span className="text-gray-300">—</span>
+                  )}
                 </td>
                 <td className="px-3 py-2 text-right font-bold">
                   {groupId ? (

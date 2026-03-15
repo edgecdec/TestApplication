@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { parseBracketData } from "@/lib/bracket-utils";
-import { ROUND_NAMES } from "@/lib/bracket-constants";
+import { ROUND_NAMES, CHAMPIONSHIP_GAME_ID } from "@/lib/bracket-constants";
 import type { TournamentStats, ChampionPick, UpsetPick, BracketProfile } from "@/types/stats";
 
-const CHAMPIONSHIP_GAME_ID = "ff-5-0";
 const UPSET_SEED_THRESHOLD = 5; // only count seeds > 4 as upsets
 const CHALK_SEED_WEIGHT = 17; // higher seed number = lower chalk score
 

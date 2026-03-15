@@ -156,3 +156,53 @@ export function gamesInRound(round: number): number {
   if (round === 5) return 1;
   return 0;
 }
+
+/**
+ * Build the set of eliminated teams from results.
+ * A team is eliminated if it lost a game (was in a matchup where the result is the other team).
+ */
+export function getEliminatedTeams(
+  results: Picks,
+  regions: RegionData[]
+): Set<string> {
+  const eliminated = new Set<string>();
+
+  for (const gId of Object.keys(results)) {
+    const winner = results[gId];
+    if (!winner) continue;
+    const [teamA, teamB] = getTeamsForGameFromResults(gId, results, regions);
+    if (teamA && teamA !== winner) eliminated.add(teamA);
+    if (teamB && teamB !== winner) eliminated.add(teamB);
+  }
+
+  return eliminated;
+}
+
+/**
+ * Get the two teams in a game based on results data (not picks).
+ * For R64, uses seed data. For later rounds, uses results of feeder games.
+ */
+function getTeamsForGameFromResults(
+  gId: string,
+  results: Picks,
+  regions: RegionData[]
+): [string | null, string | null] {
+  const parts = gId.split("-");
+  const regionName = parts[0];
+  const round = parseInt(parts[parts.length - 2], 10);
+  const index = parseInt(parts[parts.length - 1], 10);
+
+  if (round === 0 && regionName !== "ff") {
+    const region = regions.find((r) => r.name === regionName);
+    if (!region) return [null, null];
+    const matchups = buildR64Matchups();
+    const [topSeed, bottomSeed] = matchups[index];
+    const topTeam = region.seeds.find((s) => s.seed === topSeed);
+    const bottomTeam = region.seeds.find((s) => s.seed === bottomSeed);
+    return [topTeam?.name ?? null, bottomTeam?.name ?? null];
+  }
+
+  const feeders = feederGameIds(gId);
+  if (!feeders) return [null, null];
+  return [results[feeders[0]] ?? null, results[feeders[1]] ?? null];
+}

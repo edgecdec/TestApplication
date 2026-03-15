@@ -24,3 +24,4 @@ export const DEFAULT_SCORING: ScoringSettings = {
 
 export const INVITE_CODE_LENGTH = 8;
 export const EVERYONE_GROUP_NAME = "Everyone";
+export const CHAMPIONSHIP_GAME_ID = "ff-5-0";

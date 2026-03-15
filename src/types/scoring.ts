@@ -28,4 +28,6 @@ export interface BracketScore {
 export interface LeaderboardEntry extends BracketScore {
   rank: number;
   percentile: number;
+  championPick: string | null;
+  busted: boolean;
 }

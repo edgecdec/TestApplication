@@ -7,6 +7,8 @@ import type { RegionData } from "@/types/tournament";
 import type { SimulatorBracketData } from "@/types/simulator";
 import type { LeaderboardEntry } from "@/types/scoring";
 import { scoreBracket } from "@/lib/scoring";
+import { CHAMPIONSHIP_GAME_ID } from "@/lib/bracket-constants";
+import { getEliminatedTeams } from "@/lib/bracket-utils";
 
 interface Props {
   brackets: SimulatorBracketData[];
@@ -17,9 +19,13 @@ interface Props {
 
 export default function SimulatorLeaderboard({ brackets, results, settings, regions }: Props) {
   const leaderboard = useMemo<LeaderboardEntry[]>(() => {
-    const scores = brackets.map((b) =>
-      scoreBracket(b.bracketId, b.bracketName, b.username, b.userId, b.picks, results, settings, regions, b.tiebreaker, null)
-    );
+    const eliminated = getEliminatedTeams(results, regions);
+    const scores = brackets.map((b) => {
+      const score = scoreBracket(b.bracketId, b.bracketName, b.username, b.userId, b.picks, results, settings, regions, b.tiebreaker, null);
+      const championPick = b.picks[CHAMPIONSHIP_GAME_ID] ?? null;
+      const busted = championPick !== null && eliminated.has(championPick);
+      return { ...score, championPick, busted };
+    });
     scores.sort((a, b) => {
       if (b.total !== a.total) return b.total - a.total;
       if (a.tiebreakerDiff != null && b.tiebreakerDiff != null) return a.tiebreakerDiff - b.tiebreakerDiff;
