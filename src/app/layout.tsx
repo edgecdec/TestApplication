@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import CommandPalette from "@/components/CommandPalette";
+import KeyboardShortcutsHelp from "@/components/KeyboardShortcutsHelp";
 
 const APP_TITLE = "March Madness Picker";
 const APP_DESCRIPTION = "Fill out your NCAA March Madness bracket and compete with friends";
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-gray-50 text-gray-900">
         <Navbar />
         <CommandPalette />
+        <KeyboardShortcutsHelp />
         {children}
       </body>
     </html>
