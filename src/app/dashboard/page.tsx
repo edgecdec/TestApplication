@@ -15,6 +15,7 @@ import BracketHealth from "@/components/BracketHealth";
 import BracketGrade from "@/components/BracketGrade";
 import RecentResults from "@/components/RecentResults";
 import StreakBadge from "@/components/StreakBadge";
+import MyGroupsSummary from "@/components/MyGroupsSummary";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
@@ -160,6 +161,9 @@ export default function DashboardPage() {
       {tournaments.map((t) => (
         <RecentResults key={`recent-${t.id}`} tournamentId={t.id} />
       ))}
+
+      {/* My Groups Summary */}
+      <MyGroupsSummary />
 
       {/* Tournaments */}
       {tournaments.length === 0 ? (
