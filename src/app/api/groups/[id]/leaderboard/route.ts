@@ -76,7 +76,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return 0;
   });
 
-  // Assign ranks (tied scores get same rank)
+  const leaderScore = scored.length > 0 ? scored[0].total : 0;
+
+  // Assign ranks, eliminated status, and best possible finish
   const leaderboard: LeaderboardEntry[] = scored.map((s, i) => {
     let rank = 1;
     if (i > 0) {
@@ -91,7 +93,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       ? Math.round(((scored.length - rank) / (scored.length - 1)) * 100)
       : 100;
 
-    return { ...s, rank, percentile };
+    // Eliminated: max possible < leader's current score
+    const eliminated = s.maxPossible < leaderScore;
+
+    // Best possible finish: count brackets whose current score already exceeds this bracket's max
+    const bestPossibleFinish = scored.filter((other) => other.total > s.maxPossible).length + 1;
+
+    return { ...s, rank, percentile, eliminated, bestPossibleFinish };
   });
 
   return NextResponse.json({ leaderboard, actualTotal });

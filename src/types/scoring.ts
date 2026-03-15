@@ -31,4 +31,6 @@ export interface LeaderboardEntry extends BracketScore {
   championPick: string | null;
   busted: boolean;
   maxPossible: number;
+  eliminated: boolean;
+  bestPossibleFinish: number;
 }

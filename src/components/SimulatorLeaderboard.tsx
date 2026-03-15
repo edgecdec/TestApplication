@@ -34,6 +34,7 @@ export default function SimulatorLeaderboard({ brackets, results, settings, regi
       if (b.tiebreakerDiff != null) return 1;
       return 0;
     });
+    const leaderScore = scores.length > 0 ? scores[0].total : 0;
     return scores.map((s, i) => {
       let rank = 1;
       if (i > 0) {
@@ -41,7 +42,9 @@ export default function SimulatorLeaderboard({ brackets, results, settings, regi
         rank = s.total === prev.total ? leaderboard[i - 1]?.rank ?? i + 1 : i + 1;
       }
       const percentile = scores.length > 1 ? Math.round(((scores.length - rank) / (scores.length - 1)) * 100) : 100;
-      return { ...s, rank, percentile };
+      const isEliminated = s.maxPossible < leaderScore;
+      const bestPossibleFinish = scores.filter((other) => other.total > s.maxPossible).length + 1;
+      return { ...s, rank, percentile, eliminated: isEliminated, bestPossibleFinish };
     });
   }, [brackets, results, settings, regions]);
 

@@ -33,6 +33,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
               <th className="text-left px-3 py-2 font-medium">Champion</th>
               <th className="text-right px-3 py-2 font-medium">Total</th>
               <th className="text-right px-3 py-2 font-medium" title="Maximum possible score if all remaining alive picks win">Max</th>
+              <th className="text-right px-3 py-2 font-medium" title="Best rank this bracket can still achieve">Best</th>
               {ROUND_NAMES.map((rn) => (
                 <th key={rn} className="text-right px-3 py-2 font-medium text-xs">{rn}</th>
               ))}
@@ -59,6 +60,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
                   >
                     {e.username}
                   </button>
+                  {e.eliminated && <span className="ml-1" title="Eliminated — can't catch the leader">🚫</span>}
                 </td>
                 <td className="px-3 py-2 text-sm whitespace-nowrap">
                   {e.championPick ? (
@@ -86,6 +88,9 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
                 </td>
                 <td className="px-3 py-2 text-right text-gray-500" title="Max possible score">
                   {e.maxPossible}
+                </td>
+                <td className="px-3 py-2 text-right text-gray-500" title="Best possible finish">
+                  #{e.bestPossibleFinish}
                 </td>
                 {e.rounds.map((r, i) => (
                   <td key={i} className="px-3 py-2 text-right text-xs">
