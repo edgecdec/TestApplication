@@ -9,6 +9,7 @@ export interface Group {
   created_at: string;
   buy_in: number;
   payout_structure: string; // JSON: PayoutStructure
+  payment_link: string;
 }
 
 export interface ScoringSettings {

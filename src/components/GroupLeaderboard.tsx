@@ -24,6 +24,7 @@ interface Props {
   actualTotal: number | null;
   groupId?: string;
   groupName?: string;
+  paymentLink?: string;
 }
 
 function parseSortKey(key: SortKey): { type: "field"; field: keyof LeaderboardEntry } | { type: "round"; index: number } {
@@ -38,7 +39,7 @@ function getSortValue(entry: LeaderboardEntry, key: SortKey): number {
   return typeof val === "number" ? val : 0;
 }
 
-export default function GroupLeaderboard({ entries, actualTotal, groupId, groupName }: Props) {
+export default function GroupLeaderboard({ entries, actualTotal, groupId, groupName, paymentLink }: Props) {
   const router = useRouter();
   const [selectedBracketId, setSelectedBracketId] = useState<number | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("rank");
@@ -280,7 +281,14 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
                   </button>
                   {e.eliminated && <span className="ml-1" title="Eliminated — can't catch the leader">🚫</span>}
                   {e.paid === true && <span className="ml-1" title="Paid">💰</span>}
-                  {e.paid === false && <span className="ml-1" title="Unpaid">⚠️</span>}
+                  {e.paid === false && (
+                    <>
+                      <span className="ml-1" title="Unpaid">⚠️</span>
+                      {paymentLink && (
+                        <a href={paymentLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-xs text-blue-600 hover:underline" title="Pay now">💸 Pay</a>
+                      )}
+                    </>
+                  )}
                 </td>
                 <td className="px-3 py-2 text-sm whitespace-nowrap">
                   {e.championPick ? (

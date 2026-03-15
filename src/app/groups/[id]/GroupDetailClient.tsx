@@ -54,6 +54,7 @@ export default function GroupDetailClient() {
   const [description, setDescription] = useState("");
   const [buyIn, setBuyIn] = useState(0);
   const [payout, setPayout] = useState<PayoutStructure>({ places: [100] });
+  const [paymentLink, setPaymentLink] = useState("");
   const [saving, setSaving] = useState(false);
   const [addingBracketId, setAddingBracketId] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -84,6 +85,7 @@ export default function GroupDetailClient() {
         setDescription(g.description || "");
         setBuyIn(g.buy_in || 0);
         setPayout(parsePayoutStructure(g.payout_structure));
+        setPaymentLink(g.payment_link || "");
       }
       if (bRes.ok) {
         const bData = await bRes.json();
@@ -149,7 +151,7 @@ export default function GroupDetailClient() {
     await fetch(`/api/groups/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets, description, buy_in: buyIn, payout_structure: payout }),
+      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets, description, buy_in: buyIn, payout_structure: payout, payment_link: paymentLink }),
     });
     setSaving(false);
   }
@@ -246,12 +248,15 @@ export default function GroupDetailClient() {
                 return (
                   <div className="text-xs text-gray-500 mb-3">
                     💰 {paidCount}/{totalCount} paid (${paidCount * buyIn} of ${totalCount * buyIn} collected)
+                    {paymentLink && (
+                      <a href={paymentLink} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:underline">💸 Pay Now</a>
+                    )}
                   </div>
                 );
               })()}
             </>
           )}
-          <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} groupName={group?.name} />
+          <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} groupName={group?.name} paymentLink={paymentLink} />
         </>
       )}
 
@@ -364,6 +369,12 @@ export default function GroupDetailClient() {
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} disabled={!canEdit} className="w-full border rounded px-3 py-2 text-sm disabled:opacity-50" placeholder="e.g. $20 buy-in, winner takes 70%, runner-up 30%." />
           </div>
           <PoolPayoutSettings buyIn={buyIn} setBuyIn={setBuyIn} payout={payout} setPayout={setPayout} memberCount={group.member_count} disabled={!canEdit} />
+          {buyIn > 0 && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Payment Link <span className="text-gray-400 font-normal">(Venmo, PayPal, Zelle, Cash App URL)</span></label>
+              <input type="url" value={paymentLink} onChange={(e) => setPaymentLink(e.target.value)} disabled={!canEdit} className="w-full border rounded px-3 py-2 text-sm disabled:opacity-50" placeholder="e.g. https://venmo.com/YourUsername" />
+            </div>
+          )}
           {canEdit && buyIn > 0 && (
             <PaymentTracker groupId={id} buyIn={buyIn} />
           )}

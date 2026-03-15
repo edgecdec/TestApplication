@@ -41,7 +41,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const body = await req.json();
-  const { scoring_settings, max_brackets, name, description, buy_in, payout_structure } = body;
+  const { scoring_settings, max_brackets, name, description, buy_in, payout_structure, payment_link } = body;
 
   const fields: string[] = [];
   const values: (string | number)[] = [];
@@ -52,6 +52,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (max_brackets !== undefined) { fields.push("max_brackets = ?"); values.push(max_brackets); }
   if (buy_in !== undefined) { fields.push("buy_in = ?"); values.push(Number(buy_in)); }
   if (payout_structure !== undefined) { fields.push("payout_structure = ?"); values.push(typeof payout_structure === "string" ? payout_structure : JSON.stringify(payout_structure)); }
+  if (payment_link !== undefined) { fields.push("payment_link = ?"); values.push(String(payment_link)); }
 
   if (fields.length === 0) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
