@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GroupRow, ScoringSettings } from "@/types/group";
 import { DEFAULT_SCORING, ROUND_NAMES, EVERYONE_GROUP_NAME } from "@/lib/bracket-constants";
+import ScoringPresetPicker from "@/components/ScoringPresetPicker";
 
 const MAX_BRACKETS_OPTIONS = [1, 2, 3, 5, 10] as const;
 
@@ -78,6 +79,7 @@ export default function GroupsPage() {
               {MAX_BRACKETS_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
+          <ScoringPresetPicker onSelect={setScoring} />
           <div>
             <label className="block text-sm font-medium mb-1">Points Per Round</label>
             <div className="grid grid-cols-6 gap-2">

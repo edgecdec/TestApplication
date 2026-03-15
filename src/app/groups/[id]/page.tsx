@@ -16,6 +16,7 @@ import InviteQRCode from "@/components/InviteQRCode";
 import PoolPayoutSettings from "@/components/PoolPayoutSettings";
 import PoolPayoutDisplay from "@/components/PoolPayoutDisplay";
 import PaymentTracker from "@/components/PaymentTracker";
+import ScoringPresetPicker from "@/components/ScoringPresetPicker";
 import { parsePayoutStructure } from "@/lib/payouts";
 import type { StandingsHistoryData } from "@/types/standings-history";
 
@@ -335,6 +336,7 @@ export default function GroupDetailPage() {
               {[1, 2, 3, 5, 10].map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
+          {canEdit && <ScoringPresetPicker onSelect={setScoring} />}
           <div>
             <label className="block text-sm font-medium mb-1">Points Per Round</label>
             <div className="grid grid-cols-6 gap-2">

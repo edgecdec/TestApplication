@@ -25,3 +25,42 @@ export const DEFAULT_SCORING: ScoringSettings = {
 export const INVITE_CODE_LENGTH = 8;
 export const EVERYONE_GROUP_NAME = "Everyone";
 export const CHAMPIONSHIP_GAME_ID = "ff-5-0";
+
+export interface ScoringPreset {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  scoring: ScoringSettings;
+}
+
+export const SCORING_PRESETS: ScoringPreset[] = [
+  {
+    id: "standard",
+    name: "Standard",
+    emoji: "📊",
+    description: "Classic doubling format — later rounds worth more",
+    scoring: { pointsPerRound: [1, 2, 4, 8, 16, 32], upsetBonusPerRound: [0, 0, 0, 0, 0, 0] },
+  },
+  {
+    id: "upset-heavy",
+    name: "Upset Heavy",
+    emoji: "🔥",
+    description: "Standard points plus upset bonuses that reward bold picks",
+    scoring: { pointsPerRound: [1, 2, 4, 8, 16, 32], upsetBonusPerRound: [1, 2, 3, 5, 8, 13] },
+  },
+  {
+    id: "progressive",
+    name: "Progressive",
+    emoji: "📈",
+    description: "Fibonacci-style scaling — big rewards for deep runs",
+    scoring: { pointsPerRound: [2, 3, 5, 8, 13, 21], upsetBonusPerRound: [0, 0, 0, 0, 0, 0] },
+  },
+  {
+    id: "flat",
+    name: "Flat",
+    emoji: "⚖️",
+    description: "Every correct pick worth the same — early rounds matter equally",
+    scoring: { pointsPerRound: [10, 10, 10, 10, 10, 10], upsetBonusPerRound: [0, 0, 0, 0, 0, 0] },
+  },
+];
