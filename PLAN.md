@@ -6,7 +6,7 @@ Agent picks the top incomplete task. When all tasks are done, study competitor s
 - [x] Research and decide on tech stack: study pros/cons of Next.js vs Remix vs plain React+Express, SQLite vs PostgreSQL vs JSON files, MUI vs Tailwind vs shadcn. Write findings to specs/tech-decisions.md. Consider: free hosting, simplicity, bundle size, developer experience. Then scaffold the chosen stack.
 - [x] Implement user auth: register/login with username+password, bcrypt hashing, JWT cookies. First user becomes admin.
 - [x] Implement tournament and bracket data model: DB schema for users, tournaments, picks, groups. See specs/bracket.md and specs/groups.md.
-- [ ] Build the interactive bracket UI: 68-team bracket with First Four, click-to-pick, cascade clearing. See specs/bracket.md.
+- [x] Build the interactive bracket UI: 68-team bracket with First Four, click-to-pick, cascade clearing. See specs/bracket.md.
 - [ ] Build groups system: create/join via invite link, custom scoring settings, group leaderboards. See specs/groups.md.
 - [ ] Build scoring and leaderboard: per-round points, upset bonuses, tiebreaker, round-by-round breakdown. See specs/scoring.md.
 - [ ] Add live scores from ESPN public API and auto-resolve results.
