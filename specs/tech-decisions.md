@@ -15,7 +15,7 @@
 - Rejected PostgreSQL: overkill for single-server, requires separate process
 - Rejected JSON files: no query capability, no transactions, doesn't scale
 
-## Styling: Tailwind CSS
+## Styling: Tailwind CSS v4
 - Utility-first, small production bundle (purged CSS)
 - Fast to build responsive layouts (mobile-first requirement)
 - No component library lock-in

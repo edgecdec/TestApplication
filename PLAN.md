@@ -3,7 +3,7 @@
 Agent picks the top incomplete task. When all tasks are done, study competitor sites and propose small free improvements.
 
 ## Tasks
-- [ ] Research and decide on tech stack: study pros/cons of Next.js vs Remix vs plain React+Express, SQLite vs PostgreSQL vs JSON files, MUI vs Tailwind vs shadcn. Write findings to specs/tech-decisions.md. Consider: free hosting, simplicity, bundle size, developer experience. Then scaffold the chosen stack.
+- [x] Research and decide on tech stack: study pros/cons of Next.js vs Remix vs plain React+Express, SQLite vs PostgreSQL vs JSON files, MUI vs Tailwind vs shadcn. Write findings to specs/tech-decisions.md. Consider: free hosting, simplicity, bundle size, developer experience. Then scaffold the chosen stack.
 - [ ] Implement user auth: register/login with username+password, bcrypt hashing, JWT cookies. First user becomes admin.
 - [ ] Implement tournament and bracket data model: DB schema for users, tournaments, picks, groups. See specs/bracket.md and specs/groups.md.
 - [ ] Build the interactive bracket UI: 68-team bracket with First Four, click-to-pick, cascade clearing. See specs/bracket.md.
