@@ -13,6 +13,7 @@ import MiniBracketPreview from "@/components/MiniBracketPreview";
 import BracketReactions from "@/components/BracketReactions";
 import { leaderboardToCSV, downloadCSV } from "@/lib/csv-export";
 import { leaderboardToText } from "@/lib/standings-text";
+import { generateTrashTalk } from "@/lib/trash-talk";
 
 type SortKey = "rank" | "total" | "maxPossible" | "bestPossibleFinish" | "correctPicks" | "tiebreaker" | "percentile" | `round-${number}`;
 
@@ -46,6 +47,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
   const [h2hIds, setH2hIds] = useState<number[]>([]);
   const [showH2h, setShowH2h] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [trashCopied, setTrashCopied] = useState(false);
   const [reactions, setReactions] = useState<BracketReactionsMap>({});
 
   // Fetch reactions for group leaderboards
@@ -186,6 +188,19 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
           title="Copy standings to clipboard"
         >
           {copied ? "✅ Copied!" : "📋 Copy Standings"}
+        </button>
+        <button
+          onClick={() => {
+            const text = generateTrashTalk(entries, groupName);
+            navigator.clipboard.writeText(text).then(() => {
+              setTrashCopied(true);
+              setTimeout(() => setTrashCopied(false), 2000);
+            });
+          }}
+          className="px-3 py-2 text-sm bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition whitespace-nowrap"
+          title="Generate trash talk based on current standings"
+        >
+          {trashCopied ? "✅ Copied!" : "🗣️ Trash Talk"}
         </button>
       </div>
       <div className="bg-white rounded-lg shadow overflow-x-auto">
