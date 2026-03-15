@@ -2,9 +2,25 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 
+const APP_TITLE = "March Madness Picker";
+const APP_DESCRIPTION = "Fill out your NCAA March Madness bracket and compete with friends";
+
 export const metadata: Metadata = {
-  title: "March Madness Picker",
-  description: "Fill out your NCAA March Madness bracket and compete with friends",
+  title: { default: APP_TITLE, template: `%s | ${APP_TITLE}` },
+  description: APP_DESCRIPTION,
+  openGraph: {
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
+    type: "website",
+    images: [{ url: "/api/og", width: 1200, height: 630, alt: APP_TITLE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
+    images: ["/api/og"],
+  },
+  icons: { icon: "/icon.svg" },
 };
 
 const THEME_INIT_SCRIPT = `(function(){try{if(localStorage.getItem('theme-preference')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`;
