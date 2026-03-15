@@ -44,7 +44,14 @@ export default function GroupLeaderboard({ entries, actualTotal }: Props) {
                   {e.bracketName}
                 </button>
               </td>
-              <td className="px-3 py-2 text-gray-600">{e.username}</td>
+              <td className="px-3 py-2">
+                <button
+                  onClick={() => router.push(`/profile/${encodeURIComponent(e.username)}`)}
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  {e.username}
+                </button>
+              </td>
               <td className="px-3 py-2 text-right font-bold">{e.total}</td>
               {e.rounds.map((r, i) => (
                 <td key={i} className="px-3 py-2 text-right text-xs">

@@ -1,0 +1,105 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import type { ProfileData } from "@/types/profile";
+import { ROUND_NAMES } from "@/lib/bracket-constants";
+
+export default function ProfilePage() {
+  const { username } = useParams<{ username: string }>();
+  const router = useRouter();
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!username) return;
+    fetch(`/api/profile/${encodeURIComponent(username)}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status === 401 ? "Not authenticated" : "User not found");
+        return r.json();
+      })
+      .then(setProfile)
+      .catch((e) => setError(e.message));
+  }, [username]);
+
+  if (error) {
+    return (
+      <main className="min-h-screen p-8 max-w-2xl mx-auto">
+        <p className="text-red-600">{error}</p>
+        <button onClick={() => router.push("/dashboard")} className="mt-4 text-blue-600 hover:underline">← Dashboard</button>
+      </main>
+    );
+  }
+
+  if (!profile) {
+    return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  }
+
+  return (
+    <main className="min-h-screen p-8 max-w-3xl mx-auto">
+      <button onClick={() => router.back()} className="text-blue-600 hover:underline text-sm mb-4">← Back</button>
+
+      <h1 className="text-2xl font-bold mb-1">🏀 {profile.username}</h1>
+      <p className="text-gray-500 text-sm mb-6">Joined {new Date(profile.createdAt).toLocaleDateString()}</p>
+
+      {/* Groups */}
+      <h2 className="text-lg font-semibold mb-2">Groups ({profile.groups.length})</h2>
+      {profile.groups.length === 0 ? (
+        <p className="text-gray-400 text-sm mb-6">No groups yet.</p>
+      ) : (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {profile.groups.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => router.push(`/groups/${g.id}`)}
+              className="px-3 py-1 text-sm border rounded-full hover:bg-gray-50 transition"
+            >
+              {g.name} ({g.memberCount})
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Brackets */}
+      <h2 className="text-lg font-semibold mb-2">Brackets ({profile.brackets.length})</h2>
+      {profile.brackets.length === 0 ? (
+        <p className="text-gray-400 text-sm">No brackets submitted.</p>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="text-left px-3 py-2 font-medium">Bracket</th>
+                {ROUND_NAMES.map((rn) => (
+                  <th key={rn} className="text-right px-3 py-2 font-medium text-xs">{rn}</th>
+                ))}
+                <th className="text-right px-3 py-2 font-medium">Total</th>
+                <th className="text-right px-3 py-2 font-medium">TB</th>
+              </tr>
+            </thead>
+            <tbody>
+              {profile.brackets.map((b) => (
+                <tr key={b.id} className="border-t hover:bg-gray-50">
+                  <td className="px-3 py-2">
+                    <button onClick={() => router.push(`/bracket/${b.id}`)} className="text-blue-600 hover:underline">
+                      {b.name}
+                    </button>
+                    <span className="text-xs text-gray-400 ml-2">{b.tournamentName}</span>
+                  </td>
+                  {b.rounds.map((r, i) => (
+                    <td key={i} className="px-3 py-2 text-right text-xs">
+                      {r.points}
+                      {r.upsetBonus > 0 && <span className="text-green-600 ml-0.5">*</span>}
+                    </td>
+                  ))}
+                  <td className="px-3 py-2 text-right font-bold">{b.total}</td>
+                  <td className="px-3 py-2 text-right text-gray-500">{b.tiebreaker ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </main>
+  );
+}

@@ -217,7 +217,9 @@ export default function GroupDetailPage() {
                       <td className="px-4 py-2">
                         <button onClick={() => router.push(`/bracket/${b.id}`)} className="text-blue-600 hover:underline">{b.name}</button>
                       </td>
-                      <td className="px-4 py-2 text-gray-600">{b.username}</td>
+                      <td className="px-4 py-2">
+                        <button onClick={() => router.push(`/profile/${encodeURIComponent(b.username)}`)} className="text-gray-600 hover:text-blue-600 hover:underline">{b.username}</button>
+                      </td>
                       <td className="px-4 py-2">
                         <BracketProgress picks={b.picks} />
                       </td>

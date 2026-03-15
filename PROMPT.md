@@ -53,10 +53,10 @@ If PLAN.md has no incomplete tasks:
 - DRY — if you write the same pattern twice, extract it into a shared function, hook, or component.
 
 ## Test Account
-- Username: `testbot`, Password: `testpass` (non-admin)
-- Username: `edgecdec`, Password: `admin123` (admin)
-- Use testbot for authenticated endpoint testing. To get a session cookie:
-  `curl -s -c /tmp/testcookie.txt -X POST http://localhost:3333/api/auth/login -H "Content-Type: application/json" -d '{"username":"testbot","password":"testpass"}'`
+- Test credentials are in `~/.config/testapp-creds.env` (source it to get TESTBOT_USER, TESTBOT_PASS, ADMIN_USER, ADMIN_PASS)
+- testbot is a non-admin user, ralphbot is an admin user
+- To get a session cookie:
+  `source ~/.config/testapp-creds.env && curl -s -c /tmp/testcookie.txt -X POST http://localhost:3333/api/auth/login -H "Content-Type: application/json" -d "{\"username\":\"$TESTBOT_USER\",\"password\":\"$TESTBOT_PASS\"}"`
 - Then use the cookie: `curl -s -b /tmp/testcookie.txt http://localhost:3333/api/some-endpoint`
 
 ## Rules

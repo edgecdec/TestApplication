@@ -26,9 +26,10 @@ check() {
 echo "🔍 Verifying pages..."
 
 # Login to get session cookie
+source ~/.config/testapp-creds.env 2>/dev/null || true
 curl -s -c /tmp/verify-cookie.txt -X POST "$BASE/api/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{"username":"testbot","password":"testpass"}' > /dev/null 2>&1
+  -d "{\"username\":\"${TESTBOT_USER:-testbot}\",\"password\":\"${TESTBOT_PASS:-testpass}\"}" > /dev/null 2>&1
 
 check "$BASE" "Homepage"
 check "$BASE/login" "Login"
