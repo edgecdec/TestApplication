@@ -31,6 +31,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
               <th className="text-left px-3 py-2 font-medium">Bracket</th>
               <th className="text-left px-3 py-2 font-medium">User</th>
               <th className="text-left px-3 py-2 font-medium">Champion</th>
+              <th className="text-left px-3 py-2 font-medium">Final Four</th>
               <th className="text-right px-3 py-2 font-medium">Total</th>
               <th className="text-right px-3 py-2 font-medium" title="Maximum possible score if all remaining alive picks win">Max</th>
               <th className="text-right px-3 py-2 font-medium" title="Best rank this bracket can still achieve">Best</th>
@@ -72,6 +73,24 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
                   ) : (
                     <span className="text-gray-300">—</span>
                   )}
+                </td>
+                <td className="px-3 py-2">
+                  <div className="flex gap-1">
+                    {e.finalFourPicks?.map((ff) => (
+                      ff.team ? (
+                        <span
+                          key={ff.region}
+                          className={`inline-flex items-center gap-0.5 text-xs px-1 py-0.5 rounded ${ff.eliminated ? "bg-red-50 text-gray-400 line-through" : "bg-gray-100"}`}
+                          title={`${ff.region}: (${ff.seed}) ${ff.team}${ff.eliminated ? " — eliminated" : ""}`}
+                        >
+                          <TeamLogo team={ff.team} />
+                          <span className="text-[10px] text-gray-500">{ff.seed}</span>
+                        </span>
+                      ) : (
+                        <span key={ff.region} className="text-gray-300 text-xs px-1">—</span>
+                      )
+                    ))}
+                  </div>
                 </td>
                 <td className="px-3 py-2 text-right font-bold">
                   {groupId ? (

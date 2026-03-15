@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket, maxPossibleRemaining } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import type { ScoringSettings } from "@/types/group";
 import type { Bracket, Tournament, RegionData } from "@/types/tournament";
-import type { LeaderboardEntry } from "@/types/scoring";
+import type { LeaderboardEntry, FinalFourPick } from "@/types/scoring";
 import type { Picks, Results } from "@/types/bracket";
-import { CHAMPIONSHIP_GAME_ID } from "@/lib/bracket-constants";
+import { CHAMPIONSHIP_GAME_ID, REGIONS } from "@/lib/bracket-constants";
 
 interface BracketWithUser extends Bracket {
   username: string;
@@ -49,20 +49,34 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const regions: RegionData[] = parseBracketData(tournament.bracket_data);
   const results: Results = JSON.parse(tournament.results_data);
   const eliminatedTeams = getEliminatedTeams(results, regions);
+  const seedMap = buildTeamSeedMap(regions);
 
   const actualTotal: number | null = null;
+
+  function getFinalFourPicks(picks: Picks): FinalFourPick[] {
+    return REGIONS.map((region) => {
+      const team = picks[`${region}-3-0`] ?? null;
+      return {
+        region,
+        team,
+        seed: team ? (seedMap.get(team) ?? null) : null,
+        eliminated: team !== null && eliminatedTeams.has(team),
+      };
+    });
+  }
 
   const scored = brackets.map((b) => {
     const picks: Picks = JSON.parse(b.picks);
     const championPick = picks[CHAMPIONSHIP_GAME_ID] ?? null;
     const busted = championPick !== null && eliminatedTeams.has(championPick);
+    const finalFourPicks = getFinalFourPicks(picks);
     const score = scoreBracket(
       b.id, b.name, b.username, b.user_id,
       picks, results, settings, regions,
       b.tiebreaker, actualTotal
     );
     const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
-    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining };
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks };
   });
 
   // Sort: highest total first, then by tiebreaker diff (lower is better)

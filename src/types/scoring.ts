@@ -25,6 +25,13 @@ export interface BracketScore {
   tiebreakerDiff: number | null;
 }
 
+export interface FinalFourPick {
+  region: string;
+  team: string | null;
+  seed: number | null;
+  eliminated: boolean;
+}
+
 export interface LeaderboardEntry extends BracketScore {
   rank: number;
   percentile: number;
@@ -33,4 +40,5 @@ export interface LeaderboardEntry extends BracketScore {
   maxPossible: number;
   eliminated: boolean;
   bestPossibleFinish: number;
+  finalFourPicks: FinalFourPick[];
 }
