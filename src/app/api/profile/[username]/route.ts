@@ -51,8 +51,7 @@ export async function GET(
     if (!tRow) continue;
     const tResults: Results = typeof tRow.results_data === "string" ? JSON.parse(tRow.results_data) : tRow.results_data;
     if (countResolvedGames(tResults) === 0) continue;
-    const tBracketData = typeof tRow.bracket_data === "string" ? JSON.parse(tRow.bracket_data) : tRow.bracket_data;
-    const tRegions: RegionData[] = Array.isArray(tBracketData) ? tBracketData : tBracketData?.regions ?? [];
+    const tRegions = parseBracketData(tRow.bracket_data);
     if (tRegions.length === 0) continue;
 
     const allBrackets = db.prepare("SELECT id, picks FROM brackets WHERE tournament_id = ?").all(tid) as { id: number; picks: string }[];
@@ -77,8 +76,7 @@ export async function GET(
   const brackets: ProfileBracket[] = rows.map((r) => {
     const picks: Picks = typeof r.picks === "string" ? JSON.parse(r.picks) : r.picks;
     const results: Results = typeof r.results_data === "string" ? JSON.parse(r.results_data) : r.results_data;
-    const bracketDataParsed = typeof r.bracket_data === "string" ? JSON.parse(r.bracket_data) : r.bracket_data;
-    const regions: RegionData[] = Array.isArray(bracketDataParsed) ? bracketDataParsed : bracketDataParsed?.regions ?? [];
+    const regions = parseBracketData(r.bracket_data);
     const hasRegions = regions.length > 0 && regions.every((rg: RegionData) => Array.isArray(rg.seeds));
     const rounds = hasRegions ? scorePicks(picks, results, DEFAULT_SCORING, regions) : [];
     const total = rounds.reduce((s, rd) => s + rd.points, 0);
