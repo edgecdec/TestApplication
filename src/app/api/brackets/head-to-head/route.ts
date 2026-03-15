@@ -84,8 +84,9 @@ export async function GET(req: NextRequest) {
       if (!result) continue;
       const pA = picksA[gId] ?? "";
       const pB = picksB[gId] ?? "";
-      const cA = pA === result;
-      const cB = pB === result;
+      if (!pA && !pB) continue; // skip games where neither bracket picked
+      const cA = !!pA && pA === result;
+      const cB = !!pB && pB === result;
       if (cA && !cB) winsA++;
       else if (!cA && cB) winsB++;
       else ties++;
