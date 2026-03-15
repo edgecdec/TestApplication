@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { notifyGroupMembers } from "@/lib/notifications";
 import type { GroupMessage } from "@/types/chat";
 
 const MAX_MESSAGE_LENGTH = 500;
@@ -45,6 +46,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   const result = db.prepare("INSERT INTO group_messages (group_id, user_id, message) VALUES (?, ?, ?)").run(id, user.id, message);
+
+  const groupRow = db.prepare("SELECT name FROM groups WHERE id = ?").get(id) as { name: string } | undefined;
+  const preview = message.length > 50 ? message.slice(0, 47) + "..." : message;
+  notifyGroupMembers(Number(id), user.id, "chat_message", `💬 ${user.username} in ${groupRow?.name ?? "group"}: ${preview}`, `/groups/${id}`);
 
   return NextResponse.json({ id: result.lastInsertRowid });
 }

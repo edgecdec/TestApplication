@@ -99,6 +99,20 @@ function initSchema(db: Database.Database) {
     );
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      message TEXT NOT NULL,
+      link TEXT NOT NULL DEFAULT '',
+      read INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read, created_at DESC);
+  `);
+
   // Add results_updated_at column if missing (migration)
   const cols = db.prepare("PRAGMA table_info(tournaments)").all() as { name: string }[];
   if (!cols.some(c => c.name === "results_updated_at")) {

@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchEspnScores, resolveResults } from "@/lib/espn";
 import { parseBracketData } from "@/lib/bracket-utils";
+import { notifyResultsSynced } from "@/lib/notifications";
 import type { Tournament, RegionData } from "@/types/tournament";
 import type { Results } from "@/types/bracket";
 
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
   if (newCount > 0) {
     db.prepare("UPDATE tournaments SET results_data = ?, results_updated_at = datetime('now') WHERE id = ?")
       .run(JSON.stringify(results), tournamentId);
+    notifyResultsSynced(tournamentId, newCount);
   }
 
   const totalResolved = Object.keys(results).length;

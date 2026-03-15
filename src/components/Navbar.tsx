@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 
 const PUBLIC_PATHS = ["/login", "/register", "/"] as const;
 
@@ -93,6 +94,7 @@ export default function Navbar() {
 
         {/* Desktop right side */}
         <div className="hidden md:flex items-center gap-3">
+          <NotificationBell />
           <ThemeToggle />
           <button
             onClick={() => navigate(`/profile/${user.username}`)}
@@ -110,6 +112,7 @@ export default function Navbar() {
 
         {/* Mobile: theme toggle + hamburger */}
         <div className="flex md:hidden items-center gap-2">
+          <NotificationBell />
           <ThemeToggle />
           <button
             onClick={() => setMenuOpen((v) => !v)}
