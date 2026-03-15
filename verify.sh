@@ -90,6 +90,7 @@ check_auth "$BASE/stats" "Stats /stats"
 check_auth "$BASE/results" "Results /results"
 check_auth "$BASE/whos-left" "Who's Left /whos-left"
 check_auth "$BASE/upsets" "Upsets /upsets"
+check_auth "$BASE/party" "Party /party"
 check_auth "$BASE/profile/testbot" "Profile /profile/testbot"
 check_auth "$BASE/admin" "Admin /admin"
 

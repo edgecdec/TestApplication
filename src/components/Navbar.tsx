@@ -21,6 +21,7 @@ const NAV_LINKS = [
   { href: "/stats", label: "Stats" },
   { href: "/whos-left", label: "Who's Left?" },
   { href: "/upsets", label: "Upsets" },
+  { href: "/party", label: "📺 Party" },
   { href: "/rules", label: "Rules" },
 ] as const;
 
