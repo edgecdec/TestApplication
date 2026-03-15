@@ -152,6 +152,30 @@ function initSchema(db: Database.Database) {
     db.exec("ALTER TABLE group_brackets ADD COLUMN paid INTEGER NOT NULL DEFAULT 0");
   }
 
+  // Group predictions (prop bets)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS group_predictions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER NOT NULL,
+      creator_id INTEGER NOT NULL,
+      question TEXT NOT NULL,
+      resolved INTEGER NOT NULL DEFAULT 0,
+      correct_answer INTEGER,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (group_id) REFERENCES groups(id),
+      FOREIGN KEY (creator_id) REFERENCES users(id)
+    );
+    CREATE TABLE IF NOT EXISTS prediction_votes (
+      prediction_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      vote INTEGER NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (prediction_id, user_id),
+      FOREIGN KEY (prediction_id) REFERENCES group_predictions(id),
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+  `);
+
   // Add second chance columns to brackets if missing (migration)
   const bracketCols = db.prepare("PRAGMA table_info(brackets)").all() as { name: string }[];
   if (!bracketCols.some(c => c.name === "is_second_chance")) {

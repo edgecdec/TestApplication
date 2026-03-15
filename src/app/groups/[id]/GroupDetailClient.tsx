@@ -19,6 +19,7 @@ import PaymentTracker from "@/components/PaymentTracker";
 import ScoringPresetPicker from "@/components/ScoringPresetPicker";
 import MemberBracketStatus from "@/components/MemberBracketStatus";
 import MemberManager from "@/components/MemberManager";
+import GroupPropBets from "@/components/GroupPropBets";
 import { parsePayoutStructure } from "@/lib/payouts";
 import type { StandingsHistoryData } from "@/types/standings-history";
 
@@ -37,7 +38,7 @@ interface BracketWithUser extends BracketRow {
   username: string;
 }
 
-type Tab = "leaderboard" | "brackets" | "standings" | "similarity" | "activity" | "chat" | "settings";
+type Tab = "leaderboard" | "brackets" | "standings" | "similarity" | "activity" | "props" | "chat" | "settings";
 
 export default function GroupDetailClient() {
   const { id } = useParams<{ id: string }>();
@@ -227,9 +228,9 @@ export default function GroupDetailClient() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b overflow-x-auto">
-        {(["leaderboard", "brackets", "standings", "similarity", "activity", "chat", "settings"] as const).map((t) => (
+        {(["leaderboard", "brackets", "standings", "similarity", "activity", "props", "chat", "settings"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap ${tab === t ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
-            {t === "leaderboard" ? "Leaderboard" : t === "brackets" ? "Brackets" : t === "standings" ? "📈 Standings" : t === "similarity" ? "🔀 Similarity" : t === "activity" ? "📰 Activity" : t === "chat" ? "💬 Chat" : "Settings"}
+            {t === "leaderboard" ? "Leaderboard" : t === "brackets" ? "Brackets" : t === "standings" ? "📈 Standings" : t === "similarity" ? "🔀 Similarity" : t === "activity" ? "📰 Activity" : t === "props" ? "🎲 Props" : t === "chat" ? "💬 Chat" : "Settings"}
           </button>
         ))}
       </div>
@@ -345,6 +346,10 @@ export default function GroupDetailClient() {
           <h3 className="text-sm font-medium mb-3">Recent Activity</h3>
           <GroupActivityFeed groupId={id} />
         </div>
+      )}
+
+      {tab === "props" && user && (
+        <GroupPropBets groupId={id} userId={user.id} isCreator={!!canEdit} />
       )}
 
       {tab === "chat" && user && (

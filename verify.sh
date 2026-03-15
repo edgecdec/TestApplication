@@ -141,6 +141,7 @@ check_api "$BASE/api/groups/1/similarity" "GET /api/groups/1/similarity" "any"
 check_api "$BASE/api/groups/1/recap" "GET /api/groups/1/recap" "any"
 check_api "$BASE/api/groups/1/reactions" "GET /api/groups/1/reactions" "any"
 check_api "$BASE/api/groups/1/member-status" "GET /api/groups/1/member-status" "any"
+check_api "$BASE/api/groups/1/predictions" "GET /api/groups/1/predictions" "any"
 check_api "$BASE/api/groups/1/brackets" "GET /api/groups/1/brackets" "any"
 
 echo ""
