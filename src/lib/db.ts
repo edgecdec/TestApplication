@@ -86,6 +86,17 @@ function initSchema(db: Database.Database) {
       FOREIGN KEY (group_id) REFERENCES groups(id),
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
+
+    CREATE TABLE IF NOT EXISTS group_activity (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      activity_type TEXT NOT NULL,
+      metadata TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (group_id) REFERENCES groups(id),
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
   `);
 
   // Add results_updated_at column if missing (migration)

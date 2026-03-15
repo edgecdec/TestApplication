@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { logBracketActivityToGroups } from "@/lib/activity";
+import { TOTAL_GAMES } from "@/lib/bracket-constants";
 import type { Bracket } from "@/types/tournament";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -50,6 +52,19 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   values.push(Number(id));
   db.prepare(`UPDATE brackets SET ${fields.join(", ")} WHERE id = ?`).run(...values);
+
+  // Log activity to groups this bracket belongs to
+  if (picks !== undefined) {
+    const parsedPicks = typeof picks === "string" ? JSON.parse(picks) : picks;
+    const pickCount = Object.keys(parsedPicks).length;
+    const wasComplete = Object.keys(JSON.parse(bracket.picks)).length >= TOTAL_GAMES;
+    const isNowComplete = pickCount >= TOTAL_GAMES;
+    if (isNowComplete && !wasComplete) {
+      logBracketActivityToGroups(Number(id), user.id, "bracket_completed", { bracket_name: bracket.name });
+    } else {
+      logBracketActivityToGroups(Number(id), user.id, "bracket_updated", { bracket_name: bracket.name });
+    }
+  }
 
   return NextResponse.json({ success: true });
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { logGroupActivity } from "@/lib/activity";
 import type { Group } from "@/types/group";
 import type { Bracket } from "@/types/tournament";
 
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   db.prepare("INSERT INTO group_brackets (group_id, bracket_id) VALUES (?, ?)").run(id, bracket_id);
+  logGroupActivity(Number(id), user.id, "bracket_added", { bracket_name: bracket.name });
 
   return NextResponse.json({ success: true }, { status: 201 });
 }

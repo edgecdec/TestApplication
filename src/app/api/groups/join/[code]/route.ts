@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { logGroupActivity } from "@/lib/activity";
 import type { Group } from "@/types/group";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ code: string }> }) {
@@ -43,6 +44,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ co
   }
 
   db.prepare("INSERT INTO group_members (group_id, user_id) VALUES (?, ?)").run(group.id, user.id);
+  logGroupActivity(group.id, user.id, "member_joined");
 
   return NextResponse.json({ id: group.id }, { status: 201 });
 }
