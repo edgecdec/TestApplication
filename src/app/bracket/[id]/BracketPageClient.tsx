@@ -15,6 +15,7 @@ import { parseBracketData } from "@/lib/bracket-utils";
 import AutofillDropdown from "@/components/bracket/AutofillDropdown";
 import ShareButton from "@/components/bracket/ShareButton";
 import LockCountdown from "@/components/LockCountdown";
+import AddToCalendarButton from "@/components/AddToCalendarButton";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results, PickDistribution } from "@/types/bracket";
@@ -148,6 +149,7 @@ function BracketView({ data }: { data: LoadedData }) {
             <span className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-0.5 rounded">🔄 2nd Chance</span>
           )}
           <LockCountdown lockTime={data.tournament.lock_time} />
+          <AddToCalendarButton lockTime={data.tournament.lock_time} />
         </div>
         <div className="flex items-center gap-2 no-print">
           <div className="flex items-center border rounded overflow-hidden text-xs">

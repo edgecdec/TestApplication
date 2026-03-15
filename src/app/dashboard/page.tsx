@@ -18,6 +18,7 @@ import StreakBadge from "@/components/StreakBadge";
 import MyGroupsSummary from "@/components/MyGroupsSummary";
 import BracketAchievements from "@/components/BracketAchievements";
 import MyPicksTonight from "@/components/MyPicksTonight";
+import AddToCalendarButton from "@/components/AddToCalendarButton";
 import GamesThatMatter from "@/components/GamesThatMatter";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
@@ -256,6 +257,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                     <h2 className="text-lg font-semibold dark:text-white">{t.name} ({t.year})</h2>
                     <LockCountdown lockTime={t.lock_time} />
+                    <AddToCalendarButton lockTime={t.lock_time} />
                     <div className="flex items-center gap-2">
                       {user.isAdmin && <EspnSyncButton tournamentId={t.id} />}
                       {!isLocked && (
