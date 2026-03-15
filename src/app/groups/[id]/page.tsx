@@ -140,6 +140,12 @@ export default function GroupDetailPage() {
       </div>
       <p className="text-sm text-gray-500 mb-4">Created by {group.creator_name} · {group.member_count} member{group.member_count !== 1 ? "s" : ""}</p>
 
+      <div className="mb-4">
+        <button onClick={() => router.push(`/simulator/${id}`)} className="px-4 py-2 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition">
+          🔮 What-If Simulator
+        </button>
+      </div>
+
       {!isEveryone && (
         <div className="bg-gray-100 rounded-lg p-3 mb-6 flex items-center gap-2">
           <span className="text-sm font-medium">Invite Link:</span>
