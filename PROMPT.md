@@ -52,6 +52,13 @@ If PLAN.md has no incomplete tasks:
 - Types for everything — all data shapes defined in src/types/. No `any` types unless absolutely unavoidable.
 - DRY — if you write the same pattern twice, extract it into a shared function, hook, or component.
 
+## Test Account
+- Username: `testbot`, Password: `testpass` (non-admin)
+- Username: `edgecdec`, Password: `admin123` (admin)
+- Use testbot for authenticated endpoint testing. To get a session cookie:
+  `curl -s -c /tmp/testcookie.txt -X POST http://localhost:3333/api/auth/login -H "Content-Type: application/json" -d '{"username":"testbot","password":"testpass"}'`
+- Then use the cookie: `curl -s -b /tmp/testcookie.txt http://localhost:3333/api/some-endpoint`
+
 ## Rules
 - ONE item per loop.
 - THINK before coding. Consider tradeoffs. Write reasoning for big decisions.
