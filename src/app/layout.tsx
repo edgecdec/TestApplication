@@ -8,6 +8,9 @@ const APP_DESCRIPTION = "Fill out your NCAA March Madness bracket and compete wi
 export const metadata: Metadata = {
   title: { default: APP_TITLE, template: `%s | ${APP_TITLE}` },
   description: APP_DESCRIPTION,
+  manifest: "/manifest.json",
+  themeColor: "#f97316",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: APP_TITLE },
   openGraph: {
     title: APP_TITLE,
     description: APP_DESCRIPTION,
@@ -20,7 +23,10 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
     images: ["/api/og"],
   },
-  icons: { icon: "/icon.svg" },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/api/pwa-icon?size=192",
+  },
 };
 
 const THEME_INIT_SCRIPT = `(function(){try{if(localStorage.getItem('theme-preference')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`;
