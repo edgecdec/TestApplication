@@ -5,6 +5,7 @@ import { scorePicks, countResolvedGames } from "@/lib/scoring";
 import { DEFAULT_SCORING } from "@/lib/bracket-constants";
 import { parseBracketData } from "@/lib/bracket-utils";
 import { computeGrade } from "@/lib/grading";
+import { computeAchievements, type Achievement } from "@/lib/achievements";
 import type { RegionData } from "@/types/tournament";
 import type { Picks, Results } from "@/types/bracket";
 import type { ProfileData, ProfileBracket, ProfileGroup } from "@/types/profile";
@@ -80,6 +81,7 @@ export async function GET(
     const hasRegions = regions.length > 0 && regions.every((rg: RegionData) => Array.isArray(rg.seeds));
     const rounds = hasRegions ? scorePicks(picks, results, DEFAULT_SCORING, regions) : [];
     const total = rounds.reduce((s, rd) => s + rd.points, 0);
+    const bracketAchievements = hasRegions ? computeAchievements(picks, results, regions) : [];
     return {
       id: r.id,
       name: r.name,
@@ -89,6 +91,7 @@ export async function GET(
       tiebreaker: r.tiebreaker,
       updatedAt: r.updated_at,
       grade: gradeMap.get(r.id) ?? null,
+      achievements: bracketAchievements,
     };
   });
 

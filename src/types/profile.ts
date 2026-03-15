@@ -1,5 +1,6 @@
 import type { RoundScore } from "@/types/scoring";
 import type { BracketGradeInfo } from "@/lib/grading";
+import type { Achievement } from "@/lib/achievements";
 
 export interface ProfileBracket {
   id: number;
@@ -10,6 +11,7 @@ export interface ProfileBracket {
   tiebreaker: number | null;
   updatedAt: string;
   grade: BracketGradeInfo | null;
+  achievements: Achievement[];
 }
 
 export interface ProfileGroup {

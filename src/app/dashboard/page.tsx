@@ -16,9 +16,11 @@ import BracketGrade from "@/components/BracketGrade";
 import RecentResults from "@/components/RecentResults";
 import StreakBadge from "@/components/StreakBadge";
 import MyGroupsSummary from "@/components/MyGroupsSummary";
+import BracketAchievements from "@/components/BracketAchievements";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
+import type { Achievement } from "@/lib/achievements";
 import { parseBracketData } from "@/lib/bracket-utils";
 import { computeStreak } from "@/lib/scoring";
 
@@ -39,6 +41,7 @@ export default function DashboardPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [brackets, setBrackets] = useState<Bracket[]>([]);
   const [grades, setGrades] = useState<Record<number, BracketGradeInfo & { percentile: number }>>({});
+  const [achievements, setAchievements] = useState<Record<number, Achievement[]>>({});
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -66,16 +69,25 @@ export default function DashboardPage() {
 
       // Fetch grades for each tournament
       const allGrades: Record<number, BracketGradeInfo & { percentile: number }> = {};
+      const allAchievements: Record<number, Achievement[]> = {};
       await Promise.all(loadedTournaments.map(async (t) => {
         try {
-          const gRes = await fetch(`/api/brackets/grades?tournament_id=${t.id}`);
+          const [gRes, aRes] = await Promise.all([
+            fetch(`/api/brackets/grades?tournament_id=${t.id}`),
+            fetch(`/api/brackets/achievements?tournament_id=${t.id}`),
+          ]);
           if (gRes.ok) {
             const gData = await gRes.json();
             Object.assign(allGrades, gData.grades ?? {});
           }
+          if (aRes.ok) {
+            const aData = await aRes.json();
+            Object.assign(allAchievements, aData.achievements ?? {});
+          }
         } catch { /* ignore */ }
       }));
       setGrades(allGrades);
+      setAchievements(allAchievements);
 
       setLoading(false);
     }
@@ -218,6 +230,7 @@ export default function DashboardPage() {
                           results={safeParsePicks(t.results_data)}
                           regions={parseBracketData(t.bracket_data)}
                         />
+                        <BracketAchievements achievements={achievements[b.id] ?? []} />
                       </button>
                       {!isLocked && (
                         <div className="flex flex-col gap-1">
