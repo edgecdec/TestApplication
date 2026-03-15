@@ -41,4 +41,6 @@ export interface LeaderboardEntry extends BracketScore {
   eliminated: boolean;
   bestPossibleFinish: number;
   finalFourPicks: FinalFourPick[];
+  correctPicks: number;
+  totalResolved: number;
 }

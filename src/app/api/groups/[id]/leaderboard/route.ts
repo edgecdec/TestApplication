@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import type { ScoringSettings } from "@/types/group";
 import type { Bracket, Tournament, RegionData } from "@/types/tournament";
@@ -52,6 +52,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const seedMap = buildTeamSeedMap(regions);
 
   const actualTotal: number | null = null;
+  const totalResolved = countResolvedGames(results);
 
   function getFinalFourPicks(picks: Picks): FinalFourPick[] {
     return REGIONS.map((region) => {
@@ -76,7 +77,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       b.tiebreaker, actualTotal
     );
     const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
-    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks };
+    const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, correctPicks, totalResolved };
   });
 
   // Sort: highest total first, then by tiebreaker diff (lower is better)

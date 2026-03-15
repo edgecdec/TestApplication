@@ -123,6 +123,13 @@ export function scorePicks(
   return rounds;
 }
 
+/**
+ * Count total resolved games from results.
+ */
+export function countResolvedGames(results: Results): number {
+  return Object.keys(results).length;
+}
+
 /** Score a bracket and return a full BracketScore object. */
 export function scoreBracket(
   bracketId: number,

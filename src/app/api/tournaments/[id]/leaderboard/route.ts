@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import { DEFAULT_SCORING, CHAMPIONSHIP_GAME_ID, REGIONS } from "@/lib/bracket-constants";
 import type { Tournament, RegionData, BracketRow } from "@/types/tournament";
@@ -20,6 +20,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const results: Results = JSON.parse(tournament.results_data);
   const eliminatedTeams = getEliminatedTeams(results, regions);
   const seedMap = buildTeamSeedMap(regions);
+  const totalResolved = countResolvedGames(results);
 
   const brackets = db.prepare(
     "SELECT b.*, u.username FROM brackets b JOIN users u ON u.id = b.user_id WHERE b.tournament_id = ?"
@@ -54,7 +55,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       b.tiebreaker, null
     );
     const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
-    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks };
+    const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, correctPicks, totalResolved };
   });
 
   scored.sort((a, b) => {
