@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const PUBLIC_PATHS = ["/login", "/register", "/"] as const;
 
@@ -72,6 +73,7 @@ export default function Navbar() {
         )}
       </div>
       <div className="flex items-center gap-3">
+        <ThemeToggle />
         <button
           onClick={() => router.push(`/profile/${user.username}`)}
           className="text-gray-600 hover:text-blue-600 transition"
