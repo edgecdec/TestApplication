@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { href: "/groups", label: "Groups" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/stats", label: "Stats" },
+  { href: "/whos-left", label: "Who's Left?" },
   { href: "/rules", label: "Rules" },
 ] as const;
 
