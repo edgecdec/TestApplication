@@ -100,6 +100,21 @@ function initSchema(db: Database.Database) {
   `);
 
   db.exec(`
+    CREATE TABLE IF NOT EXISTS bracket_reactions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER NOT NULL,
+      bracket_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      emoji TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (group_id) REFERENCES groups(id),
+      FOREIGN KEY (bracket_id) REFERENCES brackets(id),
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      UNIQUE(group_id, bracket_id, user_id, emoji)
+    );
+  `);
+
+  db.exec(`
     CREATE TABLE IF NOT EXISTS notifications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,

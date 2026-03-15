@@ -138,6 +138,7 @@ check_api "$BASE/api/groups/1/simulator" "GET /api/groups/1/simulator" "any"
 check_api "$BASE/api/groups/1/standings-history" "GET /api/groups/1/standings-history" "any"
 check_api "$BASE/api/groups/1/similarity" "GET /api/groups/1/similarity" "any"
 check_api "$BASE/api/groups/1/recap" "GET /api/groups/1/recap" "any"
+check_api "$BASE/api/groups/1/reactions" "GET /api/groups/1/reactions" "any"
 check_api "$BASE/api/groups/1/brackets" "GET /api/groups/1/brackets" "any"
 
 echo ""

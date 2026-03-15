@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { LeaderboardEntry } from "@/types/scoring";
+import type { BracketReactions as BracketReactionsMap } from "@/types/reactions";
 import { ROUND_NAMES } from "@/lib/bracket-constants";
 import ScoringBreakdownDialog from "@/components/ScoringBreakdownDialog";
 import HeadToHeadDialog from "@/components/HeadToHeadDialog";
 import TeamLogo from "@/components/TeamLogo";
 import StreakBadge from "@/components/StreakBadge";
 import MiniBracketPreview from "@/components/MiniBracketPreview";
+import BracketReactions from "@/components/BracketReactions";
 import { leaderboardToCSV, downloadCSV } from "@/lib/csv-export";
 import { leaderboardToText } from "@/lib/standings-text";
 
@@ -44,6 +46,44 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
   const [h2hIds, setH2hIds] = useState<number[]>([]);
   const [showH2h, setShowH2h] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [reactions, setReactions] = useState<BracketReactionsMap>({});
+
+  // Fetch reactions for group leaderboards
+  useEffect(() => {
+    if (!groupId) return;
+    fetch(`/api/groups/${groupId}/reactions`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.reactions) setReactions(data.reactions); })
+      .catch(() => {});
+  }, [groupId]);
+
+  const toggleReaction = useCallback(async (bracketId: number, emoji: string) => {
+    if (!groupId) return;
+    const res = await fetch(`/api/groups/${groupId}/reactions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bracketId, emoji }),
+    });
+    if (!res.ok) return;
+    const { action } = await res.json() as { action: "added" | "removed" };
+    setReactions((prev) => {
+      const updated = { ...prev };
+      const list = [...(updated[bracketId] || [])];
+      const idx = list.findIndex((r) => r.emoji === emoji);
+      if (action === "added") {
+        if (idx >= 0) { list[idx] = { ...list[idx], count: list[idx].count + 1, reacted: true }; }
+        else { list.push({ emoji: emoji as import("@/types/reactions").ReactionEmoji, count: 1, reacted: true }); }
+      } else {
+        if (idx >= 0) {
+          const newCount = list[idx].count - 1;
+          if (newCount <= 0) list.splice(idx, 1);
+          else list[idx] = { ...list[idx], count: newCount, reacted: false };
+        }
+      }
+      updated[bracketId] = list;
+      return updated;
+    });
+  }, [groupId]);
 
   function toggleH2h(bracketId: number) {
     setH2hIds((prev) => {
@@ -205,6 +245,13 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
                       {e.bracketName}
                     </button>
                   </MiniBracketPreview>
+                  {groupId && (
+                    <BracketReactions
+                      bracketId={e.bracketId}
+                      reactions={reactions[e.bracketId] || []}
+                      onToggle={toggleReaction}
+                    />
+                  )}
                 </td>
                 <td className="px-3 py-2">
                   <button
