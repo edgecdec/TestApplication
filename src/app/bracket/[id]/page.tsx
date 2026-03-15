@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { REGIONS } from "@/lib/bracket-constants";
 import RegionBracket from "@/components/bracket/RegionBracket";
@@ -101,7 +101,8 @@ function BracketView({ data }: { data: LoadedData }) {
   const router = useRouter();
   const bracketRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const initialPicks: Picks = JSON.parse(data.bracket.picks);
+  // Memoize initialPicks so the reference is stable across renders (prevents infinite re-render loop)
+  const initialPicks: Picks = useMemo(() => JSON.parse(data.bracket.picks), [data.bracket.picks]);
   const { picks, tiebreaker, dirty, saving, error, lastSavedAt, makePick, bulkSetPicks, updateTiebreaker, save, undo, redo, canUndo, canRedo } = useBracketPicks({
     initialPicks,
     initialTiebreaker: data.bracket.tiebreaker,

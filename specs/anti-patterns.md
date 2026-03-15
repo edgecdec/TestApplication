@@ -58,3 +58,15 @@
 - Test ONE thing per act() call: "Click the Duke team name" not "Click Duke and verify it advances and check the score updates"
 - If act() returns no response, the action succeeded — check the next state with another act()
 - NEVER write Nova Act auth errors to bugs.md
+
+## Nova Act Testing Mistakes
+- NEVER test by clicking the same element repeatedly — if Duke was picked once, it stays picked. Test DIFFERENT teams and DIFFERENT rounds to verify the full flow works.
+- After making a pick, verify the NEXT round's slot updated — don't just check if the click happened, check if the team appeared in the next matchup.
+- Test the FULL flow: pick teams through all 6 rounds to championship, then save. Don't stop after one click.
+- Check the browser console for errors — "Maximum update depth exceeded" means infinite re-render loop, which is a CRITICAL bug even if the page appears to load.
+
+## Infinite Re-render Prevention
+- NEVER create new object/array references inside useEffect dependencies — use useMemo/useCallback
+- NEVER call setState inside useEffect without proper dependency guards
+- If useEffect depends on props, make sure those props have stable references (not recreated each render)
+- Test for infinite loops by checking browser console, not just visual appearance
