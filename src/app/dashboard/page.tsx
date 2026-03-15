@@ -10,6 +10,7 @@ import BracketMiniSummary from "@/components/BracketMiniSummary";
 import LockCountdown from "@/components/LockCountdown";
 import PickReminderBanner from "@/components/PickReminderBanner";
 import ResultsBanner from "@/components/ResultsBanner";
+import TournamentProgress from "@/components/TournamentProgress";
 
 interface UserInfo {
   id: number;
@@ -108,6 +109,14 @@ export default function DashboardPage() {
 
       {/* Pick Reminder Banner */}
       <PickReminderBanner brackets={brackets} tournaments={tournaments} />
+
+      {/* Tournament Progress */}
+      {tournaments.map((t) => {
+        const results = JSON.parse(t.results_data || "{}");
+        return Object.keys(results).length > 0 ? (
+          <TournamentProgress key={`prog-${t.id}`} results={results} />
+        ) : null;
+      })}
 
       {/* Live Scores */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
