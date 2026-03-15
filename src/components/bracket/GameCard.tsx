@@ -16,6 +16,7 @@ interface GameCardProps {
   locked: boolean;
   distribution?: Record<string, number>;
   seedLookup?: Record<string, number>;
+  userPicks?: Record<string, string>;
 }
 
 function teamClass(team: string | null, pick: string | null, result: string | null): string {
@@ -39,6 +40,7 @@ export default function GameCard({
   locked,
   distribution,
   seedLookup,
+  userPicks,
 }: GameCardProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = REGION_COLORS[region as RegionName] ?? "#6b7280";
@@ -50,6 +52,13 @@ export default function GameCard({
 
   const topPct = topTeam ? distribution?.[topTeam] : undefined;
   const bottomPct = bottomTeam ? distribution?.[bottomTeam] : undefined;
+
+  // User picks overlay indicator
+  const userPick = userPicks?.[gameId];
+  const hasOverlay = userPicks !== undefined && result;
+  const overlayCorrect = hasOverlay && userPick === result;
+  const overlayWrong = hasOverlay && userPick && userPick !== result;
+  const overlayMissed = hasOverlay && !userPick;
 
   // Compute seed matchup hint (only when unlocked and both teams present)
   let matchupHint: string | null = null;
@@ -75,6 +84,13 @@ export default function GameCard({
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-[10px] rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
           📊 {matchupHint}
         </div>
+      )}
+      {hasOverlay && (
+        <span className={`absolute -top-1.5 -right-1.5 text-[10px] leading-none rounded-full w-4 h-4 flex items-center justify-center z-10 shadow ${
+          overlayCorrect ? "bg-green-500 text-white" : overlayWrong ? "bg-red-500 text-white" : "bg-gray-400 text-white"
+        }`}>
+          {overlayCorrect ? "✓" : overlayWrong ? "✗" : "–"}
+        </span>
       )}
       <div
         className={teamClass(topTeam, pick, result)}

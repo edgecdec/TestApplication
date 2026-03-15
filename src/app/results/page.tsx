@@ -9,14 +9,17 @@ import ExportButton from "@/components/bracket/ExportButton";
 import PrintButton from "@/components/bracket/PrintButton";
 import { parseBracketData } from "@/lib/bracket-utils";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import type { RegionData, Tournament } from "@/types/tournament";
-import type { Results } from "@/types/bracket";
+import type { RegionData, Tournament, Bracket } from "@/types/tournament";
+import type { Results, Picks } from "@/types/bracket";
 
 export default function ResultsPage() {
   const [regions, setRegions] = useState<RegionData[]>([]);
   const [results, setResults] = useState<Results>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [brackets, setBrackets] = useState<Bracket[]>([]);
+  const [selectedBracketId, setSelectedBracketId] = useState<string>("");
+  const [userPicks, setUserPicks] = useState<Picks | undefined>(undefined);
   const bracketRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
@@ -32,6 +35,13 @@ export default function ResultsPage() {
         const { tournament } = await tRes.json() as { tournament: Tournament };
         setRegions(parseBracketData(tournament.bracket_data));
         setResults(JSON.parse(tournament.results_data || "{}"));
+
+        // Fetch user's brackets (will 401 if not logged in — that's fine)
+        const bRes = await fetch(`/api/brackets?tournament_id=${tournaments[0].id}`);
+        if (bRes.ok) {
+          const { brackets: userBrackets } = await bRes.json() as { brackets: Bracket[] };
+          setBrackets(userBrackets || []);
+        }
       } catch {
         setError("Failed to load results");
       } finally {
@@ -41,11 +51,39 @@ export default function ResultsPage() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (!selectedBracketId) {
+      setUserPicks(undefined);
+      return;
+    }
+    const bracket = brackets.find((b) => String(b.id) === selectedBracketId);
+    if (bracket) {
+      const parsed = typeof bracket.picks === "string" ? JSON.parse(bracket.picks || "{}") : bracket.picks;
+      setUserPicks(parsed as Picks);
+    }
+  }, [selectedBracketId, brackets]);
+
   if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading results...</p></main>;
   if (error) return <main className="flex min-h-screen items-center justify-center"><p className="text-red-600">{error}</p></main>;
 
-  const noop = () => {};
   const resolvedCount = Object.keys(results).length;
+
+  // Compute overlay summary
+  let correct = 0, wrong = 0, pending = 0;
+  if (userPicks) {
+    const resolvedIds = Object.keys(results);
+    for (const gId of resolvedIds) {
+      const pick = userPicks[gId];
+      if (!pick) { wrong++; }
+      else if (pick === results[gId]) { correct++; }
+      else { wrong++; }
+    }
+    const totalPicked = Object.keys(userPicks).length;
+    pending = totalPicked - correct - Object.keys(results).reduce((n, gId) => n + (userPicks[gId] ? 1 : 0), 0);
+    if (pending < 0) pending = 0;
+  }
+
+  const noop = () => {};
 
   return (
     <main className="min-h-screen p-4">
@@ -55,10 +93,32 @@ export default function ResultsPage() {
           <p className="text-xs text-gray-500">{resolvedCount} of 63 games resolved</p>
         </div>
         <div className="flex items-center gap-2 no-print">
+          {brackets.length > 0 && (
+            <select
+              value={selectedBracketId}
+              onChange={(e) => setSelectedBracketId(e.target.value)}
+              className="text-xs border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">My Picks: Off</option>
+              {brackets.map((b) => (
+                <option key={b.id} value={String(b.id)}>{b.name}</option>
+              ))}
+            </select>
+          )}
           {!isMobile && <ExportButton bracketRef={bracketRef} bracketName="Tournament Results" />}
           {!isMobile && <PrintButton />}
         </div>
       </div>
+
+      {userPicks && resolvedCount > 0 && (
+        <div className="flex items-center gap-3 text-xs mb-3 max-w-screen-2xl mx-auto px-1">
+          <span className="font-semibold">My Picks:</span>
+          <span className="text-green-700 dark:text-green-400">✅ {correct} correct</span>
+          <span className="text-red-700 dark:text-red-400">❌ {wrong} wrong</span>
+          {pending > 0 && <span className="text-gray-500">⏳ {pending} pending</span>}
+          <span className="text-gray-400">({correct}/{resolvedCount} resolved)</span>
+        </div>
+      )}
 
       {isMobile ? (
         <div className="bg-white dark:bg-gray-800 p-3 rounded">
@@ -68,20 +128,21 @@ export default function ResultsPage() {
             results={results}
             onPick={noop}
             locked={true}
+            userPicks={userPicks}
           />
         </div>
       ) : (
         <div ref={bracketRef} className="overflow-x-auto bg-white p-4">
           <div className="min-w-[1200px] max-w-screen-2xl mx-auto">
             <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
-              <RegionBracket region={REGIONS[0]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="left" />
-              <FinalFour regions={regions} picks={results} results={results} onPick={noop} locked={true} />
-              <RegionBracket region={REGIONS[1]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="right" />
+              <RegionBracket region={REGIONS[0]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="left" userPicks={userPicks} />
+              <FinalFour regions={regions} picks={results} results={results} onPick={noop} locked={true} userPicks={userPicks} />
+              <RegionBracket region={REGIONS[1]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="right" userPicks={userPicks} />
             </div>
             <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start mt-8">
-              <RegionBracket region={REGIONS[2]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="left" />
+              <RegionBracket region={REGIONS[2]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="left" userPicks={userPicks} />
               <div className="w-40" />
-              <RegionBracket region={REGIONS[3]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="right" />
+              <RegionBracket region={REGIONS[3]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="right" userPicks={userPicks} />
             </div>
           </div>
         </div>
