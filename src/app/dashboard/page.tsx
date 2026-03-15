@@ -14,10 +14,12 @@ import TournamentProgress from "@/components/TournamentProgress";
 import BracketHealth from "@/components/BracketHealth";
 import BracketGrade from "@/components/BracketGrade";
 import RecentResults from "@/components/RecentResults";
+import StreakBadge from "@/components/StreakBadge";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
 import { parseBracketData } from "@/lib/bracket-utils";
+import { computeStreak } from "@/lib/scoring";
 
 function safeParsePicks(raw: string | Record<string, string> | null | undefined): Picks {
   if (!raw) return {};
@@ -199,6 +201,7 @@ export default function DashboardPage() {
                           <span className="font-medium flex items-center gap-2">
                             {b.name}
                             {grades[b.id] && <BracketGrade grade={grades[b.id]} />}
+                            <StreakBadge streak={computeStreak(safeParsePicks(b.picks), safeParsePicks(t.results_data))} />
                           </span>
                           <span className="text-xs text-gray-400">
                             Updated {new Date(b.updated_at).toLocaleDateString()}

@@ -32,6 +32,9 @@ export interface FinalFourPick {
   eliminated: boolean;
 }
 
+/** Pick streak: positive = correct streak, negative = incorrect streak, 0 = no resolved picks */
+export type PickStreak = number;
+
 export interface LeaderboardEntry extends BracketScore {
   rank: number;
   percentile: number;
@@ -43,6 +46,7 @@ export interface LeaderboardEntry extends BracketScore {
   finalFourPicks: FinalFourPick[];
   correctPicks: number;
   totalResolved: number;
+  streak: PickStreak;
 }
 
 export interface RecentResultItem {

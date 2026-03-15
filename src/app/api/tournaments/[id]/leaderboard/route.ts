@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import { DEFAULT_SCORING, CHAMPIONSHIP_GAME_ID, REGIONS } from "@/lib/bracket-constants";
 import type { Tournament, RegionData, BracketRow } from "@/types/tournament";
@@ -56,7 +56,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     );
     const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
     const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
-    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, correctPicks, totalResolved };
+    const streak = computeStreak(picks, results);
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, correctPicks, totalResolved, streak };
   });
 
   scored.sort((a, b) => {

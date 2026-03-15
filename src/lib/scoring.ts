@@ -1,7 +1,7 @@
 import type { RegionData } from "@/types/tournament";
 import type { Picks, Results } from "@/types/bracket";
 import type { ScoringSettings } from "@/types/group";
-import type { RoundScore, BracketScore, PickDetail } from "@/types/scoring";
+import type { RoundScore, BracketScore, PickDetail, PickStreak } from "@/types/scoring";
 import { ROUND_NAMES, REGIONS } from "@/lib/bracket-constants";
 import { gameId, buildR64Matchups, gamesInRound } from "@/lib/bracket-utils";
 
@@ -229,4 +229,33 @@ export function scorePicksDetailed(
   }
 
   return details;
+}
+
+/**
+ * Compute the current pick streak for a bracket.
+ * Positive = consecutive correct picks from most recent, negative = consecutive wrong.
+ * Games are ordered by round descending (most recent first), then by gameId descending.
+ * Only considers games where the user made a pick AND a result exists.
+ */
+export function computeStreak(picks: Picks, results: Results): PickStreak {
+  const resolved: { gameId: string; round: number; correct: boolean }[] = [];
+  for (const [gId, result] of Object.entries(results)) {
+    const pick = picks[gId];
+    if (!pick) continue;
+    const parts = gId.split("-");
+    const round = parseInt(parts[parts.length - 2], 10);
+    resolved.push({ gameId: gId, round, correct: pick === result });
+  }
+  if (resolved.length === 0) return 0;
+
+  // Most recent games first
+  resolved.sort((a, b) => b.round - a.round || b.gameId.localeCompare(a.gameId));
+
+  const firstCorrect = resolved[0].correct;
+  let count = 0;
+  for (const r of resolved) {
+    if (r.correct !== firstCorrect) break;
+    count++;
+  }
+  return firstCorrect ? count : -count;
 }

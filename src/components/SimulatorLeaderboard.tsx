@@ -6,7 +6,7 @@ import type { ScoringSettings } from "@/types/group";
 import type { RegionData } from "@/types/tournament";
 import type { SimulatorBracketData } from "@/types/simulator";
 import type { LeaderboardEntry } from "@/types/scoring";
-import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak } from "@/lib/scoring";
 import { CHAMPIONSHIP_GAME_ID, REGIONS } from "@/lib/bracket-constants";
 import { getEliminatedTeams } from "@/lib/bracket-utils";
 import type { FinalFourPick } from "@/types/scoring";
@@ -29,11 +29,12 @@ export default function SimulatorLeaderboard({ brackets, results, settings, regi
       const busted = championPick !== null && eliminated.has(championPick);
       const maxRemaining = maxPossibleRemaining(b.picks, results, settings, eliminated);
       const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
+      const streak = computeStreak(b.picks, results);
       const finalFourPicks: FinalFourPick[] = REGIONS.map((region) => {
         const team = b.picks[`${region}-3-0`] ?? null;
         return { region, team, seed: team ? (seedMap.get(team) ?? null) : null, eliminated: team !== null && eliminated.has(team) };
       });
-      return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, correctPicks, totalResolved };
+      return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, correctPicks, totalResolved, streak };
     });
     scores.sort((a, b) => {
       if (b.total !== a.total) return b.total - a.total;

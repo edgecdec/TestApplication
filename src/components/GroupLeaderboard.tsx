@@ -7,6 +7,7 @@ import { ROUND_NAMES } from "@/lib/bracket-constants";
 import ScoringBreakdownDialog from "@/components/ScoringBreakdownDialog";
 import HeadToHeadDialog from "@/components/HeadToHeadDialog";
 import TeamLogo from "@/components/TeamLogo";
+import StreakBadge from "@/components/StreakBadge";
 
 type SortKey = "rank" | "total" | "maxPossible" | "bestPossibleFinish" | "correctPicks" | "tiebreaker" | "percentile" | `round-${number}`;
 
@@ -130,6 +131,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
               <th className="text-left px-3 py-2 font-medium">Final Four</th>
               <th className={`text-right ${thClass}`} onClick={() => handleSort("total")}>Total{arrow("total")}</th>
               <th className={`text-right ${thClass}`} onClick={() => handleSort("correctPicks")} title="Correct picks out of resolved games">Correct{arrow("correctPicks")}</th>
+              <th className="text-right px-3 py-2 font-medium whitespace-nowrap" title="Pick streak">Streak</th>
               <th className={`text-right ${thClass}`} onClick={() => handleSort("maxPossible")} title="Maximum possible score if all remaining alive picks win">Max{arrow("maxPossible")}</th>
               <th className={`text-right ${thClass}`} onClick={() => handleSort("bestPossibleFinish")} title="Best rank this bracket can still achieve">Best{arrow("bestPossibleFinish")}</th>
               {ROUND_NAMES.map((rn, i) => (
@@ -214,6 +216,9 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
                 </td>
                 <td className="px-3 py-2 text-right text-gray-600">
                   {e.correctPicks}/{e.totalResolved}
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <StreakBadge streak={e.streak} />
                 </td>
                 <td className="px-3 py-2 text-right text-gray-500" title="Max possible score">
                   {e.maxPossible}
