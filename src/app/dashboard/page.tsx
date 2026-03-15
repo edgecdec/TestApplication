@@ -6,6 +6,7 @@ import type { Tournament, Bracket } from "@/types/tournament";
 import LiveScores from "@/components/LiveScores";
 import EspnSyncButton from "@/components/EspnSyncButton";
 import BracketProgress from "@/components/BracketProgress";
+import BracketMiniSummary from "@/components/BracketMiniSummary";
 import LockCountdown from "@/components/LockCountdown";
 import PickReminderBanner from "@/components/PickReminderBanner";
 import ResultsBanner from "@/components/ResultsBanner";
@@ -157,6 +158,7 @@ export default function DashboardPage() {
                           </span>
                         </div>
                         <BracketProgress picks={b.picks} />
+                        <BracketMiniSummary picks={b.picks} />
                       </button>
                       {!isLocked && (
                         <div className="flex flex-col gap-1">
