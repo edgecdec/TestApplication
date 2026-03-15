@@ -80,6 +80,11 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          {user.isAdmin && (
+            <button onClick={() => router.push("/admin")} className="px-4 py-2 text-sm bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition">
+              ⚙️ Admin
+            </button>
+          )}
           <button onClick={() => router.push("/groups")} className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition">
             My Groups
           </button>
