@@ -6,22 +6,29 @@ import type { ProfileData } from "@/types/profile";
 import { ROUND_NAMES } from "@/lib/bracket-constants";
 import BracketGrade from "@/components/BracketGrade";
 import BracketAchievements from "@/components/BracketAchievements";
+import PasswordChange from "@/components/PasswordChange";
 
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
   const router = useRouter();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!username) return;
-    fetch(`/api/profile/${encodeURIComponent(username)}`)
-      .then((r) => {
-        if (!r.ok) throw new Error(r.status === 401 ? "Not authenticated" : "User not found");
-        return r.json();
-      })
-      .then(setProfile)
-      .catch((e) => setError(e.message));
+    Promise.all([
+      fetch(`/api/profile/${encodeURIComponent(username)}`),
+      fetch("/api/auth/me"),
+    ]).then(async ([profileRes, meRes]) => {
+      if (!profileRes.ok) throw new Error(profileRes.status === 401 ? "Not authenticated" : "User not found");
+      const profileData = await profileRes.json();
+      setProfile(profileData);
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        setIsOwnProfile(meData?.user?.username === profileData.username);
+      }
+    }).catch((e) => setError(e.message));
   }, [username]);
 
   if (error) {
@@ -99,6 +106,14 @@ export default function ProfilePage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {isOwnProfile && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-2">🔒 Change Password</h2>
+          <div className="bg-white rounded-lg shadow p-4 max-w-sm">
+            <PasswordChange />
+          </div>
         </div>
       )}
     </main>
