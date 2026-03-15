@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Tournament } from "@/types/tournament";
 import TournamentForm from "@/components/admin/TournamentForm";
 import TournamentList from "@/components/admin/TournamentList";
+import AdminUserManagement from "@/components/admin/AdminUserManagement";
 
 export default function AdminPage() {
   const [loading, setLoading] = useState(true);
@@ -89,6 +90,11 @@ export default function AdminPage() {
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="font-semibold text-lg mb-4">Tournaments ({tournaments.length})</h2>
         <TournamentList tournaments={tournaments} onRefresh={loadFullTournaments} />
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6 mt-6">
+        <h2 className="font-semibold text-lg mb-4">👥 User Management</h2>
+        <AdminUserManagement />
       </div>
     </main>
   );
