@@ -99,7 +99,7 @@ function BracketView({ data }: { data: LoadedData }) {
   const bracketRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const initialPicks: Picks = JSON.parse(data.bracket.picks);
-  const { picks, tiebreaker, dirty, saving, error, makePick, bulkSetPicks, updateTiebreaker, save } = useBracketPicks({
+  const { picks, tiebreaker, dirty, saving, error, makePick, bulkSetPicks, updateTiebreaker, save, undo, redo, canUndo, canRedo } = useBracketPicks({
     initialPicks,
     initialTiebreaker: data.bracket.tiebreaker,
     bracketId: data.bracket.id,
@@ -148,6 +148,22 @@ function BracketView({ data }: { data: LoadedData }) {
           <ShareButton bracketName={data.bracket.name} bracketId={data.bracket.id} picks={picks} regions={data.regions} />
           {!data.locked && (
             <>
+              <button
+                onClick={undo}
+                disabled={!canUndo}
+                className="px-2 py-1.5 text-sm rounded border hover:bg-gray-100 disabled:opacity-30 transition"
+                title="Undo (⌘Z)"
+              >
+                ↩️
+              </button>
+              <button
+                onClick={redo}
+                disabled={!canRedo}
+                className="px-2 py-1.5 text-sm rounded border hover:bg-gray-100 disabled:opacity-30 transition"
+                title="Redo (⌘⇧Z)"
+              >
+                ↪️
+              </button>
               <AutofillDropdown onSelect={handleAutofill} disabled={saving} />
               <button
                 onClick={save}

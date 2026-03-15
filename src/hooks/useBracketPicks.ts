@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { Picks } from "@/types/bracket";
 import { cascadeClear } from "@/lib/bracket-utils";
+
+const MAX_UNDO_HISTORY = 50;
 
 interface UseBracketPicksOptions {
   initialPicks: Picks;
@@ -18,32 +20,46 @@ export function useBracketPicks({ initialPicks, initialTiebreaker, bracketId, lo
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Undo/redo history stacks (store picks snapshots)
+  const undoStack = useRef<Picks[]>([]);
+  const redoStack = useRef<Picks[]>([]);
+  const [historyVersion, setHistoryVersion] = useState(0); // trigger re-render for canUndo/canRedo
+
   // Sync if initialPicks changes (e.g. bracket reload)
   useEffect(() => {
     setPicks(initialPicks);
     setTiebreaker(initialTiebreaker);
     setDirty(false);
+    undoStack.current = [];
+    redoStack.current = [];
+    setHistoryVersion(0);
   }, [initialPicks, initialTiebreaker]);
 
   // Warn on navigation away with unsaved changes
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
-      if (dirty) {
-        e.preventDefault();
-      }
+      if (dirty) { e.preventDefault(); }
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [dirty]);
+
+  // Push current picks to undo stack before a change
+  const pushUndo = useCallback((currentPicks: Picks) => {
+    undoStack.current = [...undoStack.current.slice(-(MAX_UNDO_HISTORY - 1)), currentPicks];
+    redoStack.current = [];
+    setHistoryVersion((v) => v + 1);
+  }, []);
 
   const makePick = useCallback(
     (gameId: string, team: string) => {
       if (locked) return;
       setPicks((prev) => {
         const oldWinner = prev[gameId];
-        if (oldWinner === team) return prev; // same pick, no-op
+        if (oldWinner === team) return prev;
+        // Save snapshot before change
+        pushUndo(prev);
         let newPicks = { ...prev };
-        // Cascade clear if changing an existing pick
         if (oldWinner) {
           newPicks = cascadeClear(newPicks, gameId, oldWinner);
         }
@@ -52,17 +68,61 @@ export function useBracketPicks({ initialPicks, initialTiebreaker, bracketId, lo
       });
       setDirty(true);
     },
-    [locked]
+    [locked, pushUndo]
   );
 
   const bulkSetPicks = useCallback(
     (newPicks: Picks) => {
       if (locked) return;
-      setPicks(newPicks);
+      setPicks((prev) => {
+        pushUndo(prev);
+        return newPicks;
+      });
       setDirty(true);
     },
-    [locked]
+    [locked, pushUndo]
   );
+
+  const undo = useCallback(() => {
+    if (locked || undoStack.current.length === 0) return;
+    const prev = undoStack.current.pop()!;
+    setPicks((current) => {
+      redoStack.current.push(current);
+      return prev;
+    });
+    setDirty(true);
+    setHistoryVersion((v) => v + 1);
+  }, [locked]);
+
+  const redo = useCallback(() => {
+    if (locked || redoStack.current.length === 0) return;
+    const next = redoStack.current.pop()!;
+    setPicks((current) => {
+      undoStack.current.push(current);
+      return next;
+    });
+    setDirty(true);
+    setHistoryVersion((v) => v + 1);
+  }, [locked]);
+
+  const canUndo = undoStack.current.length > 0 && !locked;
+  const canRedo = redoStack.current.length > 0 && !locked;
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    if (locked) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod || e.key.toLowerCase() !== "z") return;
+      // Don't intercept when typing in an input
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      e.preventDefault();
+      if (e.shiftKey) { redo(); } else { undo(); }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [locked, undo, redo]);
 
   const updateTiebreaker = useCallback(
     (value: number | null) => {
@@ -95,5 +155,9 @@ export function useBracketPicks({ initialPicks, initialTiebreaker, bracketId, lo
     }
   }, [bracketId, picks, tiebreaker]);
 
-  return { picks, tiebreaker, dirty, saving, error, makePick, bulkSetPicks, updateTiebreaker, save };
+  return {
+    picks, tiebreaker, dirty, saving, error,
+    makePick, bulkSetPicks, updateTiebreaker, save,
+    undo, redo, canUndo, canRedo,
+  };
 }
