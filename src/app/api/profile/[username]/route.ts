@@ -45,7 +45,8 @@ export async function GET(
     const results: Results = typeof r.results_data === "string" ? JSON.parse(r.results_data) : r.results_data;
     const bracketDataParsed = typeof r.bracket_data === "string" ? JSON.parse(r.bracket_data) : r.bracket_data;
     const regions: RegionData[] = Array.isArray(bracketDataParsed) ? bracketDataParsed : bracketDataParsed?.regions ?? [];
-    const rounds = scorePicks(picks, results, DEFAULT_SCORING, regions);
+    const hasRegions = regions.length > 0 && regions.every((rg: RegionData) => Array.isArray(rg.seeds));
+    const rounds = hasRegions ? scorePicks(picks, results, DEFAULT_SCORING, regions) : [];
     const total = rounds.reduce((s, rd) => s + rd.points, 0);
     return {
       id: r.id,
