@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { href: "/groups", label: "Groups" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/stats", label: "Stats" },
+  { href: "/rules", label: "Rules" },
 ] as const;
 
 export default function Navbar() {
