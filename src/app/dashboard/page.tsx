@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Tournament, Bracket } from "@/types/tournament";
 import LiveScores from "@/components/LiveScores";
 import EspnSyncButton from "@/components/EspnSyncButton";
+import BracketProgress from "@/components/BracketProgress";
 
 interface UserInfo {
   id: number;
@@ -130,12 +131,15 @@ export default function DashboardPage() {
                     <li key={b.id}>
                       <button
                         onClick={() => router.push(`/bracket/${b.id}`)}
-                        className="w-full text-left px-4 py-2 rounded border hover:bg-gray-50 transition flex justify-between items-center"
+                        className="w-full text-left px-4 py-3 rounded border hover:bg-gray-50 transition"
                       >
-                        <span className="font-medium">{b.name}</span>
-                        <span className="text-xs text-gray-400">
-                          Updated {new Date(b.updated_at).toLocaleDateString()}
-                        </span>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-medium">{b.name}</span>
+                          <span className="text-xs text-gray-400">
+                            Updated {new Date(b.updated_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <BracketProgress picks={b.picks} />
                       </button>
                     </li>
                   ))}

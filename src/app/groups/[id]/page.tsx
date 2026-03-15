@@ -7,6 +7,7 @@ import type { BracketRow } from "@/types/tournament";
 import type { LeaderboardEntry } from "@/types/scoring";
 import { ROUND_NAMES, EVERYONE_GROUP_NAME } from "@/lib/bracket-constants";
 import GroupLeaderboard from "@/components/GroupLeaderboard";
+import BracketProgress from "@/components/BracketProgress";
 
 interface GroupDetail extends Group {
   member_count: number;
@@ -202,6 +203,7 @@ export default function GroupDetailPage() {
                     <th className="text-left px-4 py-2 font-medium">#</th>
                     <th className="text-left px-4 py-2 font-medium">Bracket</th>
                     <th className="text-left px-4 py-2 font-medium">User</th>
+                    <th className="text-left px-4 py-2 font-medium min-w-[140px]">Progress</th>
                     {canEdit && <th className="px-4 py-2"></th>}
                   </tr>
                 </thead>
@@ -213,6 +215,9 @@ export default function GroupDetailPage() {
                         <button onClick={() => router.push(`/bracket/${b.id}`)} className="text-blue-600 hover:underline">{b.name}</button>
                       </td>
                       <td className="px-4 py-2 text-gray-600">{b.username}</td>
+                      <td className="px-4 py-2">
+                        <BracketProgress picks={b.picks} />
+                      </td>
                       {canEdit && (
                         <td className="px-4 py-2 text-right">
                           <button onClick={() => handleRemoveBracket(b.id)} className="text-xs text-red-500 hover:text-red-700">Remove</button>
