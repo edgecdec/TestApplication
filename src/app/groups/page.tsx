@@ -54,9 +54,6 @@ export default function GroupsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">🏀 My Groups</h1>
         <div className="flex gap-2">
-          <button onClick={() => router.push("/dashboard")} className="px-3 py-1.5 text-sm bg-gray-200 rounded hover:bg-gray-300 transition">
-            ← Dashboard
-          </button>
           <button onClick={() => setShowCreate(!showCreate)} className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition">
             + Create Group
           </button>

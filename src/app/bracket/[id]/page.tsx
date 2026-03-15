@@ -72,7 +72,6 @@ export default function BracketPage() {
     return (
       <main className="flex min-h-screen items-center justify-center flex-col gap-4">
         <p className="text-red-600">{loadError}</p>
-        <button onClick={() => router.push("/dashboard")} className="text-blue-600 underline">Back to Dashboard</button>
       </main>
     );
   }
@@ -100,9 +99,6 @@ function BracketView({ data }: { data: LoadedData }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 max-w-screen-2xl mx-auto">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.push("/dashboard")} className="text-blue-600 hover:underline text-sm">
-            ← Dashboard
-          </button>
           <h1 className="text-lg font-bold">🏀 {data.bracket.name}</h1>
           <LockCountdown lockTime={data.tournament.lock_time} />
         </div>

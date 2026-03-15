@@ -26,7 +26,6 @@ export default function ProfilePage() {
     return (
       <main className="min-h-screen p-8 max-w-2xl mx-auto">
         <p className="text-red-600">{error}</p>
-        <button onClick={() => router.push("/dashboard")} className="mt-4 text-blue-600 hover:underline">← Dashboard</button>
       </main>
     );
   }
@@ -37,8 +36,6 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen p-8 max-w-3xl mx-auto">
-      <button onClick={() => router.back()} className="text-blue-600 hover:underline text-sm mb-4">← Back</button>
-
       <h1 className="text-2xl font-bold mb-1">🏀 {profile.username}</h1>
       <p className="text-gray-500 text-sm mb-6">Joined {new Date(profile.createdAt).toLocaleDateString()}</p>
 

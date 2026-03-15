@@ -42,9 +42,6 @@ export default function StatsPage() {
     <main className="min-h-screen p-8 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">📊 Bracket Stats</h1>
-        <button onClick={() => router.push("/dashboard")} className="px-4 py-2 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 transition">
-          ← Dashboard
-        </button>
       </div>
 
       {!tournament && <p className="text-gray-500">No tournament found.</p>}

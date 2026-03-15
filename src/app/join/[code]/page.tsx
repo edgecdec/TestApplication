@@ -56,7 +56,6 @@ export default function JoinGroupPage() {
       <main className="flex min-h-screen items-center justify-center">
         <div className="bg-white rounded-lg shadow p-8 text-center max-w-sm">
           <p className="text-red-600 mb-4">{error || "Group not found."}</p>
-          <button onClick={() => router.push("/dashboard")} className="text-blue-600 hover:underline text-sm">Go to Dashboard</button>
         </div>
       </main>
     );
