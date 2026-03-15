@@ -18,6 +18,7 @@ import PoolPayoutDisplay from "@/components/PoolPayoutDisplay";
 import PaymentTracker from "@/components/PaymentTracker";
 import ScoringPresetPicker from "@/components/ScoringPresetPicker";
 import MemberBracketStatus from "@/components/MemberBracketStatus";
+import MemberManager from "@/components/MemberManager";
 import { parsePayoutStructure } from "@/lib/payouts";
 import type { StandingsHistoryData } from "@/types/standings-history";
 
@@ -170,6 +171,31 @@ export default function GroupDetailClient() {
       {group.description && (
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4 text-sm text-blue-800 dark:text-blue-200 whitespace-pre-wrap">
           📋 {group.description}
+        </div>
+      )}
+
+      {/* Leave group button for non-creator members */}
+      {!isEveryone && user && group.created_by !== user.id && (
+        <div className="mb-4">
+          <button
+            onClick={async () => {
+              if (!confirm(`Leave "${group.name}"? Your brackets will be removed from this group.`)) return;
+              const res = await fetch(`/api/groups/${id}/members`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: user.id }),
+              });
+              if (res.ok) {
+                router.push("/groups");
+              } else {
+                const err = await res.json();
+                alert(err.error || "Failed to leave group");
+              }
+            }}
+            className="px-3 py-1.5 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+          >
+            🚪 Leave Group
+          </button>
         </div>
       )}
 
@@ -335,6 +361,11 @@ export default function GroupDetailClient() {
           <PoolPayoutSettings buyIn={buyIn} setBuyIn={setBuyIn} payout={payout} setPayout={setPayout} memberCount={group.member_count} disabled={!canEdit} />
           {canEdit && buyIn > 0 && (
             <PaymentTracker groupId={id} buyIn={buyIn} />
+          )}
+          {canEdit && !isEveryone && (
+            <MemberManager groupId={id} creatorId={group.created_by} onMemberRemoved={() => {
+              setGroup((prev) => prev ? { ...prev, member_count: prev.member_count - 1 } : prev);
+            }} />
           )}
           <div>
             <label className="block text-sm font-medium mb-1">Max Brackets Per User</label>

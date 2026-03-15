@@ -1,4 +1,4 @@
-export type ActivityType = "member_joined" | "bracket_added" | "bracket_completed" | "bracket_updated";
+export type ActivityType = "member_joined" | "member_left" | "bracket_added" | "bracket_completed" | "bracket_updated";
 
 export interface GroupActivity {
   id: number;

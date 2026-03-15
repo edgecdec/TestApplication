@@ -2,6 +2,7 @@ export type NotificationType =
   | "results_synced"
   | "chat_message"
   | "member_joined"
+  | "member_left"
   | "bracket_locked"
   | "round_complete";
 

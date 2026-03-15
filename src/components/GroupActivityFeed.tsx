@@ -5,6 +5,7 @@ import type { GroupActivity } from "@/types/activity";
 
 const ACTIVITY_ICONS: Record<string, string> = {
   member_joined: "👋",
+  member_left: "🚪",
   bracket_added: "📋",
   bracket_completed: "✅",
   bracket_updated: "✏️",
@@ -12,6 +13,7 @@ const ACTIVITY_ICONS: Record<string, string> = {
 
 const ACTIVITY_LABELS: Record<string, string> = {
   member_joined: "joined the group",
+  member_left: "left the group",
   bracket_added: "added a bracket",
   bracket_completed: "completed their bracket",
   bracket_updated: "updated their bracket",
