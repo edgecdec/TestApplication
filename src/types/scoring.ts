@@ -44,6 +44,8 @@ export interface LeaderboardEntry extends BracketScore {
   eliminated: boolean;
   bestPossibleFinish: number;
   finalFourPicks: FinalFourPick[];
+  /** Winners of each semifinal game [ff-4-0 winner, ff-4-1 winner] */
+  semifinalPicks: [string | null, string | null];
   correctPicks: number;
   totalResolved: number;
   streak: PickStreak;

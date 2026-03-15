@@ -49,6 +49,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const championPick = picks[CHAMPIONSHIP_GAME_ID] ?? null;
     const busted = championPick !== null && eliminatedTeams.has(championPick);
     const finalFourPicks = getFinalFourPicks(picks);
+    const semifinalPicks: [string | null, string | null] = [picks["ff-4-0"] ?? null, picks["ff-4-1"] ?? null];
     const score = scoreBracket(
       b.id, b.name, b.username ?? "", b.user_id,
       picks, results, settings, regions,
@@ -57,7 +58,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
     const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
     const streak = computeStreak(picks, results);
-    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, correctPicks, totalResolved, streak };
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak };
   });
 
   scored.sort((a, b) => {

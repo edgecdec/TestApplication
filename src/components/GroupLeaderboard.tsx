@@ -8,6 +8,7 @@ import ScoringBreakdownDialog from "@/components/ScoringBreakdownDialog";
 import HeadToHeadDialog from "@/components/HeadToHeadDialog";
 import TeamLogo from "@/components/TeamLogo";
 import StreakBadge from "@/components/StreakBadge";
+import MiniBracketPreview from "@/components/MiniBracketPreview";
 import { leaderboardToCSV, downloadCSV } from "@/lib/csv-export";
 import { leaderboardToText } from "@/lib/standings-text";
 
@@ -191,12 +192,19 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
                   )}
                 </td>
                 <td className="px-3 py-2">
-                  <button
-                    onClick={() => router.push(`/bracket/${e.bracketId}`)}
-                    className="text-blue-600 hover:underline"
+                  <MiniBracketPreview
+                    finalFourPicks={e.finalFourPicks}
+                    semifinalPicks={e.semifinalPicks ?? [null, null]}
+                    championPick={e.championPick}
+                    busted={e.busted}
                   >
-                    {e.bracketName}
-                  </button>
+                    <button
+                      onClick={() => router.push(`/bracket/${e.bracketId}`)}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {e.bracketName}
+                    </button>
+                  </MiniBracketPreview>
                 </td>
                 <td className="px-3 py-2">
                   <button
