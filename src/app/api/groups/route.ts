@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { generateInviteCode } from "@/lib/invite";
+import { DEFAULT_SCORING } from "@/lib/bracket-constants";
 import type { Group } from "@/types/group";
 
 export async function GET() {
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
   ).run(
     name.trim(),
     inviteCode,
-    scoring_settings ? (typeof scoring_settings === "string" ? scoring_settings : JSON.stringify(scoring_settings)) : undefined,
+    scoring_settings ? (typeof scoring_settings === "string" ? scoring_settings : JSON.stringify(scoring_settings)) : JSON.stringify(DEFAULT_SCORING),
     max_brackets || 1,
     (description || "").trim(),
     user.id
