@@ -17,6 +17,7 @@ import RecentResults from "@/components/RecentResults";
 import StreakBadge from "@/components/StreakBadge";
 import MyGroupsSummary from "@/components/MyGroupsSummary";
 import BracketAchievements from "@/components/BracketAchievements";
+import MyPicksTonight from "@/components/MyPicksTonight";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
@@ -187,6 +188,22 @@ export default function DashboardPage() {
         <h2 className="text-sm font-semibold text-gray-700 mb-2">📺 Live Scores</h2>
         <LiveScores />
       </div>
+
+      {/* My Picks Tonight */}
+      {tournaments.map((t) => {
+        const results = safeParsePicks(t.results_data);
+        const regions = parseBracketData(t.bracket_data);
+        const myBrackets = brackets.filter((b) => b.tournament_id === t.id);
+        if (regions.length === 0 || myBrackets.length === 0) return null;
+        return (
+          <MyPicksTonight
+            key={`picks-tonight-${t.id}`}
+            regions={regions}
+            results={results}
+            brackets={myBrackets.map((b) => ({ name: b.name, picks: safeParsePicks(b.picks) }))}
+          />
+        );
+      })}
 
       {/* Recent Results */}
       {tournaments.map((t) => (
