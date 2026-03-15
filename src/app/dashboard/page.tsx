@@ -12,8 +12,10 @@ import PickReminderBanner from "@/components/PickReminderBanner";
 import ResultsBanner from "@/components/ResultsBanner";
 import TournamentProgress from "@/components/TournamentProgress";
 import BracketHealth from "@/components/BracketHealth";
+import BracketGrade from "@/components/BracketGrade";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
+import type { BracketGradeInfo } from "@/lib/grading";
 import { parseBracketData } from "@/lib/bracket-utils";
 
 function safeParsePicks(raw: string | Record<string, string> | null | undefined): Picks {
@@ -32,6 +34,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [brackets, setBrackets] = useState<Bracket[]>([]);
+  const [grades, setGrades] = useState<Record<number, BracketGradeInfo & { percentile: number }>>({});
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -46,14 +49,30 @@ export default function DashboardPage() {
         fetch("/api/tournaments"),
         fetch("/api/brackets"),
       ]);
+      let loadedTournaments: Tournament[] = [];
       if (tRes.ok) {
         const tData = await tRes.json();
-        setTournaments(tData.tournaments ?? []);
+        loadedTournaments = tData.tournaments ?? [];
+        setTournaments(loadedTournaments);
       }
       if (bRes.ok) {
         const bData = await bRes.json();
         setBrackets(bData.brackets ?? []);
       }
+
+      // Fetch grades for each tournament
+      const allGrades: Record<number, BracketGradeInfo & { percentile: number }> = {};
+      await Promise.all(loadedTournaments.map(async (t) => {
+        try {
+          const gRes = await fetch(`/api/brackets/grades?tournament_id=${t.id}`);
+          if (gRes.ok) {
+            const gData = await gRes.json();
+            Object.assign(allGrades, gData.grades ?? {});
+          }
+        } catch { /* ignore */ }
+      }));
+      setGrades(allGrades);
+
       setLoading(false);
     }
     load();
@@ -171,7 +190,10 @@ export default function DashboardPage() {
                         className="flex-1 text-left px-4 py-3 rounded border hover:bg-gray-50 transition"
                       >
                         <div className="flex justify-between items-center mb-1">
-                          <span className="font-medium">{b.name}</span>
+                          <span className="font-medium flex items-center gap-2">
+                            {b.name}
+                            {grades[b.id] && <BracketGrade grade={grades[b.id]} />}
+                          </span>
                           <span className="text-xs text-gray-400">
                             Updated {new Date(b.updated_at).toLocaleDateString()}
                           </span>

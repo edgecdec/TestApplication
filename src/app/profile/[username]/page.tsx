@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { ProfileData } from "@/types/profile";
 import { ROUND_NAMES } from "@/lib/bracket-constants";
+import BracketGrade from "@/components/BracketGrade";
 
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
@@ -81,6 +82,7 @@ export default function ProfilePage() {
                     <button onClick={() => router.push(`/bracket/${b.id}`)} className="text-blue-600 hover:underline">
                       {b.name}
                     </button>
+                    {b.grade && <BracketGrade grade={b.grade} />}
                     <span className="text-xs text-gray-400 ml-2">{b.tournamentName}</span>
                   </td>
                   {b.rounds.map((r, i) => (
