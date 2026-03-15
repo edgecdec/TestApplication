@@ -177,6 +177,13 @@ function BracketView({ data }: { data: LoadedData }) {
               </button>
               <AutofillDropdown onSelect={handleAutofill} disabled={saving} />
               <button
+                onClick={() => { if (confirm("Reset all picks and tiebreaker? This cannot be undone.")) { bulkSetPicks({}); updateTiebreaker(null); } }}
+                className="px-2 py-1.5 text-sm rounded border text-red-600 border-red-200 hover:bg-red-50 transition"
+                title="Reset all picks"
+              >
+                🔄 Reset
+              </button>
+              <button
                 onClick={save}
                 disabled={saving || !dirty}
                 className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 transition"
