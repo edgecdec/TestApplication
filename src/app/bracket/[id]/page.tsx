@@ -7,6 +7,7 @@ import RegionBracket from "@/components/bracket/RegionBracket";
 import FinalFour from "@/components/bracket/FinalFour";
 import MobileBracket from "@/components/bracket/MobileBracket";
 import ExportButton from "@/components/bracket/ExportButton";
+import PrintButton from "@/components/bracket/PrintButton";
 import { useBracketPicks } from "@/hooks/useBracketPicks";
 import { generateAutofill, type AutofillMode } from "@/lib/autofill";
 import { parseBracketData } from "@/lib/bracket-utils";
@@ -118,7 +119,7 @@ function BracketView({ data }: { data: LoadedData }) {
           <h1 className="text-lg font-bold">🏀 {data.bracket.name}</h1>
           <LockCountdown lockTime={data.tournament.lock_time} />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 no-print">
           {error && <span className="text-red-600 text-xs">{error}</span>}
           {dirty && !data.locked && (
             <span className="text-yellow-600 text-xs">Unsaved</span>
@@ -143,6 +144,7 @@ function BracketView({ data }: { data: LoadedData }) {
             <span className="text-xs text-gray-500">TB: {tiebreaker}</span>
           )}
           {!isMobile && <ExportButton bracketRef={bracketRef} bracketName={data.bracket.name} />}
+          {!isMobile && <PrintButton />}
           <ShareButton bracketName={data.bracket.name} bracketId={data.bracket.id} picks={picks} regions={data.regions} />
           {!data.locked && (
             <>

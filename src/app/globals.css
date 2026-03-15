@@ -60,3 +60,12 @@
 .dark .hover\:bg-red-100:hover { background-color: #7f1d1d !important; }
 .dark .bg-green-50 { background-color: #052e16 !important; }
 .dark .bg-green-100 { background-color: #064e3b !important; }
+
+/* Print styles */
+@media print {
+  nav, .no-print { display: none !important; }
+  body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  main { padding: 0 !important; }
+  .overflow-x-auto { overflow: visible !important; }
+  .min-w-\[1200px\] { min-width: auto !important; }
+}
