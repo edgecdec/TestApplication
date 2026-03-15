@@ -43,6 +43,8 @@ export default function DashboardPage() {
   const [grades, setGrades] = useState<Record<number, BracketGradeInfo & { percentile: number }>>({});
   const [achievements, setAchievements] = useState<Record<number, Achievement[]>>({});
   const [loading, setLoading] = useState(true);
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -127,6 +129,23 @@ export default function DashboardPage() {
     const res = await fetch(`/api/brackets/${bracketId}`, { method: "DELETE" });
     if (res.ok) {
       setBrackets((prev) => prev.filter((b) => b.id !== bracketId));
+    }
+  }
+
+  async function renameBracket(bracketId: number) {
+    const trimmed = renameValue.trim();
+    if (!trimmed) return;
+    const res = await fetch(`/api/brackets/${bracketId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: trimmed }),
+    });
+    if (res.ok) {
+      setBrackets((prev) => prev.map((b) => b.id === bracketId ? { ...b, name: trimmed } : b));
+      setRenamingId(null);
+    } else {
+      const err = await res.json();
+      alert(err.error || "Failed to rename");
     }
   }
 
@@ -215,7 +234,20 @@ export default function DashboardPage() {
                       >
                         <div className="flex justify-between items-center mb-1">
                           <span className="font-medium flex items-center gap-2">
-                            {b.name}
+                            {renamingId === b.id ? (
+                              <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                <input
+                                  autoFocus
+                                  value={renameValue}
+                                  onChange={(e) => setRenameValue(e.target.value)}
+                                  onKeyDown={(e) => { if (e.key === "Enter") renameBracket(b.id); if (e.key === "Escape") setRenamingId(null); }}
+                                  className="border rounded px-2 py-0.5 text-sm w-40"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                                <button onClick={(e) => { e.stopPropagation(); renameBracket(b.id); }} className="text-green-600 text-xs font-bold">✓</button>
+                                <button onClick={(e) => { e.stopPropagation(); setRenamingId(null); }} className="text-gray-400 text-xs">✕</button>
+                              </span>
+                            ) : b.name}
                             {grades[b.id] && <BracketGrade grade={grades[b.id]} />}
                             <StreakBadge streak={computeStreak(safeParsePicks(b.picks), safeParsePicks(t.results_data))} />
                           </span>
@@ -234,6 +266,13 @@ export default function DashboardPage() {
                       </button>
                       {!isLocked && (
                         <div className="flex flex-col gap-1">
+                          <button
+                            onClick={() => { setRenamingId(b.id); setRenameValue(b.name); }}
+                            className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition"
+                            title="Rename bracket"
+                          >
+                            ✏️ Rename
+                          </button>
                           <button
                             onClick={() => duplicateBracket(b.id)}
                             className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition"
