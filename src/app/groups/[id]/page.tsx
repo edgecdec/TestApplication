@@ -152,6 +152,9 @@ export default function GroupDetailPage() {
         <button onClick={() => router.push(`/groups/${id}/whopicked`)} className="px-4 py-2 text-sm bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition">
           🔍 Who Picked Whom
         </button>
+        <button onClick={() => router.push(`/groups/${id}/recap`)} className="px-4 py-2 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition">
+          📋 Round Recap
+        </button>
       </div>
 
       {!isEveryone && (
