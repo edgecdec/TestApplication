@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { REGIONS } from "@/lib/bracket-constants";
 import RegionBracket from "@/components/bracket/RegionBracket";
 import FinalFour from "@/components/bracket/FinalFour";
+import ExportButton from "@/components/bracket/ExportButton";
 import { useBracketPicks } from "@/hooks/useBracketPicks";
 import { generateAutofill, type AutofillMode } from "@/lib/autofill";
 import AutofillDropdown from "@/components/bracket/AutofillDropdown";
@@ -79,6 +80,7 @@ export default function BracketPage() {
 
 function BracketView({ data }: { data: LoadedData }) {
   const router = useRouter();
+  const bracketRef = useRef<HTMLDivElement>(null);
   const initialPicks: Picks = JSON.parse(data.bracket.picks);
   const { picks, dirty, saving, error, makePick, bulkSetPicks, save } = useBracketPicks({
     initialPicks,
@@ -109,6 +111,7 @@ function BracketView({ data }: { data: LoadedData }) {
           {dirty && !data.locked && (
             <span className="text-yellow-600 text-xs">Unsaved changes</span>
           )}
+          <ExportButton bracketRef={bracketRef} bracketName={data.bracket.name} />
           {!data.locked && (
             <>
               <AutofillDropdown onSelect={handleAutofill} disabled={saving} />
@@ -125,7 +128,7 @@ function BracketView({ data }: { data: LoadedData }) {
       </div>
 
       {/* Bracket */}
-      <div className="overflow-x-auto">
+      <div ref={bracketRef} className="overflow-x-auto bg-white p-4">
         <div className="min-w-[1200px] max-w-screen-2xl mx-auto">
           {/* Top two regions + Final Four */}
           <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
