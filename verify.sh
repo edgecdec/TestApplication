@@ -136,6 +136,7 @@ check_api "$BASE/api/groups/1/activity" "GET /api/groups/1/activity" "any"
 check_api "$BASE/api/groups/1/whopicked" "GET /api/groups/1/whopicked" "any"
 check_api "$BASE/api/groups/1/simulator" "GET /api/groups/1/simulator" "any"
 check_api "$BASE/api/groups/1/standings-history" "GET /api/groups/1/standings-history" "any"
+check_api "$BASE/api/groups/1/similarity" "GET /api/groups/1/similarity" "any"
 check_api "$BASE/api/groups/1/recap" "GET /api/groups/1/recap" "any"
 check_api "$BASE/api/groups/1/brackets" "GET /api/groups/1/brackets" "any"
 
