@@ -15,6 +15,7 @@ interface NavUser {
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/groups", label: "Groups" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/stats", label: "Stats" },
 ] as const;
 
