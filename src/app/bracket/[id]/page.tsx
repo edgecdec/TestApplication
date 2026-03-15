@@ -8,6 +8,7 @@ import FinalFour from "@/components/bracket/FinalFour";
 import MobileBracket from "@/components/bracket/MobileBracket";
 import ExportButton from "@/components/bracket/ExportButton";
 import PrintButton from "@/components/bracket/PrintButton";
+import LiveScores from "@/components/LiveScores";
 import { useBracketPicks } from "@/hooks/useBracketPicks";
 import { generateAutofill, type AutofillMode } from "@/lib/autofill";
 import { parseBracketData } from "@/lib/bracket-utils";
@@ -207,6 +208,14 @@ function BracketView({ data }: { data: LoadedData }) {
 
       {/* Bracket Insights — only shown after lock time when distribution data exists */}
       <BracketInsights picks={picks} regions={data.regions} distribution={data.distribution} />
+
+      {/* Live Scores ticker */}
+      <div className="max-w-screen-2xl mx-auto mb-3 no-print">
+        <details className="bg-gray-50 dark:bg-gray-800 rounded p-2">
+          <summary className="text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer">📺 Live Scores</summary>
+          <div className="mt-2"><LiveScores /></div>
+        </details>
+      </div>
 
       {/* Bracket — mobile vs desktop */}
       {isMobile ? (
