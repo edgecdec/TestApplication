@@ -5,6 +5,7 @@ import type { Picks } from "@/types/bracket";
 import { cascadeClear } from "@/lib/bracket-utils";
 
 const MAX_UNDO_HISTORY = 50;
+const AUTO_SAVE_DELAY_MS = 2000;
 
 interface UseBracketPicksOptions {
   initialPicks: Picks;
@@ -19,6 +20,7 @@ export function useBracketPicks({ initialPicks, initialTiebreaker, bracketId, lo
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   // Undo/redo history stacks (store picks snapshots)
   const undoStack = useRef<Picks[]>([]);
@@ -148,6 +150,7 @@ export function useBracketPicks({ initialPicks, initialTiebreaker, bracketId, lo
         return;
       }
       setDirty(false);
+      setLastSavedAt(new Date());
     } catch {
       setError("Network error");
     } finally {
@@ -155,8 +158,16 @@ export function useBracketPicks({ initialPicks, initialTiebreaker, bracketId, lo
     }
   }, [bracketId, picks, tiebreaker]);
 
+  // Auto-save: debounce save when dirty
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!dirty || locked || saving) return;
+    autoSaveTimer.current = setTimeout(() => { save(); }, AUTO_SAVE_DELAY_MS);
+    return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
+  }, [dirty, locked, saving, picks, tiebreaker, save]);
+
   return {
-    picks, tiebreaker, dirty, saving, error,
+    picks, tiebreaker, dirty, saving, error, lastSavedAt,
     makePick, bulkSetPicks, updateTiebreaker, save,
     undo, redo, canUndo, canRedo,
   };

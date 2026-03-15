@@ -101,7 +101,7 @@ function BracketView({ data }: { data: LoadedData }) {
   const bracketRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const initialPicks: Picks = JSON.parse(data.bracket.picks);
-  const { picks, tiebreaker, dirty, saving, error, makePick, bulkSetPicks, updateTiebreaker, save, undo, redo, canUndo, canRedo } = useBracketPicks({
+  const { picks, tiebreaker, dirty, saving, error, lastSavedAt, makePick, bulkSetPicks, updateTiebreaker, save, undo, redo, canUndo, canRedo } = useBracketPicks({
     initialPicks,
     initialTiebreaker: data.bracket.tiebreaker,
     bracketId: data.bracket.id,
@@ -128,8 +128,12 @@ function BracketView({ data }: { data: LoadedData }) {
         </div>
         <div className="flex flex-wrap items-center gap-2 no-print">
           {error && <span className="text-red-600 text-xs">{error}</span>}
-          {dirty && !data.locked && (
-            <span className="text-yellow-600 text-xs">Unsaved</span>
+          {saving && <span className="text-blue-500 text-xs">Saving...</span>}
+          {!saving && dirty && !data.locked && (
+            <span className="text-yellow-600 text-xs">Auto-saving…</span>
+          )}
+          {!saving && !dirty && lastSavedAt && !data.locked && (
+            <span className="text-green-600 text-xs">✓ Saved {lastSavedAt.toLocaleTimeString()}</span>
           )}
           {!data.locked && (
             <div className="flex items-center gap-1">
