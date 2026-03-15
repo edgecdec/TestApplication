@@ -157,11 +157,11 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <main className="min-h-screen p-8 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <main className="min-h-screen p-4 md:p-8 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">🏀 Dashboard</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl font-bold dark:text-white">🏀 Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">
             Welcome, {user.username}
             {user.isAdmin && (
               <span className="ml-2 text-xs bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded">Admin</span>
@@ -170,152 +170,161 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Results Updated Banner */}
+      {/* Full-width banners */}
       <ResultsBanner />
-
-      {/* Pick Reminder Banner */}
       <PickReminderBanner brackets={brackets} tournaments={tournaments} />
 
-      {/* Tournament Progress */}
-      {tournaments.map((t) => {
-        const results = JSON.parse(t.results_data || "{}");
-        return Object.keys(results).length > 0 ? (
-          <TournamentProgress key={`prog-${t.id}`} results={results} />
-        ) : null;
-      })}
+      {/* Two-column grid: on mobile, right column (scores) stacks on top */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* RIGHT column — time-sensitive content (appears first on mobile via order) */}
+        <div className="order-1 lg:order-2 lg:col-span-2 space-y-4">
+          {/* Tournament Progress */}
+          {tournaments.map((t) => {
+            const results = JSON.parse(t.results_data || "{}");
+            return Object.keys(results).length > 0 ? (
+              <TournamentProgress key={`prog-${t.id}`} results={results} />
+            ) : null;
+          })}
 
-      {/* Live Scores */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <h2 className="text-sm font-semibold text-gray-700 mb-2">📺 Live Scores</h2>
-        <LiveScores />
-      </div>
+          {/* Live Scores */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">📺 Live Scores</h2>
+            <LiveScores />
+          </div>
 
-      {/* My Picks Tonight */}
-      {tournaments.map((t) => {
-        const results = safeParsePicks(t.results_data);
-        const regions = parseBracketData(t.bracket_data);
-        const myBrackets = brackets.filter((b) => b.tournament_id === t.id);
-        if (regions.length === 0 || myBrackets.length === 0) return null;
-        return (
-          <MyPicksTonight
-            key={`picks-tonight-${t.id}`}
-            regions={regions}
-            results={results}
-            brackets={myBrackets.map((b) => ({ name: b.name, picks: safeParsePicks(b.picks) }))}
-          />
-        );
-      })}
+          {/* My Picks Tonight */}
+          {tournaments.map((t) => {
+            const results = safeParsePicks(t.results_data);
+            const regions = parseBracketData(t.bracket_data);
+            const myBrackets = brackets.filter((b) => b.tournament_id === t.id);
+            if (regions.length === 0 || myBrackets.length === 0) return null;
+            return (
+              <MyPicksTonight
+                key={`picks-tonight-${t.id}`}
+                regions={regions}
+                results={results}
+                brackets={myBrackets.map((b) => ({ name: b.name, picks: safeParsePicks(b.picks) }))}
+              />
+            );
+          })}
 
-      {/* Recent Results */}
-      <GamesThatMatter />
-      {tournaments.map((t) => (
-        <RecentResults key={`recent-${t.id}`} tournamentId={t.id} />
-      ))}
+          {/* Games That Matter */}
+          <GamesThatMatter />
 
-      {/* My Groups Summary */}
-      <MyGroupsSummary />
-
-      {/* Tournaments */}
-      {tournaments.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-500">No tournaments yet. {user.isAdmin ? "Create one from the admin panel." : "Ask an admin to create a tournament."}</p>
+          {/* Recent Results */}
+          {tournaments.map((t) => (
+            <RecentResults key={`recent-${t.id}`} tournamentId={t.id} />
+          ))}
         </div>
-      ) : (
-        tournaments.map((t) => {
-          const myBrackets = brackets.filter((b) => b.tournament_id === t.id);
-          const isLocked = new Date(t.lock_time) <= new Date();
-          return (
-            <div key={t.id} className="bg-white rounded-lg shadow p-6 mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold">{t.name} ({t.year})</h2>
-                <LockCountdown lockTime={t.lock_time} />
-                <div className="flex items-center gap-2">
-                  {user.isAdmin && <EspnSyncButton tournamentId={t.id} />}
-                  {!isLocked && (
-                    <button
-                      onClick={() => createBracket(t.id)}
-                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                    >
-                      + New Bracket
-                    </button>
+
+        {/* LEFT column — groups + brackets */}
+        <div className="order-2 lg:order-1 lg:col-span-3 space-y-4">
+          {/* My Groups Summary */}
+          <MyGroupsSummary />
+
+          {/* Tournaments & Brackets */}
+          {tournaments.length === 0 ? (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <p className="text-gray-500 dark:text-gray-400">No tournaments yet. {user.isAdmin ? "Create one from the admin panel." : "Ask an admin to create a tournament."}</p>
+            </div>
+          ) : (
+            tournaments.map((t) => {
+              const myBrackets = brackets.filter((b) => b.tournament_id === t.id);
+              const isLocked = new Date(t.lock_time) <= new Date();
+              return (
+                <div key={t.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <h2 className="text-lg font-semibold dark:text-white">{t.name} ({t.year})</h2>
+                    <LockCountdown lockTime={t.lock_time} />
+                    <div className="flex items-center gap-2">
+                      {user.isAdmin && <EspnSyncButton tournamentId={t.id} />}
+                      {!isLocked && (
+                        <button
+                          onClick={() => createBracket(t.id)}
+                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                        >
+                          + New Bracket
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {myBrackets.length === 0 ? (
+                    <p className="text-gray-400 text-sm">No brackets yet. Create one to start picking!</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {myBrackets.map((b) => (
+                        <li key={b.id} className="flex items-center gap-2">
+                          <button
+                            onClick={() => router.push(`/bracket/${b.id}`)}
+                            className="flex-1 text-left px-4 py-3 rounded border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                          >
+                            <div className="flex justify-between items-center mb-1 flex-wrap gap-1">
+                              <span className="font-medium flex items-center gap-2 flex-wrap dark:text-white">
+                                {renamingId === b.id ? (
+                                  <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                    <input
+                                      autoFocus
+                                      value={renameValue}
+                                      onChange={(e) => setRenameValue(e.target.value)}
+                                      onKeyDown={(e) => { if (e.key === "Enter") renameBracket(b.id); if (e.key === "Escape") setRenamingId(null); }}
+                                      className="border rounded px-2 py-0.5 text-sm w-40 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                      onClick={(e) => e.stopPropagation()}
+                                    />
+                                    <button onClick={(e) => { e.stopPropagation(); renameBracket(b.id); }} className="text-green-600 text-xs font-bold">✓</button>
+                                    <button onClick={(e) => { e.stopPropagation(); setRenamingId(null); }} className="text-gray-400 text-xs">✕</button>
+                                  </span>
+                                ) : b.name}
+                                {grades[b.id] && <BracketGrade grade={grades[b.id]} />}
+                                <StreakBadge streak={computeStreak(safeParsePicks(b.picks), safeParsePicks(t.results_data))} />
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                Updated {new Date(b.updated_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <BracketProgress picks={b.picks} />
+                            <BracketMiniSummary picks={b.picks} />
+                            <BracketHealth
+                              picks={safeParsePicks(b.picks)}
+                              results={safeParsePicks(t.results_data)}
+                              regions={parseBracketData(t.bracket_data)}
+                            />
+                            <BracketAchievements achievements={achievements[b.id] ?? []} />
+                          </button>
+                          {!isLocked && (
+                            <div className="flex flex-col gap-1">
+                              <button
+                                onClick={() => { setRenamingId(b.id); setRenameValue(b.name); }}
+                                className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                                title="Rename bracket"
+                              >
+                                ✏️ Rename
+                              </button>
+                              <button
+                                onClick={() => duplicateBracket(b.id)}
+                                className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                                title="Duplicate bracket"
+                              >
+                                📋 Duplicate
+                              </button>
+                              <button
+                                onClick={() => deleteBracket(b.id)}
+                                className="px-2 py-1 text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-100 dark:hover:bg-red-900/50 transition"
+                                title="Delete bracket"
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
-              </div>
-              {myBrackets.length === 0 ? (
-                <p className="text-gray-400 text-sm">No brackets yet. Create one to start picking!</p>
-              ) : (
-                <ul className="space-y-2">
-                  {myBrackets.map((b) => (
-                    <li key={b.id} className="flex items-center gap-2">
-                      <button
-                        onClick={() => router.push(`/bracket/${b.id}`)}
-                        className="flex-1 text-left px-4 py-3 rounded border hover:bg-gray-50 transition"
-                      >
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-medium flex items-center gap-2">
-                            {renamingId === b.id ? (
-                              <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                                <input
-                                  autoFocus
-                                  value={renameValue}
-                                  onChange={(e) => setRenameValue(e.target.value)}
-                                  onKeyDown={(e) => { if (e.key === "Enter") renameBracket(b.id); if (e.key === "Escape") setRenamingId(null); }}
-                                  className="border rounded px-2 py-0.5 text-sm w-40"
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                                <button onClick={(e) => { e.stopPropagation(); renameBracket(b.id); }} className="text-green-600 text-xs font-bold">✓</button>
-                                <button onClick={(e) => { e.stopPropagation(); setRenamingId(null); }} className="text-gray-400 text-xs">✕</button>
-                              </span>
-                            ) : b.name}
-                            {grades[b.id] && <BracketGrade grade={grades[b.id]} />}
-                            <StreakBadge streak={computeStreak(safeParsePicks(b.picks), safeParsePicks(t.results_data))} />
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            Updated {new Date(b.updated_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <BracketProgress picks={b.picks} />
-                        <BracketMiniSummary picks={b.picks} />
-                        <BracketHealth
-                          picks={safeParsePicks(b.picks)}
-                          results={safeParsePicks(t.results_data)}
-                          regions={parseBracketData(t.bracket_data)}
-                        />
-                        <BracketAchievements achievements={achievements[b.id] ?? []} />
-                      </button>
-                      {!isLocked && (
-                        <div className="flex flex-col gap-1">
-                          <button
-                            onClick={() => { setRenamingId(b.id); setRenameValue(b.name); }}
-                            className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition"
-                            title="Rename bracket"
-                          >
-                            ✏️ Rename
-                          </button>
-                          <button
-                            onClick={() => duplicateBracket(b.id)}
-                            className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition"
-                            title="Duplicate bracket"
-                          >
-                            📋 Duplicate
-                          </button>
-                          <button
-                            onClick={() => deleteBracket(b.id)}
-                            className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition"
-                            title="Delete bracket"
-                          >
-                            🗑️ Delete
-                          </button>
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          );
-        })
-      )}
+              );
+            })
+          )}
+        </div>
+      </div>
     </main>
   );
 }
