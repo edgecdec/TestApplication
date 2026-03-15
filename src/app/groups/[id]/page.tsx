@@ -11,6 +11,7 @@ import BracketProgress from "@/components/BracketProgress";
 import GroupChat from "@/components/GroupChat";
 import GroupActivityFeed from "@/components/GroupActivityFeed";
 import StandingsChart from "@/components/StandingsChart";
+import InviteQRCode from "@/components/InviteQRCode";
 import type { StandingsHistoryData } from "@/types/standings-history";
 
 interface GroupDetail extends Group {
@@ -175,6 +176,7 @@ export default function GroupDetailPage() {
           <button onClick={() => navigator.clipboard.writeText(inviteUrl)} className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition">
             Copy
           </button>
+          <InviteQRCode url={inviteUrl} groupName={group.name} />
         </div>
       )}
 
