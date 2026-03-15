@@ -17,6 +17,7 @@ import PoolPayoutSettings from "@/components/PoolPayoutSettings";
 import PoolPayoutDisplay from "@/components/PoolPayoutDisplay";
 import PaymentTracker from "@/components/PaymentTracker";
 import ScoringPresetPicker from "@/components/ScoringPresetPicker";
+import MemberBracketStatus from "@/components/MemberBracketStatus";
 import { parsePayoutStructure } from "@/lib/payouts";
 import type { StandingsHistoryData } from "@/types/standings-history";
 
@@ -229,6 +230,11 @@ export default function GroupDetailClient() {
 
       {tab === "brackets" && (
         <div>
+          {/* Member bracket completion tracker */}
+          {!isEveryone && group && (
+            <MemberBracketStatus groupId={id} groupName={group.name} inviteUrl={inviteUrl} />
+          )}
+
           {/* Add bracket */}
           {addableBrackets.length > 0 && (
             <div className="bg-white rounded-lg shadow p-4 mb-4">
