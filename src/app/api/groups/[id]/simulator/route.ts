@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { parseBracketData } from "@/lib/bracket-utils";
 import type { ScoringSettings } from "@/types/group";
 import type { Bracket, Tournament, RegionData } from "@/types/tournament";
 import type { Picks, Results } from "@/types/bracket";
@@ -43,7 +44,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Tournament not found" }, { status: 404 });
   }
 
-  const regions: RegionData[] = JSON.parse(tournament.bracket_data);
+  const regions: RegionData[] = parseBracketData(tournament.bracket_data);
   const results: Results = JSON.parse(tournament.results_data);
 
   const bracketData: SimulatorBracketData[] = brackets.map((b) => ({

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Tournament, RegionData } from "@/types/tournament";
 import type { Results } from "@/types/bracket";
+import { parseBracketData } from "@/lib/bracket-utils";
 import BracketDataImport from "@/components/admin/BracketDataImport";
 import EspnSyncButton from "@/components/EspnSyncButton";
 
@@ -54,7 +55,7 @@ export default function TournamentList({ tournaments, onRefresh }: Props) {
   return (
     <div className="space-y-3">
       {tournaments.map((t) => {
-        const regions: RegionData[] = JSON.parse(t.bracket_data || "[]");
+        const regions: RegionData[] = parseBracketData(t.bracket_data);
         const results: Results = JSON.parse(t.results_data || "{}");
         const teamCount = regions.reduce((sum, r) => sum + r.seeds.length, 0);
         const resultCount = Object.keys(results).length;

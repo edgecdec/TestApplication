@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchEspnScores, resolveResults } from "@/lib/espn";
+import { parseBracketData } from "@/lib/bracket-utils";
 import type { Tournament, RegionData } from "@/types/tournament";
 import type { Results } from "@/types/bracket";
 
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Tournament not found" }, { status: 404 });
   }
 
-  const regions: RegionData[] = JSON.parse(tournament.bracket_data);
+  const regions: RegionData[] = parseBracketData(tournament.bracket_data);
   const currentResults: Results = JSON.parse(tournament.results_data);
 
   if (regions.length === 0) {

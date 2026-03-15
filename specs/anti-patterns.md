@@ -38,3 +38,9 @@
 - bracket_data from the DB is a JSON string — ALWAYS JSON.parse() it before use
 - bracket_data structure is `{ regions: [...] }` — access `.regions` to get the array, don't pass the whole object where an array is expected
 - ALWAYS validate data shape before using it — check if it's a string (needs parsing), check if the expected property exists
+
+## Runtime Verification
+- `npx next build` passing does NOT mean the app works — TypeScript can't catch runtime data shape issues
+- After restarting dev server, ALWAYS curl the pages you changed and grep for errors: `curl -s http://localhost:3333/your-page | grep -i "error\|TypeError\|undefined\|is not a function"`
+- If curl returns HTML with an error stack trace, you have a runtime bug — fix it before committing
+- Common runtime bugs that build passes but runtime catches: unparsed JSON strings, missing .property access, wrong data shape passed to functions, undefined props

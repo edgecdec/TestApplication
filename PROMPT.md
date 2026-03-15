@@ -28,7 +28,11 @@ Read other specs (@specs/overview.md, @specs/bracket.md, @specs/groups.md, @spec
 6. Write or update tests. Add comments explaining WHAT the test verifies and WHY.
 7. `npx next build` — must pass.
 8. `git add -A && git commit -m "descriptive message" && git push`
-9. Restart dev server: run `bash dev.sh` — this kills any existing server and starts fresh on port 3333. Returns immediately. Then verify: `sleep 5 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3333` must return 200.
+9. Restart dev server: run `bash dev.sh` — this kills any existing server and starts fresh on port 3333. Returns immediately. Then verify ALL of these:
+   - `sleep 5 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3333` must return 200
+   - Curl any page you changed or that uses code you changed, e.g. `curl -s http://localhost:3333/bracket/1 2>&1 | head -5` — check for error messages in the HTML like "TypeError", "Cannot read", "is not a function", "undefined". If you see any runtime error in the response, you have a bug — fix it before marking the task done.
+   - Curl any API route you changed, e.g. `curl -s http://localhost:3333/api/auth/me` — verify it returns valid JSON.
+   - Or run `bash verify.sh` which checks all key pages for runtime errors. If it fails, fix the errors before proceeding.
 10. Bug fixed? DELETE the line from bugs.md. Task done? Mark [x] in PLAN.md. Commit.
 11. If you discover a bug during work, add it to bugs.md immediately.
 

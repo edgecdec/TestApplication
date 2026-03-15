@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { scoreBracket } from "@/lib/scoring";
+import { parseBracketData } from "@/lib/bracket-utils";
 import type { ScoringSettings } from "@/types/group";
 import type { Bracket, Tournament, RegionData } from "@/types/tournament";
 import type { LeaderboardEntry } from "@/types/scoring";
@@ -44,7 +45,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ leaderboard: [], actualTotal: null });
   }
 
-  const regions: RegionData[] = JSON.parse(tournament.bracket_data);
+  const regions: RegionData[] = parseBracketData(tournament.bracket_data);
   const results: Results = JSON.parse(tournament.results_data);
 
   // Check if championship game has a result for tiebreaker

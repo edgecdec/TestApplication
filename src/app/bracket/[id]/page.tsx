@@ -8,6 +8,7 @@ import FinalFour from "@/components/bracket/FinalFour";
 import ExportButton from "@/components/bracket/ExportButton";
 import { useBracketPicks } from "@/hooks/useBracketPicks";
 import { generateAutofill, type AutofillMode } from "@/lib/autofill";
+import { parseBracketData } from "@/lib/bracket-utils";
 import AutofillDropdown from "@/components/bracket/AutofillDropdown";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results } from "@/types/bracket";
@@ -47,7 +48,7 @@ export default function BracketPage() {
           return;
         }
         const { tournament } = await tournamentRes.json() as { tournament: Tournament };
-        const regions: RegionData[] = JSON.parse(tournament.bracket_data);
+        const regions: RegionData[] = parseBracketData(tournament.bracket_data);
         const results: Results = JSON.parse(tournament.results_data);
         const meData = meRes.ok ? await meRes.json() : null;
         const isOwner = meData?.user?.id === bracket.user_id;

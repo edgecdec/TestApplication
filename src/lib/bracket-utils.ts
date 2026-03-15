@@ -1,6 +1,23 @@
 import { REGIONS, SEEDS_PER_REGION } from "@/lib/bracket-constants";
-import type { RegionData } from "@/types/tournament";
+import type { RegionData, TeamSeed } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
+
+/**
+ * Safely parse bracket_data from the DB (a JSON string) into RegionData[].
+ * Handles: plain array, object with `.regions` key, and `teams` vs `seeds` key mismatch.
+ */
+export function parseBracketData(raw: string | undefined | null): RegionData[] {
+  if (!raw) return [];
+  const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+  const arr: unknown[] = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.regions) ? parsed.regions : [];
+  return arr.map((item) => {
+    const r = item as Record<string, unknown>;
+    return {
+      name: String(r.name ?? ""),
+      seeds: (Array.isArray(r.seeds) ? r.seeds : Array.isArray(r.teams) ? r.teams : []) as TeamSeed[],
+    };
+  });
+}
 
 /**
  * Build a game ID for a regional game.
