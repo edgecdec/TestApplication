@@ -18,6 +18,7 @@ import StreakBadge from "@/components/StreakBadge";
 import MyGroupsSummary from "@/components/MyGroupsSummary";
 import BracketAchievements from "@/components/BracketAchievements";
 import MyPicksTonight from "@/components/MyPicksTonight";
+import GamesThatMatter from "@/components/GamesThatMatter";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
@@ -206,6 +207,7 @@ export default function DashboardPage() {
       })}
 
       {/* Recent Results */}
+      <GamesThatMatter />
       {tournaments.map((t) => (
         <RecentResults key={`recent-${t.id}`} tournamentId={t.id} />
       ))}
