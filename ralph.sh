@@ -39,7 +39,7 @@ while true; do
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
   kiro-cli chat \
-    --agent marchmadness \
+    --agent testapp \
     --no-interactive \
     --trust-all-tools \
     "$(cat PROMPT.md)" \
