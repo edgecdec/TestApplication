@@ -6,6 +6,8 @@ import { REGIONS } from "@/lib/bracket-constants";
 import RegionBracket from "@/components/bracket/RegionBracket";
 import FinalFour from "@/components/bracket/FinalFour";
 import { useBracketPicks } from "@/hooks/useBracketPicks";
+import { generateAutofill, type AutofillMode } from "@/lib/autofill";
+import AutofillDropdown from "@/components/bracket/AutofillDropdown";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results } from "@/types/bracket";
 
@@ -78,11 +80,16 @@ export default function BracketPage() {
 function BracketView({ data }: { data: LoadedData }) {
   const router = useRouter();
   const initialPicks: Picks = JSON.parse(data.bracket.picks);
-  const { picks, dirty, saving, error, makePick, save } = useBracketPicks({
+  const { picks, dirty, saving, error, makePick, bulkSetPicks, save } = useBracketPicks({
     initialPicks,
     bracketId: data.bracket.id,
     locked: data.locked,
   });
+
+  function handleAutofill(mode: AutofillMode) {
+    const filled = generateAutofill(mode, data.regions, picks);
+    bulkSetPicks(filled);
+  }
 
   return (
     <main className="min-h-screen p-4">
@@ -103,13 +110,16 @@ function BracketView({ data }: { data: LoadedData }) {
             <span className="text-yellow-600 text-xs">Unsaved changes</span>
           )}
           {!data.locked && (
-            <button
-              onClick={save}
-              disabled={saving || !dirty}
-              className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 transition"
-            >
-              {saving ? "Saving..." : "Save Picks"}
-            </button>
+            <>
+              <AutofillDropdown onSelect={handleAutofill} disabled={saving} />
+              <button
+                onClick={save}
+                disabled={saving || !dirty}
+                className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 transition"
+              >
+                {saving ? "Saving..." : "Save Picks"}
+              </button>
+            </>
           )}
         </div>
       </div>

@@ -52,6 +52,15 @@ export function useBracketPicks({ initialPicks, bracketId, locked }: UseBracketP
     [locked]
   );
 
+  const bulkSetPicks = useCallback(
+    (newPicks: Picks) => {
+      if (locked) return;
+      setPicks(newPicks);
+      setDirty(true);
+    },
+    [locked]
+  );
+
   const save = useCallback(async () => {
     setSaving(true);
     setError(null);
@@ -74,5 +83,5 @@ export function useBracketPicks({ initialPicks, bracketId, locked }: UseBracketP
     }
   }, [bracketId, picks]);
 
-  return { picks, dirty, saving, error, makePick, save };
+  return { picks, dirty, saving, error, makePick, bulkSetPicks, save };
 }
