@@ -1,5 +1,6 @@
 "use client";
 
+import TeamLogo from "@/components/TeamLogo";
 import type { ComparisonBracket } from "@/types/comparison";
 import type { Results } from "@/types/bracket";
 
@@ -67,12 +68,18 @@ export default function ComparisonGameCard({ gameId, topTeam, bottomTeam, result
   return (
     <div className="border rounded bg-white shadow-sm w-44 overflow-hidden">
       <div className={teamClass(topTeam)}>
-        <span className="truncate">{topTeam ?? "TBD"}</span>
+        <span className="flex items-center gap-1 truncate">
+          {topTeam && <TeamLogo team={topTeam} />}
+          <span className="truncate">{topTeam ?? "TBD"}</span>
+        </span>
         <AgreementBadge team={topTeam} gameId={gameId} brackets={brackets} />
       </div>
       <div className="border-t border-gray-200" />
       <div className={teamClass(bottomTeam)}>
-        <span className="truncate">{bottomTeam ?? "TBD"}</span>
+        <span className="flex items-center gap-1 truncate">
+          {bottomTeam && <TeamLogo team={bottomTeam} />}
+          <span className="truncate">{bottomTeam ?? "TBD"}</span>
+        </span>
         <AgreementBadge team={bottomTeam} gameId={gameId} brackets={brackets} />
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { REGION_COLORS, type RegionName } from "@/lib/bracket-constants";
+import TeamLogo from "@/components/TeamLogo";
 
 interface Props {
   gameId: string;
@@ -41,7 +42,10 @@ export default function SimulatorGameCard({ gameId, topTeam, bottomTeam, result,
         tabIndex={0}
         onKeyDown={(e) => e.key === "Enter" && handleClick(topTeam)}
       >
-        {topTeam ?? "TBD"}
+        <span className="flex items-center gap-1">
+          {topTeam && <TeamLogo team={topTeam} />}
+          <span className="truncate">{topTeam ?? "TBD"}</span>
+        </span>
       </div>
       <div className="border-t border-gray-200" />
       <div
@@ -51,7 +55,10 @@ export default function SimulatorGameCard({ gameId, topTeam, bottomTeam, result,
         tabIndex={0}
         onKeyDown={(e) => e.key === "Enter" && handleClick(bottomTeam)}
       >
-        {bottomTeam ?? "TBD"}
+        <span className="flex items-center gap-1">
+          {bottomTeam && <TeamLogo team={bottomTeam} />}
+          <span className="truncate">{bottomTeam ?? "TBD"}</span>
+        </span>
       </div>
     </div>
   );

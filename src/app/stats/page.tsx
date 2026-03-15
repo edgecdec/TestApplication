@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ROUND_NAMES } from "@/lib/bracket-constants";
+import TeamLogo from "@/components/TeamLogo";
 import type { Tournament } from "@/types/tournament";
 import type { TournamentStats } from "@/types/stats";
 
@@ -61,6 +62,7 @@ export default function StatsPage() {
                 {stats.champions.slice(0, MAX_CHAMPIONS_SHOWN).map((c) => (
                   <div key={c.team} className="flex items-center gap-3">
                     <span className="text-sm text-gray-500 w-8 text-right">({c.seed})</span>
+                    <TeamLogo team={c.team} />
                     <span className="text-sm font-medium w-36 truncate">{c.team}</span>
                     <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
                       <div className="bg-blue-500 h-full rounded-full transition-all" style={{ width: `${c.pct}%`, minWidth: c.pct > 0 ? "8px" : "0" }} />
@@ -77,7 +79,10 @@ export default function StatsPage() {
             <section className="bg-white rounded-lg shadow p-6">
               <h2 className="text-lg font-semibold mb-3">🔥 Biggest Upset Pick</h2>
               <div>
-                <p className="text-xl font-bold">({stats.biggestUpset.seed}) {stats.biggestUpset.team}</p>
+                <p className="text-xl font-bold flex items-center gap-2">
+                  <TeamLogo team={stats.biggestUpset.team} size={24} />
+                  ({stats.biggestUpset.seed}) {stats.biggestUpset.team}
+                </p>
                 <p className="text-gray-500 text-sm">
                   Picked to win {ROUND_NAMES[stats.biggestUpset.round] ?? `Round ${stats.biggestUpset.round}`} by {stats.biggestUpset.count} bracket{stats.biggestUpset.count !== 1 ? "s" : ""}
                 </p>

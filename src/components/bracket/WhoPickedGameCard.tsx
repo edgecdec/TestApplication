@@ -1,5 +1,6 @@
 "use client";
 
+import TeamLogo from "@/components/TeamLogo";
 import type { GamePicks } from "@/types/whopicked";
 
 interface Props {
@@ -27,7 +28,10 @@ export default function WhoPickedGameCard({ game, totalBrackets, regionColor }: 
               style={{ width: `${pct}%`, backgroundColor: regionColor }}
             />
             <div className="relative flex items-center gap-2 py-0.5 px-1">
-              <span className="text-sm font-semibold min-w-[120px]">{tp.team}</span>
+              <span className="text-sm font-semibold min-w-[120px] flex items-center gap-1">
+                <TeamLogo team={tp.team} />
+                {tp.team}
+              </span>
               <span className="text-xs bg-gray-100 rounded px-1.5 py-0.5">
                 {tp.count}/{totalBrackets} ({pct}%)
               </span>

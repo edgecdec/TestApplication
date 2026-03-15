@@ -1,6 +1,7 @@
 "use client";
 
 import { REGION_COLORS, type RegionName } from "@/lib/bracket-constants";
+import TeamLogo from "@/components/TeamLogo";
 
 interface GameCardProps {
   gameId: string;
@@ -59,7 +60,10 @@ export default function GameCard({
         onKeyDown={(e) => e.key === "Enter" && handleClick(topTeam)}
       >
         <span className="flex items-center justify-between gap-1">
-          <span className="truncate">{topTeam ?? "TBD"}</span>
+          <span className="flex items-center gap-1 truncate">
+            {topTeam && <TeamLogo team={topTeam} />}
+            <span className="truncate">{topTeam ?? "TBD"}</span>
+          </span>
           {topPct !== undefined && (
             <span className="text-[9px] text-gray-400 font-normal shrink-0">{topPct}%</span>
           )}
@@ -74,7 +78,10 @@ export default function GameCard({
         onKeyDown={(e) => e.key === "Enter" && handleClick(bottomTeam)}
       >
         <span className="flex items-center justify-between gap-1">
-          <span className="truncate">{bottomTeam ?? "TBD"}</span>
+          <span className="flex items-center gap-1 truncate">
+            {bottomTeam && <TeamLogo team={bottomTeam} />}
+            <span className="truncate">{bottomTeam ?? "TBD"}</span>
+          </span>
           {bottomPct !== undefined && (
             <span className="text-[9px] text-gray-400 font-normal shrink-0">{bottomPct}%</span>
           )}

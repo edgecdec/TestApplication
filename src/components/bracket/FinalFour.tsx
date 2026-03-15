@@ -1,6 +1,7 @@
 "use client";
 
 import GameCard from "@/components/bracket/GameCard";
+import TeamLogo from "@/components/TeamLogo";
 import { gameId, getTeamsForGame } from "@/lib/bracket-utils";
 import type { RegionData } from "@/types/tournament";
 import type { Picks, Results, PickDistribution } from "@/types/bracket";
@@ -52,8 +53,8 @@ export default function FinalFour({ regions, picks, results, onPick, locked, dis
             distribution={distribution?.[champ]}
           />
           {picks[champ] && (
-            <div className="text-center mt-1 px-3 py-1 bg-yellow-100 rounded text-sm font-bold text-yellow-800 border border-yellow-300">
-              🏆 {picks[champ]}
+            <div className="text-center mt-1 px-3 py-1 bg-yellow-100 rounded text-sm font-bold text-yellow-800 border border-yellow-300 flex items-center gap-1 justify-center">
+              🏆 <TeamLogo team={picks[champ]} size={20} /> {picks[champ]}
             </div>
           )}
         </div>

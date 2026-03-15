@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { LeaderboardEntry } from "@/types/scoring";
 import { ROUND_NAMES } from "@/lib/bracket-constants";
 import ScoringBreakdownDialog from "@/components/ScoringBreakdownDialog";
+import TeamLogo from "@/components/TeamLogo";
 
 interface Props {
   entries: LeaderboardEntry[];
@@ -60,9 +61,10 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
                 </td>
                 <td className="px-3 py-2 text-sm whitespace-nowrap">
                   {e.championPick ? (
-                    <span className={e.busted ? "text-gray-400 line-through" : ""}>
+                    <span className={`flex items-center gap-1 ${e.busted ? "text-gray-400 line-through" : ""}`}>
+                      <TeamLogo team={e.championPick} />
                       {e.championPick}
-                      {e.busted && <span className="ml-1" title="Champion pick eliminated">💀</span>}
+                      {e.busted && <span className="ml-1 no-underline" style={{ textDecoration: "none" }} title="Champion pick eliminated">💀</span>}
                     </span>
                   ) : (
                     <span className="text-gray-300">—</span>
