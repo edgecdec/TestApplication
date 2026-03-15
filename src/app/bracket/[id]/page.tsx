@@ -19,6 +19,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results, PickDistribution } from "@/types/bracket";
 import BracketInsights from "@/components/bracket/BracketInsights";
+import PickListView from "@/components/bracket/PickListView";
 import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
 import { buildTeamSeedMap } from "@/lib/scoring";
 
@@ -103,6 +104,7 @@ function BracketView({ data }: { data: LoadedData }) {
   const bracketRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const [teamSearch, setTeamSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"bracket" | "list">("bracket");
   const highlightTeam = teamSearch.trim().toLowerCase() || undefined;
   // Memoize initialPicks so the reference is stable across renders (prevents infinite re-render loop)
   const initialPicks: Picks = useMemo(() => JSON.parse(data.bracket.picks), [data.bracket.picks]);
@@ -139,6 +141,20 @@ function BracketView({ data }: { data: LoadedData }) {
           <LockCountdown lockTime={data.tournament.lock_time} />
         </div>
         <div className="flex items-center gap-2 no-print">
+          <div className="flex items-center border rounded overflow-hidden text-xs">
+            <button
+              onClick={() => setViewMode("bracket")}
+              className={`px-2 py-1 transition ${viewMode === "bracket" ? "bg-blue-600 text-white" : "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"}`}
+            >
+              🏀 Bracket
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`px-2 py-1 transition ${viewMode === "list" ? "bg-blue-600 text-white" : "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"}`}
+            >
+              📋 List
+            </button>
+          </div>
           <div className="relative">
             <input
               type="text"
@@ -233,8 +249,10 @@ function BracketView({ data }: { data: LoadedData }) {
         </details>
       </div>
 
-      {/* Bracket — mobile vs desktop */}
-      {isMobile ? (
+      {/* Bracket — mobile vs desktop, or list view */}
+      {viewMode === "list" ? (
+        <PickListView regions={data.regions} picks={picks} results={data.results} seedLookup={seedLookup} />
+      ) : isMobile ? (
         <div className="bg-white dark:bg-gray-800 p-3 rounded">
           <MobileBracket
             regions={data.regions}
