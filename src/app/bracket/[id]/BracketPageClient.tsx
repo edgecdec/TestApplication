@@ -19,6 +19,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results, PickDistribution } from "@/types/bracket";
 import BracketInsights from "@/components/bracket/BracketInsights";
+import BracketScoringSummary from "@/components/bracket/BracketScoringSummary";
 import PickListView from "@/components/bracket/PickListView";
 import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
 import { buildTeamSeedMap } from "@/lib/scoring";
@@ -247,6 +248,8 @@ function BracketView({ data }: { data: LoadedData }) {
       </div>
 
       <BracketInsights picks={picks} regions={data.regions} distribution={data.distribution} />
+
+      <BracketScoringSummary bracketId={data.bracket.id} />
 
       <div className="max-w-screen-2xl mx-auto mb-3 no-print">
         <details className="bg-gray-50 dark:bg-gray-800 rounded p-2">
