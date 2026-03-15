@@ -17,6 +17,7 @@ import LockCountdown from "@/components/LockCountdown";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results, PickDistribution } from "@/types/bracket";
+import BracketInsights from "@/components/bracket/BracketInsights";
 
 interface LoadedData {
   bracket: Bracket;
@@ -176,6 +177,9 @@ function BracketView({ data }: { data: LoadedData }) {
           )}
         </div>
       </div>
+
+      {/* Bracket Insights — only shown after lock time when distribution data exists */}
+      <BracketInsights picks={picks} regions={data.regions} distribution={data.distribution} />
 
       {/* Bracket — mobile vs desktop */}
       {isMobile ? (
