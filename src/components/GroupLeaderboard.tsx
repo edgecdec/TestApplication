@@ -184,6 +184,8 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
                     {e.username}
                   </button>
                   {e.eliminated && <span className="ml-1" title="Eliminated — can't catch the leader">🚫</span>}
+                  {e.paid === true && <span className="ml-1" title="Paid">💰</span>}
+                  {e.paid === false && <span className="ml-1" title="Unpaid">⚠️</span>}
                 </td>
                 <td className="px-3 py-2 text-sm whitespace-nowrap">
                   {e.championPick ? (

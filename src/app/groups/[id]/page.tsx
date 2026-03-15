@@ -14,6 +14,7 @@ import StandingsChart from "@/components/StandingsChart";
 import InviteQRCode from "@/components/InviteQRCode";
 import PoolPayoutSettings from "@/components/PoolPayoutSettings";
 import PoolPayoutDisplay from "@/components/PoolPayoutDisplay";
+import PaymentTracker from "@/components/PaymentTracker";
 import { parsePayoutStructure } from "@/lib/payouts";
 import type { StandingsHistoryData } from "@/types/standings-history";
 
@@ -207,7 +208,18 @@ export default function GroupDetailPage() {
       {tab === "leaderboard" && (
         <>
           {group.buy_in > 0 && (
-            <PoolPayoutDisplay buyIn={buyIn} payoutStructure={JSON.stringify(payout)} memberCount={group.member_count} />
+            <>
+              <PoolPayoutDisplay buyIn={buyIn} payoutStructure={JSON.stringify(payout)} memberCount={group.member_count} />
+              {(() => {
+                const paidCount = leaderboard.filter(e => e.paid).length;
+                const totalCount = leaderboard.length;
+                return (
+                  <div className="text-xs text-gray-500 mb-3">
+                    💰 {paidCount}/{totalCount} paid (${paidCount * buyIn} of ${totalCount * buyIn} collected)
+                  </div>
+                );
+              })()}
+            </>
           )}
           <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} groupName={group?.name} />
         </>
@@ -305,6 +317,9 @@ export default function GroupDetailPage() {
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} disabled={!canEdit} className="w-full border rounded px-3 py-2 text-sm disabled:opacity-50" placeholder="e.g. $20 buy-in, winner takes 70%, runner-up 30%." />
           </div>
           <PoolPayoutSettings buyIn={buyIn} setBuyIn={setBuyIn} payout={payout} setPayout={setPayout} memberCount={group.member_count} disabled={!canEdit} />
+          {canEdit && buyIn > 0 && (
+            <PaymentTracker groupId={id} buyIn={buyIn} />
+          )}
           <div>
             <label className="block text-sm font-medium mb-1">Max Brackets Per User</label>
             <select value={maxBrackets} onChange={(e) => setMaxBrackets(Number(e.target.value))} disabled={!canEdit} className="border rounded px-3 py-2 disabled:opacity-50">

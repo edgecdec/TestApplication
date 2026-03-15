@@ -28,12 +28,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const settings: ScoringSettings = JSON.parse(group.scoring_settings);
 
   const brackets = db.prepare(`
-    SELECT b.*, u.username
+    SELECT b.*, u.username, gb.paid
     FROM group_brackets gb
     JOIN brackets b ON b.id = gb.bracket_id
     JOIN users u ON u.id = b.user_id
     WHERE gb.group_id = ?
-  `).all(id) as BracketWithUser[];
+  `).all(id) as (BracketWithUser & { paid: number })[];
 
   if (brackets.length === 0) {
     return NextResponse.json({ leaderboard: [], actualTotal: null });
@@ -79,7 +79,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
     const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
     const streak = computeStreak(picks, results);
-    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, correctPicks, totalResolved, streak };
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, correctPicks, totalResolved, streak, paid: !!b.paid };
   });
 
   // Sort: highest total first, then by tiebreaker diff (lower is better)

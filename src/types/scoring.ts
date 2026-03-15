@@ -47,6 +47,7 @@ export interface LeaderboardEntry extends BracketScore {
   correctPicks: number;
   totalResolved: number;
   streak: PickStreak;
+  paid?: boolean;
 }
 
 export interface RecentResultItem {

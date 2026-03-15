@@ -130,4 +130,10 @@ function initSchema(db: Database.Database) {
   if (!groupCols.some(c => c.name === "payout_structure")) {
     db.exec(`ALTER TABLE groups ADD COLUMN payout_structure TEXT NOT NULL DEFAULT '${JSON.stringify({ places: [100] })}'`);
   }
+
+  // Add paid column to group_brackets if missing (migration)
+  const gbCols = db.prepare("PRAGMA table_info(group_brackets)").all() as { name: string }[];
+  if (!gbCols.some(c => c.name === "paid")) {
+    db.exec("ALTER TABLE group_brackets ADD COLUMN paid INTEGER NOT NULL DEFAULT 0");
+  }
 }
