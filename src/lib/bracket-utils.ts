@@ -182,7 +182,7 @@ export function getEliminatedTeams(
  * Get the two teams in a game based on results data (not picks).
  * For R64, uses seed data. For later rounds, uses results of feeder games.
  */
-function getTeamsForGameFromResults(
+export function getTeamsForGameFromResults(
   gId: string,
   results: Picks,
   regions: RegionData[]

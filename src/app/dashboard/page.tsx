@@ -13,6 +13,7 @@ import ResultsBanner from "@/components/ResultsBanner";
 import TournamentProgress from "@/components/TournamentProgress";
 import BracketHealth from "@/components/BracketHealth";
 import BracketGrade from "@/components/BracketGrade";
+import RecentResults from "@/components/RecentResults";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
@@ -152,6 +153,11 @@ export default function DashboardPage() {
         <h2 className="text-sm font-semibold text-gray-700 mb-2">📺 Live Scores</h2>
         <LiveScores />
       </div>
+
+      {/* Recent Results */}
+      {tournaments.map((t) => (
+        <RecentResults key={`recent-${t.id}`} tournamentId={t.id} />
+      ))}
 
       {/* Tournaments */}
       {tournaments.length === 0 ? (

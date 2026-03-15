@@ -44,3 +44,19 @@ export interface LeaderboardEntry extends BracketScore {
   correctPicks: number;
   totalResolved: number;
 }
+
+export interface RecentResultItem {
+  gameId: string;
+  round: number;
+  winner: string;
+  loser: string | null;
+  winnerSeed: number | null;
+  loserSeed: number | null;
+  isUpset: boolean;
+  brackets: {
+    bracketId: number;
+    bracketName: string;
+    correct: boolean;
+    points: number;
+  }[];
+}
