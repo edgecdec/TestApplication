@@ -21,4 +21,4 @@ Agent picks the top incomplete task. When all tasks are done, study competitor s
 - [x] Add bracket stats page: show most popular champion picks with bar chart, biggest upset pick, most chalk vs most contrarian bracket. Available after lock time. Linked from dashboard nav.
 - [x] Add "Who Picked Whom" page: for a selected group, show every matchup with which members picked which team, counts, and percentages. Helps friends see consensus and contrarian picks at a glance. Linked from group page and dashboard nav.
 - [x] Add user profile page: show a user's brackets with per-round score breakdown, groups they belong to, and join date. Clickable from leaderboards and group pages. Helps friends see each other's performance at a glance.
-- [ ] Add group chat: simple real-time messaging within each group so friends can trash-talk and discuss picks. Chat panel on the group detail page with polling. DB-backed messages table.
+- [x] Add group chat: simple real-time messaging within each group so friends can trash-talk and discuss picks. Chat panel on the group detail page with polling. DB-backed messages table.
