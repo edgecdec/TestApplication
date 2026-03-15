@@ -167,7 +167,14 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
                     />
                   </td>
                 )}
-                <td className="px-3 py-2 text-gray-400 font-medium">{e.rank}</td>
+                <td className="px-3 py-2 text-gray-400 font-medium">
+                  {e.rank}
+                  {e.rankChange != null && e.rankChange !== 0 && (
+                    <span className={`ml-1 text-xs font-semibold ${e.rankChange > 0 ? "text-green-600" : "text-red-500"}`} title={`${e.rankChange > 0 ? "Up" : "Down"} ${Math.abs(e.rankChange)} from last round`}>
+                      {e.rankChange > 0 ? `↑${e.rankChange}` : `↓${Math.abs(e.rankChange)}`}
+                    </span>
+                  )}
+                </td>
                 <td className="px-3 py-2">
                   <button
                     onClick={() => router.push(`/bracket/${e.bracketId}`)}

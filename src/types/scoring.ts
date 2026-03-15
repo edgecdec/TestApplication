@@ -48,6 +48,8 @@ export interface LeaderboardEntry extends BracketScore {
   totalResolved: number;
   streak: PickStreak;
   paid?: boolean;
+  /** Rank change from previous round: positive = moved up, negative = moved down, null = no previous round */
+  rankChange: number | null;
 }
 
 export interface RecentResultItem {

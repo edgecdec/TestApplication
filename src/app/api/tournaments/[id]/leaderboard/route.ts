@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak, getCurrentRound, filterResultsBeforeRound, scorePicks } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import { DEFAULT_SCORING, CHAMPIONSHIP_GAME_ID, REGIONS } from "@/lib/bracket-constants";
 import type { Tournament, RegionData, BracketRow } from "@/types/tournament";
@@ -87,7 +87,30 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       : 100;
     const eliminated = s.maxPossible < leaderScore;
     const bestPossibleFinish = scored.filter((other) => other.total > s.maxPossible).length + 1;
-    leaderboard.push({ ...s, rank, percentile, eliminated, bestPossibleFinish });
+    leaderboard.push({ ...s, rank, percentile, eliminated, bestPossibleFinish, rankChange: null });
+  }
+
+  // Compute previous-round rankings for rank movement indicators
+  const currentRound = getCurrentRound(results);
+  if (currentRound > 0) {
+    const prevResults = filterResultsBeforeRound(results, currentRound);
+    const prevScored = brackets.map((b) => {
+      const picks: Picks = JSON.parse(b.picks);
+      const total = scorePicks(picks, prevResults, settings, regions).reduce((s, r) => s + r.points, 0);
+      return { bracketId: b.id, total };
+    });
+    prevScored.sort((a, b) => b.total - a.total);
+    const prevRankMap = new Map<number, number>();
+    for (let i = 0; i < prevScored.length; i++) {
+      const rank = i > 0 && prevScored[i].total === prevScored[i - 1].total
+        ? (prevRankMap.get(prevScored[i - 1].bracketId) ?? i + 1)
+        : i + 1;
+      prevRankMap.set(prevScored[i].bracketId, rank);
+    }
+    for (const entry of leaderboard) {
+      const prevRank = prevRankMap.get(entry.bracketId);
+      if (prevRank != null) entry.rankChange = prevRank - entry.rank;
+    }
   }
 
   return NextResponse.json({ leaderboard });

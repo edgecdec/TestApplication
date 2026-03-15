@@ -53,7 +53,7 @@ export default function SimulatorLeaderboard({ brackets, results, settings, regi
       const percentile = scores.length > 1 ? Math.round(((scores.length - rank) / (scores.length - 1)) * 100) : 100;
       const isEliminated = s.maxPossible < leaderScore;
       const bestPossibleFinish = scores.filter((other) => other.total > s.maxPossible).length + 1;
-      return { ...s, rank, percentile, eliminated: isEliminated, bestPossibleFinish };
+      return { ...s, rank, percentile, eliminated: isEliminated, bestPossibleFinish, rankChange: null };
     });
   }, [brackets, results, settings, regions]);
 

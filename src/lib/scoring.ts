@@ -259,3 +259,29 @@ export function computeStreak(picks: Picks, results: Results): PickStreak {
   }
   return firstCorrect ? count : -count;
 }
+
+/**
+ * Determine the highest round number that has at least one result.
+ * Returns -1 if no results exist.
+ */
+export function getCurrentRound(results: Results): number {
+  let maxRound = -1;
+  for (const gId of Object.keys(results)) {
+    const round = parseRoundFromGameId(gId);
+    if (round > maxRound) maxRound = round;
+  }
+  return maxRound;
+}
+
+/**
+ * Filter results to only include games from rounds strictly before the given round.
+ */
+export function filterResultsBeforeRound(results: Results, round: number): Results {
+  const filtered: Results = {};
+  for (const [gId, winner] of Object.entries(results)) {
+    if (parseRoundFromGameId(gId) < round) {
+      filtered[gId] = winner;
+    }
+  }
+  return filtered;
+}
