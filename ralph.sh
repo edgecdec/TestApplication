@@ -20,8 +20,10 @@ while true; do
   TIMESTAMP=$(date '+%Y%m%d-%H%M%S')
   LOG_FILE="$LOG_DIR/ralph-${COUNT}-${TIMESTAMP}.log"
 
-  BUGS=$(grep -c '^\- \*\*' tests/bugs.md 2>/dev/null || echo "0")
-  TASKS=$(grep -c '^\- \[ \]' PLAN.md 2>/dev/null || echo "0")
+  BUGS=$(grep -c '^\- \*\*' tests/bugs.md 2>/dev/null | tr -d '[:space:]' || true)
+  [ -z "$BUGS" ] && BUGS=0
+  TASKS=$(grep -c '^\- \[ \]' PLAN.md 2>/dev/null | tr -d '[:space:]' || true)
+  [ -z "$TASKS" ] && TASKS=0
 
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "🔄 Iteration $COUNT — $(date '+%H:%M:%S')"

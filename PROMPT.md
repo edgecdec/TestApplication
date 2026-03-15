@@ -38,10 +38,11 @@ Read other specs (@specs/overview.md, @specs/bracket.md, @specs/groups.md, @spec
 
 ## When All Tasks Are Done
 If PLAN.md has no incomplete tasks:
-1. Study competitor sites (ESPN Tournament Challenge, CBS Bracket Manager, Yahoo Pick'em) by searching for their features and UX patterns.
-2. Propose small improvements that are: FREE (no paid services), FEASIBLE (can be done in one loop), USEFUL (improves UX for a group of friends playing together), and have NO EXTERNAL BLOCKERS (no app stores, no email services, no OAuth providers).
-3. Add the best improvement to PLAN.md as a new task with a brief description.
-4. Pick it up on the next loop.
+1. Study the existing March Madness app at ~/TestProjects/MarchMadness for features we have there but not here. Browse its src/app/ for pages, src/components/ for UI features, src/app/api/ for API endpoints. Look for anything useful we're missing.
+2. Study competitor sites (ESPN Tournament Challenge, CBS Bracket Manager, Yahoo Pick'em) by searching for their features and UX patterns.
+3. Propose small improvements that are: FREE (no paid services), FEASIBLE (can be done in one loop), USEFUL (improves UX for a group of friends playing together), and have NO EXTERNAL BLOCKERS (no app stores, no email services, no OAuth providers).
+4. Add the best improvement to PLAN.md as a new task with a brief description.
+5. Pick it up on the next loop.
 
 ## Code Principles
 - Small, focused files — one component/hook/utility per file. If a file is getting long, split it.
