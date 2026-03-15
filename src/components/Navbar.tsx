@@ -18,6 +18,7 @@ const NAV_LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/stats", label: "Stats" },
   { href: "/whos-left", label: "Who's Left?" },
+  { href: "/upsets", label: "Upsets" },
   { href: "/rules", label: "Rules" },
 ] as const;
 
