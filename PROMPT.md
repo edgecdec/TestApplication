@@ -38,6 +38,14 @@ If PLAN.md has no incomplete tasks:
 3. Add the best improvement to PLAN.md as a new task with a brief description.
 4. Pick it up on the next loop.
 
+## Code Principles
+- Small, focused files — one component/hook/utility per file. If a file is getting long, split it.
+- Reusable components — before creating a new component, check if an existing one can be extended or reused.
+- Shared logic — before writing new logic, search for similar patterns already in the codebase. Extract shared utilities to src/lib/.
+- No magic numbers or hardcoded strings — use named constants in dedicated files (e.g. src/lib/constants.ts). Scoring values, game counts, round names, API URLs, etc. should all be constants.
+- Types for everything — all data shapes defined in src/types/. No `any` types unless absolutely unavoidable.
+- DRY — if you write the same pattern twice, extract it into a shared function, hook, or component.
+
 ## Rules
 - ONE item per loop.
 - THINK before coding. Consider tradeoffs. Write reasoning for big decisions.

@@ -27,3 +27,9 @@
 ## Implementation
 - FULL implementations only. No placeholders. No stubs. No TODOs.
 - Search the codebase before implementing — don't assume something doesn't exist
+
+## Code Organization
+- NEVER put magic numbers or hardcoded strings inline — use named constants
+- NEVER duplicate logic — search for existing utilities/hooks/components first
+- NEVER create large monolithic files — split into small focused files
+- NEVER use `any` type — define proper types in src/types/
