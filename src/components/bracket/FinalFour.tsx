@@ -3,7 +3,7 @@
 import GameCard from "@/components/bracket/GameCard";
 import { gameId, getTeamsForGame } from "@/lib/bracket-utils";
 import type { RegionData } from "@/types/tournament";
-import type { Picks, Results } from "@/types/bracket";
+import type { Picks, Results, PickDistribution } from "@/types/bracket";
 
 interface FinalFourProps {
   regions: RegionData[];
@@ -11,9 +11,10 @@ interface FinalFourProps {
   results: Results;
   onPick: (gameId: string, team: string) => void;
   locked: boolean;
+  distribution?: PickDistribution;
 }
 
-export default function FinalFour({ regions, picks, results, onPick, locked }: FinalFourProps) {
+export default function FinalFour({ regions, picks, results, onPick, locked, distribution }: FinalFourProps) {
   const ff0 = gameId("ff", 4, 0);
   const ff1 = gameId("ff", 4, 1);
   const champ = gameId("ff", 5, 0);
@@ -35,6 +36,7 @@ export default function FinalFour({ regions, picks, results, onPick, locked }: F
           region="ff"
           onPick={onPick}
           locked={locked}
+          distribution={distribution?.[ff0]}
         />
         <div className="flex flex-col items-center gap-2">
           <div className="text-xs font-bold text-yellow-600">🏆 Championship</div>
@@ -47,6 +49,7 @@ export default function FinalFour({ regions, picks, results, onPick, locked }: F
             region="ff"
             onPick={onPick}
             locked={locked}
+            distribution={distribution?.[champ]}
           />
           {picks[champ] && (
             <div className="text-center mt-1 px-3 py-1 bg-yellow-100 rounded text-sm font-bold text-yellow-800 border border-yellow-300">
@@ -63,6 +66,7 @@ export default function FinalFour({ regions, picks, results, onPick, locked }: F
           region="ff"
           onPick={onPick}
           locked={locked}
+          distribution={distribution?.[ff1]}
         />
       </div>
     </div>

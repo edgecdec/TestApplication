@@ -1,7 +1,6 @@
 "use client";
 
 import { REGION_COLORS, type RegionName } from "@/lib/bracket-constants";
-import type { Results } from "@/types/bracket";
 
 interface GameCardProps {
   gameId: string;
@@ -12,6 +11,7 @@ interface GameCardProps {
   region: string;
   onPick: (gameId: string, team: string) => void;
   locked: boolean;
+  distribution?: Record<string, number>;
 }
 
 function teamClass(team: string | null, pick: string | null, result: string | null): string {
@@ -34,6 +34,7 @@ export default function GameCard({
   region,
   onPick,
   locked,
+  distribution,
 }: GameCardProps) {
   const color = REGION_COLORS[region as RegionName] ?? "#6b7280";
 
@@ -41,6 +42,9 @@ export default function GameCard({
     if (!team || locked) return;
     onPick(gameId, team);
   }
+
+  const topPct = topTeam ? distribution?.[topTeam] : undefined;
+  const bottomPct = bottomTeam ? distribution?.[bottomTeam] : undefined;
 
   return (
     <div
@@ -54,7 +58,12 @@ export default function GameCard({
         tabIndex={0}
         onKeyDown={(e) => e.key === "Enter" && handleClick(topTeam)}
       >
-        {topTeam ?? "TBD"}
+        <span className="flex items-center justify-between gap-1">
+          <span className="truncate">{topTeam ?? "TBD"}</span>
+          {topPct !== undefined && (
+            <span className="text-[9px] text-gray-400 font-normal shrink-0">{topPct}%</span>
+          )}
+        </span>
       </div>
       <div className="border-t border-gray-200" />
       <div
@@ -64,7 +73,12 @@ export default function GameCard({
         tabIndex={0}
         onKeyDown={(e) => e.key === "Enter" && handleClick(bottomTeam)}
       >
-        {bottomTeam ?? "TBD"}
+        <span className="flex items-center justify-between gap-1">
+          <span className="truncate">{bottomTeam ?? "TBD"}</span>
+          {bottomPct !== undefined && (
+            <span className="text-[9px] text-gray-400 font-normal shrink-0">{bottomPct}%</span>
+          )}
+        </span>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ import { parseBracketData } from "@/lib/bracket-utils";
 import AutofillDropdown from "@/components/bracket/AutofillDropdown";
 import LockCountdown from "@/components/LockCountdown";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
-import type { Picks, Results } from "@/types/bracket";
+import type { Picks, Results, PickDistribution } from "@/types/bracket";
 
 interface LoadedData {
   bracket: Bracket;
@@ -21,6 +21,7 @@ interface LoadedData {
   results: Results;
   isOwner: boolean;
   locked: boolean;
+  distribution: PickDistribution;
 }
 
 export default function BracketPage() {
@@ -55,7 +56,17 @@ export default function BracketPage() {
         const isOwner = meData?.user?.id === bracket.user_id;
         const locked = !isOwner || new Date(tournament.lock_time) <= new Date();
 
-        setData({ bracket, tournament, regions, results, isOwner, locked });
+        // Fetch pick distribution (only returns data after lock time)
+        let distribution: PickDistribution = {};
+        try {
+          const distRes = await fetch(`/api/brackets/distribution?tournament_id=${bracket.tournament_id}`);
+          if (distRes.ok) {
+            const distData = await distRes.json();
+            distribution = distData.distribution ?? {};
+          }
+        } catch { /* ignore */ }
+
+        setData({ bracket, tournament, regions, results, isOwner, locked, distribution });
       } catch {
         setLoadError("Failed to load bracket");
       } finally {
@@ -136,6 +147,7 @@ function BracketView({ data }: { data: LoadedData }) {
               onPick={makePick}
               locked={data.locked}
               side="left"
+              distribution={data.distribution}
             />
             <FinalFour
               regions={data.regions}
@@ -143,6 +155,7 @@ function BracketView({ data }: { data: LoadedData }) {
               results={data.results}
               onPick={makePick}
               locked={data.locked}
+              distribution={data.distribution}
             />
             <RegionBracket
               region={REGIONS[1]}
@@ -152,6 +165,7 @@ function BracketView({ data }: { data: LoadedData }) {
               onPick={makePick}
               locked={data.locked}
               side="right"
+              distribution={data.distribution}
             />
           </div>
 
@@ -165,6 +179,7 @@ function BracketView({ data }: { data: LoadedData }) {
               onPick={makePick}
               locked={data.locked}
               side="left"
+              distribution={data.distribution}
             />
             <div className="w-40" /> {/* spacer to match Final Four width */}
             <RegionBracket
@@ -175,6 +190,7 @@ function BracketView({ data }: { data: LoadedData }) {
               onPick={makePick}
               locked={data.locked}
               side="right"
+              distribution={data.distribution}
             />
           </div>
         </div>

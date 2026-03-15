@@ -3,7 +3,7 @@
 import GameCard from "@/components/bracket/GameCard";
 import { gameId, getTeamsForGame, gamesInRound } from "@/lib/bracket-utils";
 import type { RegionData } from "@/types/tournament";
-import type { Picks, Results } from "@/types/bracket";
+import type { Picks, Results, PickDistribution } from "@/types/bracket";
 
 interface RegionBracketProps {
   region: string;
@@ -12,8 +12,8 @@ interface RegionBracketProps {
   results: Results;
   onPick: (gameId: string, team: string) => void;
   locked: boolean;
-  /** "left" renders rounds L-to-R (0→3), "right" renders R-to-L (3→0) */
   side: "left" | "right";
+  distribution?: PickDistribution;
 }
 
 const ROUND_LABELS = ["R64", "R32", "Sweet 16", "Elite 8"];
@@ -26,6 +26,7 @@ export default function RegionBracket({
   onPick,
   locked,
   side,
+  distribution,
 }: RegionBracketProps) {
   const rounds = [0, 1, 2, 3];
   const orderedRounds = side === "left" ? rounds : [...rounds].reverse();
@@ -53,6 +54,7 @@ export default function RegionBracket({
                       region={region}
                       onPick={onPick}
                       locked={locked}
+                      distribution={distribution?.[gId]}
                     />
                   </div>
                 );
