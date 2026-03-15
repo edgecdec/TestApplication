@@ -18,6 +18,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import type { Bracket, RegionData, Tournament } from "@/types/tournament";
 import type { Picks, Results, PickDistribution } from "@/types/bracket";
 import BracketInsights from "@/components/bracket/BracketInsights";
+import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
 import { buildTeamSeedMap } from "@/lib/scoring";
 
 interface LoadedData {
@@ -108,6 +109,13 @@ function BracketView({ data }: { data: LoadedData }) {
     locked: data.locked,
   });
 
+  const { focusedGameId, setFocusedGameId } = useBracketKeyboard({
+    regions: data.regions,
+    picks,
+    locked: data.locked,
+    onPick: makePick,
+  });
+
   // Build seed lookup for matchup tooltips
   const seedLookup: Record<string, number> = {};
   const seedMap = buildTeamSeedMap(data.regions);
@@ -175,6 +183,7 @@ function BracketView({ data }: { data: LoadedData }) {
               >
                 ↪️
               </button>
+              <span className="text-[10px] text-gray-400 hidden lg:inline" title="Arrow keys to navigate, 1/2 to pick, Tab for next unfilled">⌨️ Keys</span>
               <AutofillDropdown onSelect={handleAutofill} disabled={saving} />
               <button
                 onClick={() => { if (confirm("Reset all picks and tiebreaker? This cannot be undone.")) { bulkSetPicks({}); updateTiebreaker(null); } }}
@@ -225,6 +234,8 @@ function BracketView({ data }: { data: LoadedData }) {
                 side="left"
                 distribution={data.distribution}
                 seedLookup={seedLookup}
+                focusedGameId={focusedGameId}
+                onFocusGame={setFocusedGameId}
               />
               <FinalFour
                 regions={data.regions}
@@ -234,6 +245,8 @@ function BracketView({ data }: { data: LoadedData }) {
                 locked={data.locked}
                 distribution={data.distribution}
                 seedLookup={seedLookup}
+                focusedGameId={focusedGameId}
+                onFocusGame={setFocusedGameId}
               />
               <RegionBracket
                 region={REGIONS[1]}
@@ -245,6 +258,8 @@ function BracketView({ data }: { data: LoadedData }) {
                 side="right"
                 distribution={data.distribution}
                 seedLookup={seedLookup}
+                focusedGameId={focusedGameId}
+                onFocusGame={setFocusedGameId}
               />
             </div>
             <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start mt-8">
@@ -258,6 +273,8 @@ function BracketView({ data }: { data: LoadedData }) {
                 side="left"
                 distribution={data.distribution}
                 seedLookup={seedLookup}
+                focusedGameId={focusedGameId}
+                onFocusGame={setFocusedGameId}
               />
               <div className="w-40" />
               <RegionBracket
@@ -270,6 +287,8 @@ function BracketView({ data }: { data: LoadedData }) {
                 side="right"
                 distribution={data.distribution}
                 seedLookup={seedLookup}
+                focusedGameId={focusedGameId}
+                onFocusGame={setFocusedGameId}
               />
             </div>
           </div>

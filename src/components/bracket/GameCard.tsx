@@ -17,6 +17,8 @@ interface GameCardProps {
   distribution?: Record<string, number>;
   seedLookup?: Record<string, number>;
   userPicks?: Record<string, string>;
+  focused?: boolean;
+  onFocus?: (gameId: string) => void;
 }
 
 function teamClass(team: string | null, pick: string | null, result: string | null): string {
@@ -41,6 +43,8 @@ export default function GameCard({
   distribution,
   seedLookup,
   userPicks,
+  focused,
+  onFocus,
 }: GameCardProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = REGION_COLORS[region as RegionName] ?? "#6b7280";
@@ -75,8 +79,10 @@ export default function GameCard({
 
   return (
     <div
-      className="border rounded bg-white shadow-sm w-40 overflow-hidden relative"
+      className={`border rounded bg-white shadow-sm w-40 overflow-hidden relative${focused ? " ring-2 ring-blue-400 ring-offset-1" : ""}`}
       style={{ borderLeftColor: color, borderLeftWidth: 3 }}
+      data-game-id={gameId}
+      onClick={() => onFocus?.(gameId)}
       onMouseEnter={() => matchupHint && setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >

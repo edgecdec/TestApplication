@@ -27,14 +27,22 @@ Read other specs (@specs/overview.md, @specs/bracket.md, @specs/groups.md, @spec
 5. Make minimal changes. FULL implementations — no placeholders, no stubs.
 6. Write or update tests. Add comments explaining WHAT the test verifies and WHY.
 7. `npx next build` — must pass.
-8. `git add -A && git commit -m "descriptive message" && git push`
-9. Restart dev server: run `bash dev.sh` — this kills any existing server and starts fresh on port 3333. Returns immediately. Then verify ALL of these:
-   - `sleep 5 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3333` must return 200
-   - Curl any page you changed or that uses code you changed, e.g. `curl -s http://localhost:3333/bracket/1 2>&1 | head -5` — check for error messages in the HTML like "TypeError", "Cannot read", "is not a function", "undefined". If you see any runtime error in the response, you have a bug — fix it before marking the task done.
-   - Curl any API route you changed, e.g. `curl -s http://localhost:3333/api/auth/me` — verify it returns valid JSON.
-   - Or run `bash verify.sh` which checks all key pages for runtime errors. If it fails, fix the errors before proceeding.
-10. Bug fixed? DELETE the line from bugs.md. Task done? Mark [x] in PLAN.md. Commit.
-11. If you discover a bug during work, add it to bugs.md immediately.
+8. Restart dev server: run `bash dev.sh` — returns immediately. Wait: `sleep 8`
+9. Run `bash verify.sh` — ALL checks must pass. If any fail, fix before proceeding.
+10. For UI features (pages, components, interactions): write a temporary Nova Act test script to verify the feature works in a real browser. Save it as `/tmp/test_feature.py`. The script should:
+    - `source ~/.config/marchmadness.env` must be run before executing
+    - Login as testbot using the creds from `~/.config/testapp-creds.env`
+    - Navigate to the relevant page
+    - Use short, simple prompts (Nova Act has token limits — max 1 sentence per act() call)
+    - Verify the specific thing you built works (click a button, check text appears, etc)
+    - Print PASS or FAIL for each check
+    - Run it: `source ~/.config/marchmadness.env && source ~/.config/testapp-creds.env && python3 /tmp/test_feature.py`
+    - Use `ignore_https_errors=True` in NovaAct constructor for localhost
+    - If the test fails, fix the code and re-run until it passes
+    - Delete the temp script after the feature is verified
+11. `git add -A && git commit -m "descriptive message" && git push`
+12. Bug fixed? DELETE the line from bugs.md. Task done? Mark [x] in PLAN.md. Commit.
+13. If you discover a bug during work, add it to bugs.md immediately.
 
 ## When All Tasks Are Done
 If PLAN.md has no incomplete tasks:

@@ -44,3 +44,17 @@
 - After restarting dev server, ALWAYS curl the pages you changed and grep for errors: `curl -s http://localhost:3333/your-page | grep -i "error\|TypeError\|undefined\|is not a function"`
 - If curl returns HTML with an error stack trace, you have a runtime bug — fix it before committing
 - Common runtime bugs that build passes but runtime catches: unparsed JSON strings, missing .property access, wrong data shape passed to functions, undefined props
+
+## Nova Act Testing
+- Keep prompts SHORT — one sentence max per act() call. "Token limit exceeded" means your prompt is too long.
+- Always use `ignore_https_errors=True` for localhost
+- Login pattern:
+  ```python
+  with NovaAct(starting_page="http://localhost:3333/login", ignore_https_errors=True) as nova:
+      nova.act('Type testbot in the username field')
+      nova.act('Type testpass in the password field')
+      nova.act('Click the login button')
+  ```
+- Test ONE thing per act() call: "Click the Duke team name" not "Click Duke and verify it advances and check the score updates"
+- If act() returns no response, the action succeeded — check the next state with another act()
+- NEVER write Nova Act auth errors to bugs.md
