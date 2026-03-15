@@ -10,6 +10,8 @@ import GroupLeaderboard from "@/components/GroupLeaderboard";
 import BracketProgress from "@/components/BracketProgress";
 import GroupChat from "@/components/GroupChat";
 import GroupActivityFeed from "@/components/GroupActivityFeed";
+import StandingsChart from "@/components/StandingsChart";
+import type { StandingsHistoryData } from "@/types/standings-history";
 
 interface GroupDetail extends Group {
   member_count: number;
@@ -26,7 +28,7 @@ interface BracketWithUser extends BracketRow {
   username: string;
 }
 
-type Tab = "leaderboard" | "brackets" | "activity" | "chat" | "settings";
+type Tab = "leaderboard" | "brackets" | "standings" | "activity" | "chat" | "settings";
 
 export default function GroupDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +45,7 @@ export default function GroupDetailPage() {
   const [addingBracketId, setAddingBracketId] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [actualTotal, setActualTotal] = useState<number | null>(null);
+  const [standingsData, setStandingsData] = useState<StandingsHistoryData | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -79,6 +82,13 @@ export default function GroupDetailPage() {
         setLeaderboard(lbData.leaderboard ?? []);
         setActualTotal(lbData.actualTotal ?? null);
       }
+
+      // Fetch standings history
+      try {
+        const shRes = await fetch(`/api/groups/${id}/standings-history`);
+        if (shRes.ok) setStandingsData(await shRes.json());
+      } catch { /* ignore */ }
+
       setLoading(false);
     }
     load();
@@ -170,9 +180,9 @@ export default function GroupDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b">
-        {(["leaderboard", "brackets", "activity", "chat", "settings"] as const).map((t) => (
+        {(["leaderboard", "brackets", "standings", "activity", "chat", "settings"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm font-medium border-b-2 transition ${tab === t ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
-            {t === "leaderboard" ? "Leaderboard" : t === "brackets" ? "Brackets" : t === "activity" ? "📰 Activity" : t === "chat" ? "💬 Chat" : "Settings"}
+            {t === "leaderboard" ? "Leaderboard" : t === "brackets" ? "Brackets" : t === "standings" ? "📈 Standings" : t === "activity" ? "📰 Activity" : t === "chat" ? "💬 Chat" : "Settings"}
           </button>
         ))}
       </div>
@@ -238,6 +248,18 @@ export default function GroupDetailPage() {
                 </tbody>
               </table>
             </div>
+          )}
+        </div>
+      )}
+
+      {tab === "standings" && (
+        <div className="bg-white rounded-lg shadow p-6 dark:bg-gray-900">
+          <h3 className="text-sm font-medium mb-4">📈 Standings History</h3>
+          <p className="text-xs text-gray-500 mb-4">How rankings changed after each round. Hover to see details.</p>
+          {standingsData ? (
+            <StandingsChart data={standingsData} />
+          ) : (
+            <p className="text-gray-400 text-sm">Loading standings data...</p>
           )}
         </div>
       )}
