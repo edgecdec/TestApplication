@@ -11,7 +11,8 @@ Read other specs (@specs/overview.md, @specs/bracket.md, @specs/groups.md, @spec
 - Repo: ~/TestProjects/TestApplication
 - Local development only — no server deployment yet
 - Must be 100% free — no paid APIs, no cloud services
-- Test locally with `npx next build` and verify in browser at localhost
+- Run the dev server on port 3333: `PORT=3333 npm run dev` or configure in package.json
+- Test locally at http://localhost:3333
 
 ## Loop
 1. Read @specs/anti-patterns.md
