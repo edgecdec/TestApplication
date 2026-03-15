@@ -15,4 +15,4 @@ Agent picks the top incomplete task. When all tasks are done, study competitor s
 - [x] Add admin panel: create tournaments, import bracket data, sync ESPN results.
 - [x] Add "What-If" simulator: bracket view where clicks set hypothetical results, live leaderboard sidebar.
 - [x] Add bracket comparison overlay: one bracket showing multiple users' picks with colored indicators.
-- [ ] Add pick agreement stats to comparison view: show fraction of selected brackets that agree on each game (e.g., "3/4") and highlight unanimous picks vs split picks with color coding.
+- [x] Add pick agreement stats to comparison view: show fraction of selected brackets that agree on each game (e.g., "3/4") and highlight unanimous picks vs split picks with color coding.
