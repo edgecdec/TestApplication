@@ -61,6 +61,28 @@ export default function DashboardPage() {
     }
   }
 
+  async function duplicateBracket(bracketId: number) {
+    const res = await fetch(`/api/brackets/${bracketId}/duplicate`, { method: "POST" });
+    if (res.ok) {
+      const { id, name } = await res.json();
+      const original = brackets.find((b) => b.id === bracketId);
+      if (original) {
+        setBrackets((prev) => [...prev, { ...original, id, name, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }]);
+      }
+    } else {
+      const err = await res.json();
+      alert(err.error || "Failed to duplicate");
+    }
+  }
+
+  async function deleteBracket(bracketId: number) {
+    if (!confirm("Delete this bracket? This cannot be undone.")) return;
+    const res = await fetch(`/api/brackets/${bracketId}`, { method: "DELETE" });
+    if (res.ok) {
+      setBrackets((prev) => prev.filter((b) => b.id !== bracketId));
+    }
+  }
+
   if (loading) {
     return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
   }
@@ -100,6 +122,7 @@ export default function DashboardPage() {
       ) : (
         tournaments.map((t) => {
           const myBrackets = brackets.filter((b) => b.tournament_id === t.id);
+          const isLocked = new Date(t.lock_time) <= new Date();
           return (
             <div key={t.id} className="bg-white rounded-lg shadow p-6 mb-4">
               <div className="flex items-center justify-between mb-3">
@@ -107,12 +130,14 @@ export default function DashboardPage() {
                 <LockCountdown lockTime={t.lock_time} />
                 <div className="flex items-center gap-2">
                   {user.isAdmin && <EspnSyncButton tournamentId={t.id} />}
-                  <button
-                    onClick={() => createBracket(t.id)}
-                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                  >
-                    + New Bracket
-                  </button>
+                  {!isLocked && (
+                    <button
+                      onClick={() => createBracket(t.id)}
+                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    >
+                      + New Bracket
+                    </button>
+                  )}
                 </div>
               </div>
               {myBrackets.length === 0 ? (
@@ -120,10 +145,10 @@ export default function DashboardPage() {
               ) : (
                 <ul className="space-y-2">
                   {myBrackets.map((b) => (
-                    <li key={b.id}>
+                    <li key={b.id} className="flex items-center gap-2">
                       <button
                         onClick={() => router.push(`/bracket/${b.id}`)}
-                        className="w-full text-left px-4 py-3 rounded border hover:bg-gray-50 transition"
+                        className="flex-1 text-left px-4 py-3 rounded border hover:bg-gray-50 transition"
                       >
                         <div className="flex justify-between items-center mb-1">
                           <span className="font-medium">{b.name}</span>
@@ -133,6 +158,24 @@ export default function DashboardPage() {
                         </div>
                         <BracketProgress picks={b.picks} />
                       </button>
+                      {!isLocked && (
+                        <div className="flex flex-col gap-1">
+                          <button
+                            onClick={() => duplicateBracket(b.id)}
+                            className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition"
+                            title="Duplicate bracket"
+                          >
+                            📋 Duplicate
+                          </button>
+                          <button
+                            onClick={() => deleteBracket(b.id)}
+                            className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition"
+                            title="Delete bracket"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
