@@ -172,6 +172,15 @@ else
   echo "  ✅ GET /api/admin/users ($ADMIN_STATUS)"
 fi
 
+CHECKED=$((CHECKED + 1))
+BACKUP_STATUS=$(curl -s -b /tmp/verify-admin-cookie.txt -o /dev/null -w "%{http_code}" "$BASE/api/admin/backup")
+if [ "$BACKUP_STATUS" = "500" ]; then
+  echo "  ❌ GET /api/admin/backup — 500"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "  ✅ GET /api/admin/backup ($BACKUP_STATUS)"
+fi
+
 echo ""
 echo "=========================================="
 if [ "$ERRORS" -gt 0 ]; then

@@ -81,20 +81,32 @@ export default function AdminPage() {
       </div>
 
       {showCreate && (
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
           <h2 className="font-semibold text-lg mb-4">Create Tournament</h2>
           <TournamentForm onCreated={handleCreated} />
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <h2 className="font-semibold text-lg mb-4">Tournaments ({tournaments.length})</h2>
         <TournamentList tournaments={tournaments} onRefresh={loadFullTournaments} />
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6 mt-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mt-6">
         <h2 className="font-semibold text-lg mb-4">👥 User Management</h2>
         <AdminUserManagement />
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mt-6">
+        <h2 className="font-semibold text-lg mb-4">💾 Database Backup</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Download a full backup of the SQLite database (users, brackets, groups, scores).</p>
+        <a
+          href="/api/admin/backup"
+          className="inline-block px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition"
+          download
+        >
+          💾 Download Backup
+        </a>
       </div>
     </main>
   );
