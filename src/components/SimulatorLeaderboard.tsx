@@ -6,7 +6,7 @@ import type { ScoringSettings } from "@/types/group";
 import type { RegionData } from "@/types/tournament";
 import type { SimulatorBracketData } from "@/types/simulator";
 import type { LeaderboardEntry } from "@/types/scoring";
-import { scoreBracket } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining } from "@/lib/scoring";
 import { CHAMPIONSHIP_GAME_ID } from "@/lib/bracket-constants";
 import { getEliminatedTeams } from "@/lib/bracket-utils";
 
@@ -24,7 +24,8 @@ export default function SimulatorLeaderboard({ brackets, results, settings, regi
       const score = scoreBracket(b.bracketId, b.bracketName, b.username, b.userId, b.picks, results, settings, regions, b.tiebreaker, null);
       const championPick = b.picks[CHAMPIONSHIP_GAME_ID] ?? null;
       const busted = championPick !== null && eliminated.has(championPick);
-      return { ...score, championPick, busted };
+      const maxRemaining = maxPossibleRemaining(b.picks, results, settings, eliminated);
+      return { ...score, championPick, busted, maxPossible: score.total + maxRemaining };
     });
     scores.sort((a, b) => {
       if (b.total !== a.total) return b.total - a.total;

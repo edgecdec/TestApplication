@@ -30,4 +30,5 @@ export interface LeaderboardEntry extends BracketScore {
   percentile: number;
   championPick: string | null;
   busted: boolean;
+  maxPossible: number;
 }

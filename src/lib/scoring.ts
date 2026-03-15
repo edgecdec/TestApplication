@@ -146,6 +146,35 @@ export function scoreBracket(
 }
 
 /**
+ * Calculate the maximum points a bracket can still earn.
+ * For each undecided game where the user made a pick,
+ * check if the picked team is still alive (not eliminated).
+ * If alive, add the round's base points.
+ * Upset bonus is excluded since it's unpredictable.
+ */
+export function maxPossibleRemaining(
+  picks: Picks,
+  results: Results,
+  settings: ScoringSettings,
+  eliminatedTeams: Set<string>
+): number {
+  let remaining = 0;
+  for (const [gId, pickedTeam] of Object.entries(picks)) {
+    if (results[gId]) continue; // game already decided
+    if (eliminatedTeams.has(pickedTeam)) continue; // team is out
+    const round = parseRoundFromGameId(gId);
+    remaining += settings.pointsPerRound[round] ?? 0;
+  }
+  return remaining;
+}
+
+/** Extract the round number from a game ID like "East-2-1" or "ff-5-0". */
+function parseRoundFromGameId(gId: string): number {
+  const parts = gId.split("-");
+  return parseInt(parts[parts.length - 2], 10);
+}
+
+/**
  * Return per-game scoring details for a bracket.
  * Only includes games where the user made a pick AND a result exists.
  */

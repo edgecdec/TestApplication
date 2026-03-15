@@ -32,6 +32,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
               <th className="text-left px-3 py-2 font-medium">User</th>
               <th className="text-left px-3 py-2 font-medium">Champion</th>
               <th className="text-right px-3 py-2 font-medium">Total</th>
+              <th className="text-right px-3 py-2 font-medium" title="Maximum possible score if all remaining alive picks win">Max</th>
               {ROUND_NAMES.map((rn) => (
                 <th key={rn} className="text-right px-3 py-2 font-medium text-xs">{rn}</th>
               ))}
@@ -82,6 +83,9 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
                   ) : (
                     e.total
                   )}
+                </td>
+                <td className="px-3 py-2 text-right text-gray-500" title="Max possible score">
+                  {e.maxPossible}
                 </td>
                 {e.rounds.map((r, i) => (
                   <td key={i} className="px-3 py-2 text-right text-xs">

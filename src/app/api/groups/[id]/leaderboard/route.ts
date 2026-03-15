@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import type { ScoringSettings } from "@/types/group";
 import type { Bracket, Tournament, RegionData } from "@/types/tournament";
@@ -61,7 +61,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       picks, results, settings, regions,
       b.tiebreaker, actualTotal
     );
-    return { ...score, championPick, busted };
+    const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining };
   });
 
   // Sort: highest total first, then by tiebreaker diff (lower is better)
