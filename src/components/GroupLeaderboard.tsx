@@ -32,10 +32,17 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
   const [selectedBracketId, setSelectedBracketId] = useState<number | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortAsc, setSortAsc] = useState(true);
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return entries;
+    const q = search.toLowerCase();
+    return entries.filter((e) => e.username.toLowerCase().includes(q) || e.bracketName.toLowerCase().includes(q));
+  }, [entries, search]);
 
   const sorted = useMemo(() => {
-    if (sortKey === "rank") return entries;
-    const copy = [...entries];
+    if (sortKey === "rank") return filtered;
+    const copy = [...filtered];
     const lowerIsBetter = sortKey === "bestPossibleFinish" || sortKey === "tiebreaker";
     copy.sort((a, b) => {
       const av = getSortValue(a, sortKey);
@@ -75,6 +82,18 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
 
   return (
     <>
+      <div className="mb-3">
+        <input
+          type="text"
+          placeholder="Search by username or bracket name…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full max-w-xs px-3 py-2 border rounded text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"
+        />
+        {search && (
+          <span className="ml-2 text-xs text-gray-500">{sorted.length} of {entries.length}</span>
+        )}
+      </div>
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
