@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getDb } from "@/lib/db";
 import { signToken } from "@/lib/auth";
+import { ensureEveryoneGroup } from "@/lib/everyone-group";
 import {
   BCRYPT_ROUNDS,
   JWT_COOKIE_NAME,
@@ -65,6 +66,8 @@ export async function POST(req: NextRequest): Promise<NextResponse<AuthResponse>
     username,
     isAdmin: isAdmin === 1,
   });
+
+  ensureEveryoneGroup(Number(result.lastInsertRowid));
 
   const response = NextResponse.json({
     user: { id: Number(result.lastInsertRowid), username, isAdmin: isAdmin === 1 },
