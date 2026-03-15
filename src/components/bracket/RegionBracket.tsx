@@ -82,9 +82,6 @@ export default function RegionBracket({
     const fromCount = gamesInRound(fromRound);
     const toCount = fromCount / 2;
     const border = `2px solid ${regionColor}`;
-    // Left side: vertical line on right edge, horizontal branches go right → ]
-    // Right side: vertical line on left edge, horizontal branches go left → [
-    const verticalSide = side === "left" ? "borderRight" : "borderLeft";
     return (
       <div
         key={`conn-${fromRound}`}
@@ -93,8 +90,18 @@ export default function RegionBracket({
       >
         {Array.from({ length: toCount }, (_, i) => (
           <div key={i} className="flex flex-col justify-center relative" style={{ flex: 1 }}>
-            <div style={{ flex: 1, [verticalSide]: border, borderBottom: border }} />
-            <div style={{ flex: 1, [verticalSide]: border, borderTop: border }} />
+            <div style={{
+              flex: 1,
+              borderRight: border,
+              borderBottom: side === "left" ? border : "none",
+              borderTop: side === "right" ? border : "none",
+            }} />
+            <div style={{
+              flex: 1,
+              borderRight: border,
+              borderTop: side === "left" ? border : "none",
+              borderBottom: side === "right" ? border : "none",
+            }} />
           </div>
         ))}
       </div>

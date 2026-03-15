@@ -29,63 +29,61 @@ export default function FinalFour({ regions, picks, results, onPick, locked, dis
   const [champTop, champBottom] = getTeamsForGame(champ, regions, picks);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="text-sm font-bold text-center">Final Four</div>
-      <div className="flex gap-8 items-end">
+    <div className="flex flex-col items-center justify-center gap-2" style={{ minWidth: 160 }}>
+      <div className="text-sm font-bold text-center text-blue-600">Final Four</div>
+      <GameCard
+        gameId={ff0}
+        topTeam={ff0Top}
+        bottomTeam={ff0Bottom}
+        pick={picks[ff0] ?? null}
+        result={results[ff0] ?? null}
+        region="ff"
+        onPick={onPick}
+        locked={locked}
+        distribution={distribution?.[ff0]}
+        seedLookup={seedLookup}
+        userPicks={userPicks}
+        focused={focusedGameId === ff0}
+        onFocus={onFocusGame}
+      />
+      <div className="flex flex-col items-center gap-1 my-1">
+        <div className="text-xs font-bold text-yellow-600">🏆 Championship</div>
         <GameCard
-          gameId={ff0}
-          topTeam={ff0Top}
-          bottomTeam={ff0Bottom}
-          pick={picks[ff0] ?? null}
-          result={results[ff0] ?? null}
+          gameId={champ}
+          topTeam={champTop}
+          bottomTeam={champBottom}
+          pick={picks[champ] ?? null}
+          result={results[champ] ?? null}
           region="ff"
           onPick={onPick}
           locked={locked}
-          distribution={distribution?.[ff0]}
+          distribution={distribution?.[champ]}
           seedLookup={seedLookup}
           userPicks={userPicks}
-          focused={focusedGameId === ff0}
+          focused={focusedGameId === champ}
           onFocus={onFocusGame}
         />
-        <div className="flex flex-col items-center gap-2">
-          <div className="text-xs font-bold text-yellow-600">🏆 Championship</div>
-          <GameCard
-            gameId={champ}
-            topTeam={champTop}
-            bottomTeam={champBottom}
-            pick={picks[champ] ?? null}
-            result={results[champ] ?? null}
-            region="ff"
-            onPick={onPick}
-            locked={locked}
-            distribution={distribution?.[champ]}
-            seedLookup={seedLookup}
-            userPicks={userPicks}
-            focused={focusedGameId === champ}
-            onFocus={onFocusGame}
-          />
-          {picks[champ] && (
-            <div className="text-center mt-1 px-3 py-1 bg-yellow-100 rounded text-sm font-bold text-yellow-800 border border-yellow-300 flex items-center gap-1 justify-center">
-              🏆 <TeamLogo team={picks[champ]} size={20} /> {picks[champ]}
-            </div>
-          )}
-        </div>
-        <GameCard
-          gameId={ff1}
-          topTeam={ff1Top}
-          bottomTeam={ff1Bottom}
-          pick={picks[ff1] ?? null}
-          result={results[ff1] ?? null}
-          region="ff"
-          onPick={onPick}
-          locked={locked}
-          distribution={distribution?.[ff1]}
-          seedLookup={seedLookup}
-          userPicks={userPicks}
-          focused={focusedGameId === ff1}
-          onFocus={onFocusGame}
-        />
+        {picks[champ] && (
+          <div className="text-center mt-1 px-3 py-1 bg-yellow-100 rounded text-sm font-bold text-yellow-800 border border-yellow-300 flex items-center gap-1 justify-center">
+            🏆 <TeamLogo team={picks[champ]} size={20} /> {picks[champ]}
+          </div>
+        )}
       </div>
+      <GameCard
+        gameId={ff1}
+        topTeam={ff1Top}
+        bottomTeam={ff1Bottom}
+        pick={picks[ff1] ?? null}
+        result={results[ff1] ?? null}
+        region="ff"
+        onPick={onPick}
+        locked={locked}
+        distribution={distribution?.[ff1]}
+        seedLookup={seedLookup}
+        userPicks={userPicks}
+        focused={focusedGameId === ff1}
+        onFocus={onFocusGame}
+      />
     </div>
   );
 }

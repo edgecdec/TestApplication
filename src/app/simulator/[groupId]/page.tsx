@@ -68,15 +68,15 @@ function SimulatorView({ data }: { data: SimulatorData }) {
 
         <div className="bg-white p-4">
           <div className="min-w-[1200px] max-w-screen-2xl mx-auto">
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
-              <SimulatorRegion region={REGIONS[0]} regions={data.regions} results={mergedResults} actualResults={data.results} onSetResult={setResult} side="left" />
+            <div className="flex items-stretch">
+              <div className="flex-1"><SimulatorRegion region={REGIONS[0]} regions={data.regions} results={mergedResults} actualResults={data.results} onSetResult={setResult} side="left" /></div>
               <SimulatorFinalFour regions={data.regions} results={mergedResults} actualResults={data.results} onSetResult={setResult} />
-              <SimulatorRegion region={REGIONS[1]} regions={data.regions} results={mergedResults} actualResults={data.results} onSetResult={setResult} side="right" />
+              <div className="flex-1"><SimulatorRegion region={REGIONS[1]} regions={data.regions} results={mergedResults} actualResults={data.results} onSetResult={setResult} side="right" /></div>
             </div>
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start mt-8">
-              <SimulatorRegion region={REGIONS[2]} regions={data.regions} results={mergedResults} actualResults={data.results} onSetResult={setResult} side="left" />
-              <div className="w-40" />
-              <SimulatorRegion region={REGIONS[3]} regions={data.regions} results={mergedResults} actualResults={data.results} onSetResult={setResult} side="right" />
+            <div className="flex items-stretch mt-8">
+              <div className="flex-1"><SimulatorRegion region={REGIONS[2]} regions={data.regions} results={mergedResults} actualResults={data.results} onSetResult={setResult} side="left" /></div>
+              <div style={{ minWidth: 160 }} />
+              <div className="flex-1"><SimulatorRegion region={REGIONS[3]} regions={data.regions} results={mergedResults} actualResults={data.results} onSetResult={setResult} side="right" /></div>
             </div>
           </div>
         </div>

@@ -153,15 +153,15 @@ function CompareView({ data, selectedIds, setSelectedIds, groupId }: CompareView
       ) : (
         <div className="overflow-x-auto bg-white p-4">
           <div className="min-w-[1200px] max-w-screen-2xl mx-auto">
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
-              <ComparisonRegion region={REGIONS[0]} regions={data.regions} displayPicks={displayPicks} results={data.results} brackets={selected} side="left" />
+            <div className="flex items-stretch">
+              <div className="flex-1"><ComparisonRegion region={REGIONS[0]} regions={data.regions} displayPicks={displayPicks} results={data.results} brackets={selected} side="left" /></div>
               <ComparisonFinalFour regions={data.regions} displayPicks={displayPicks} results={data.results} brackets={selected} />
-              <ComparisonRegion region={REGIONS[1]} regions={data.regions} displayPicks={displayPicks} results={data.results} brackets={selected} side="right" />
+              <div className="flex-1"><ComparisonRegion region={REGIONS[1]} regions={data.regions} displayPicks={displayPicks} results={data.results} brackets={selected} side="right" /></div>
             </div>
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start mt-8">
-              <ComparisonRegion region={REGIONS[2]} regions={data.regions} displayPicks={displayPicks} results={data.results} brackets={selected} side="left" />
-              <div className="w-44" />
-              <ComparisonRegion region={REGIONS[3]} regions={data.regions} displayPicks={displayPicks} results={data.results} brackets={selected} side="right" />
+            <div className="flex items-stretch mt-8">
+              <div className="flex-1"><ComparisonRegion region={REGIONS[2]} regions={data.regions} displayPicks={displayPicks} results={data.results} brackets={selected} side="left" /></div>
+              <div style={{ minWidth: 176 }} />
+              <div className="flex-1"><ComparisonRegion region={REGIONS[3]} regions={data.regions} displayPicks={displayPicks} results={data.results} brackets={selected} side="right" /></div>
             </div>
           </div>
         </div>

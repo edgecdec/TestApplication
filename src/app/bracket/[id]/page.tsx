@@ -224,20 +224,22 @@ function BracketView({ data }: { data: LoadedData }) {
       ) : (
         <div ref={bracketRef} className="overflow-x-auto bg-white p-4">
           <div className="min-w-[1200px] max-w-screen-2xl mx-auto">
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
-              <RegionBracket
-                region={REGIONS[0]}
-                regions={data.regions}
-                picks={picks}
-                results={data.results}
-                onPick={makePick}
-                locked={data.locked}
-                side="left"
-                distribution={data.distribution}
-                seedLookup={seedLookup}
-                focusedGameId={focusedGameId}
-                onFocusGame={setFocusedGameId}
-              />
+            <div className="flex items-stretch">
+              <div className="flex-1">
+                <RegionBracket
+                  region={REGIONS[0]}
+                  regions={data.regions}
+                  picks={picks}
+                  results={data.results}
+                  onPick={makePick}
+                  locked={data.locked}
+                  side="left"
+                  distribution={data.distribution}
+                  seedLookup={seedLookup}
+                  focusedGameId={focusedGameId}
+                  onFocusGame={setFocusedGameId}
+                />
+              </div>
               <FinalFour
                 regions={data.regions}
                 picks={picks}
@@ -249,48 +251,54 @@ function BracketView({ data }: { data: LoadedData }) {
                 focusedGameId={focusedGameId}
                 onFocusGame={setFocusedGameId}
               />
-              <RegionBracket
-                region={REGIONS[1]}
-                regions={data.regions}
-                picks={picks}
-                results={data.results}
-                onPick={makePick}
-                locked={data.locked}
-                side="right"
-                distribution={data.distribution}
-                seedLookup={seedLookup}
-                focusedGameId={focusedGameId}
-                onFocusGame={setFocusedGameId}
-              />
+              <div className="flex-1">
+                <RegionBracket
+                  region={REGIONS[1]}
+                  regions={data.regions}
+                  picks={picks}
+                  results={data.results}
+                  onPick={makePick}
+                  locked={data.locked}
+                  side="right"
+                  distribution={data.distribution}
+                  seedLookup={seedLookup}
+                  focusedGameId={focusedGameId}
+                  onFocusGame={setFocusedGameId}
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start mt-8">
-              <RegionBracket
-                region={REGIONS[2]}
-                regions={data.regions}
-                picks={picks}
-                results={data.results}
-                onPick={makePick}
-                locked={data.locked}
-                side="left"
-                distribution={data.distribution}
-                seedLookup={seedLookup}
-                focusedGameId={focusedGameId}
-                onFocusGame={setFocusedGameId}
-              />
-              <div className="w-40" />
-              <RegionBracket
-                region={REGIONS[3]}
-                regions={data.regions}
-                picks={picks}
-                results={data.results}
-                onPick={makePick}
-                locked={data.locked}
-                side="right"
-                distribution={data.distribution}
-                seedLookup={seedLookup}
-                focusedGameId={focusedGameId}
-                onFocusGame={setFocusedGameId}
-              />
+            <div className="flex items-stretch mt-8">
+              <div className="flex-1">
+                <RegionBracket
+                  region={REGIONS[2]}
+                  regions={data.regions}
+                  picks={picks}
+                  results={data.results}
+                  onPick={makePick}
+                  locked={data.locked}
+                  side="left"
+                  distribution={data.distribution}
+                  seedLookup={seedLookup}
+                  focusedGameId={focusedGameId}
+                  onFocusGame={setFocusedGameId}
+                />
+              </div>
+              <div style={{ minWidth: 160 }} />
+              <div className="flex-1">
+                <RegionBracket
+                  region={REGIONS[3]}
+                  regions={data.regions}
+                  picks={picks}
+                  results={data.results}
+                  onPick={makePick}
+                  locked={data.locked}
+                  side="right"
+                  distribution={data.distribution}
+                  seedLookup={seedLookup}
+                  focusedGameId={focusedGameId}
+                  onFocusGame={setFocusedGameId}
+                />
+              </div>
             </div>
           </div>
         </div>

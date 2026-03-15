@@ -134,15 +134,15 @@ export default function ResultsPage() {
       ) : (
         <div ref={bracketRef} className="overflow-x-auto bg-white p-4">
           <div className="min-w-[1200px] max-w-screen-2xl mx-auto">
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
-              <RegionBracket region={REGIONS[0]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="left" userPicks={userPicks} />
+            <div className="flex items-stretch">
+              <div className="flex-1"><RegionBracket region={REGIONS[0]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="left" userPicks={userPicks} /></div>
               <FinalFour regions={regions} picks={results} results={results} onPick={noop} locked={true} userPicks={userPicks} />
-              <RegionBracket region={REGIONS[1]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="right" userPicks={userPicks} />
+              <div className="flex-1"><RegionBracket region={REGIONS[1]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="right" userPicks={userPicks} /></div>
             </div>
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start mt-8">
-              <RegionBracket region={REGIONS[2]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="left" userPicks={userPicks} />
-              <div className="w-40" />
-              <RegionBracket region={REGIONS[3]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="right" userPicks={userPicks} />
+            <div className="flex items-stretch mt-8">
+              <div className="flex-1"><RegionBracket region={REGIONS[2]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="left" userPicks={userPicks} /></div>
+              <div style={{ minWidth: 160 }} />
+              <div className="flex-1"><RegionBracket region={REGIONS[3]} regions={regions} picks={results} results={results} onPick={noop} locked={true} side="right" userPicks={userPicks} /></div>
             </div>
           </div>
         </div>
