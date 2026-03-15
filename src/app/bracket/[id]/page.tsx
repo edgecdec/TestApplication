@@ -94,8 +94,9 @@ function BracketView({ data }: { data: LoadedData }) {
   const router = useRouter();
   const bracketRef = useRef<HTMLDivElement>(null);
   const initialPicks: Picks = JSON.parse(data.bracket.picks);
-  const { picks, dirty, saving, error, makePick, bulkSetPicks, save } = useBracketPicks({
+  const { picks, tiebreaker, dirty, saving, error, makePick, bulkSetPicks, updateTiebreaker, save } = useBracketPicks({
     initialPicks,
+    initialTiebreaker: data.bracket.tiebreaker,
     bracketId: data.bracket.id,
     locked: data.locked,
   });
@@ -117,6 +118,25 @@ function BracketView({ data }: { data: LoadedData }) {
           {error && <span className="text-red-600 text-xs">{error}</span>}
           {dirty && !data.locked && (
             <span className="text-yellow-600 text-xs">Unsaved changes</span>
+          )}
+          {!data.locked && (
+            <div className="flex items-center gap-1">
+              <label htmlFor="tiebreaker" className="text-xs text-gray-500 whitespace-nowrap">Tiebreaker:</label>
+              <input
+                id="tiebreaker"
+                type="number"
+                min={0}
+                max={999}
+                placeholder="Total"
+                value={tiebreaker ?? ""}
+                onChange={(e) => updateTiebreaker(e.target.value === "" ? null : Number(e.target.value))}
+                className="w-16 border rounded px-2 py-1 text-xs"
+                title="Predicted total combined score of the championship game"
+              />
+            </div>
+          )}
+          {data.locked && tiebreaker != null && (
+            <span className="text-xs text-gray-500">TB: {tiebreaker}</span>
           )}
           <ExportButton bracketRef={bracketRef} bracketName={data.bracket.name} />
           {!data.locked && (

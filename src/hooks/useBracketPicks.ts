@@ -6,12 +6,14 @@ import { cascadeClear } from "@/lib/bracket-utils";
 
 interface UseBracketPicksOptions {
   initialPicks: Picks;
+  initialTiebreaker: number | null;
   bracketId: number;
   locked: boolean;
 }
 
-export function useBracketPicks({ initialPicks, bracketId, locked }: UseBracketPicksOptions) {
+export function useBracketPicks({ initialPicks, initialTiebreaker, bracketId, locked }: UseBracketPicksOptions) {
   const [picks, setPicks] = useState<Picks>(initialPicks);
+  const [tiebreaker, setTiebreaker] = useState<number | null>(initialTiebreaker);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +21,9 @@ export function useBracketPicks({ initialPicks, bracketId, locked }: UseBracketP
   // Sync if initialPicks changes (e.g. bracket reload)
   useEffect(() => {
     setPicks(initialPicks);
+    setTiebreaker(initialTiebreaker);
     setDirty(false);
-  }, [initialPicks]);
+  }, [initialPicks, initialTiebreaker]);
 
   // Warn on navigation away with unsaved changes
   useEffect(() => {
@@ -61,6 +64,15 @@ export function useBracketPicks({ initialPicks, bracketId, locked }: UseBracketP
     [locked]
   );
 
+  const updateTiebreaker = useCallback(
+    (value: number | null) => {
+      if (locked) return;
+      setTiebreaker(value);
+      setDirty(true);
+    },
+    [locked]
+  );
+
   const save = useCallback(async () => {
     setSaving(true);
     setError(null);
@@ -68,7 +80,7 @@ export function useBracketPicks({ initialPicks, bracketId, locked }: UseBracketP
       const res = await fetch(`/api/brackets/${bracketId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ picks }),
+        body: JSON.stringify({ picks, tiebreaker }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -81,7 +93,7 @@ export function useBracketPicks({ initialPicks, bracketId, locked }: UseBracketP
     } finally {
       setSaving(false);
     }
-  }, [bracketId, picks]);
+  }, [bracketId, picks, tiebreaker]);
 
-  return { picks, dirty, saving, error, makePick, bulkSetPicks, save };
+  return { picks, tiebreaker, dirty, saving, error, makePick, bulkSetPicks, updateTiebreaker, save };
 }
