@@ -36,7 +36,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const tournament = db.prepare("SELECT lock_time FROM tournaments WHERE id = ?").get(bracket.tournament_id) as { lock_time: string } | undefined;
-  if (tournament && new Date(tournament.lock_time) <= new Date()) {
+  if (tournament && new Date(tournament.lock_time) <= new Date() && !bracket.is_second_chance) {
     return NextResponse.json({ error: "Tournament is locked" }, { status: 403 });
   }
 

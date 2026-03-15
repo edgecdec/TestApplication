@@ -151,4 +151,13 @@ function initSchema(db: Database.Database) {
   if (!gbCols.some(c => c.name === "paid")) {
     db.exec("ALTER TABLE group_brackets ADD COLUMN paid INTEGER NOT NULL DEFAULT 0");
   }
+
+  // Add second chance columns to brackets if missing (migration)
+  const bracketCols = db.prepare("PRAGMA table_info(brackets)").all() as { name: string }[];
+  if (!bracketCols.some(c => c.name === "is_second_chance")) {
+    db.exec("ALTER TABLE brackets ADD COLUMN is_second_chance INTEGER NOT NULL DEFAULT 0");
+  }
+  if (!bracketCols.some(c => c.name === "second_chance_round")) {
+    db.exec("ALTER TABLE brackets ADD COLUMN second_chance_round INTEGER NOT NULL DEFAULT 0");
+  }
 }

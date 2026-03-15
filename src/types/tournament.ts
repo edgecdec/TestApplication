@@ -26,6 +26,8 @@ export interface Bracket {
   name: string;
   picks: string; // JSON: Record<string, string> (gameId -> winnerName)
   tiebreaker: number | null;
+  is_second_chance: number;
+  second_chance_round: number;
   created_at: string;
   updated_at: string;
 }

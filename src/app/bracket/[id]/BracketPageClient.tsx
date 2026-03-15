@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { REGIONS } from "@/lib/bracket-constants";
 import RegionBracket from "@/components/bracket/RegionBracket";
@@ -31,6 +31,7 @@ interface LoadedData {
   isOwner: boolean;
   locked: boolean;
   distribution: PickDistribution;
+  isSecondChance: boolean;
 }
 
 export default function BracketPageClient() {
@@ -63,7 +64,9 @@ export default function BracketPageClient() {
         const results: Results = JSON.parse(tournament.results_data);
         const meData = meRes.ok ? await meRes.json() : null;
         const isOwner = meData?.user?.id === bracket.user_id;
-        const locked = !isOwner || new Date(tournament.lock_time) <= new Date();
+        const isSecondChance = bracket.is_second_chance === 1;
+        // Second chance brackets are editable for unresolved games even after lock time
+        const locked = !isOwner || (!isSecondChance && new Date(tournament.lock_time) <= new Date());
 
         let distribution: PickDistribution = {};
         try {
@@ -74,7 +77,7 @@ export default function BracketPageClient() {
           }
         } catch { /* ignore */ }
 
-        setData({ bracket, tournament, regions, results, isOwner, locked, distribution });
+        setData({ bracket, tournament, regions, results, isOwner, locked, distribution, isSecondChance });
       } catch {
         setLoadError("Failed to load bracket");
       } finally {
@@ -113,11 +116,17 @@ function BracketView({ data }: { data: LoadedData }) {
     locked: data.locked,
   });
 
+  // For second chance brackets, prevent editing games that already have results
+  const handlePick = useCallback((gameId: string, team: string) => {
+    if (data.isSecondChance && data.results[gameId]) return;
+    makePick(gameId, team);
+  }, [data.isSecondChance, data.results, makePick]);
+
   const { focusedGameId, setFocusedGameId } = useBracketKeyboard({
     regions: data.regions,
     picks,
     locked: data.locked,
-    onPick: makePick,
+    onPick: handlePick,
   });
 
   const seedLookup: Record<string, number> = {};
@@ -134,6 +143,9 @@ function BracketView({ data }: { data: LoadedData }) {
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4 max-w-screen-2xl mx-auto">
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-bold">🏀 {data.bracket.name}</h1>
+          {data.isSecondChance && (
+            <span className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-0.5 rounded">🔄 2nd Chance</span>
+          )}
           <LockCountdown lockTime={data.tournament.lock_time} />
         </div>
         <div className="flex items-center gap-2 no-print">
@@ -251,7 +263,7 @@ function BracketView({ data }: { data: LoadedData }) {
             regions={data.regions}
             picks={picks}
             results={data.results}
-            onPick={makePick}
+            onPick={handlePick}
             locked={data.locked}
             distribution={data.distribution}
             seedLookup={seedLookup}
@@ -268,7 +280,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   regions={data.regions}
                   picks={picks}
                   results={data.results}
-                  onPick={makePick}
+                  onPick={handlePick}
                   locked={data.locked}
                   side="left"
                   distribution={data.distribution}
@@ -282,7 +294,7 @@ function BracketView({ data }: { data: LoadedData }) {
                 regions={data.regions}
                 picks={picks}
                 results={data.results}
-                onPick={makePick}
+                onPick={handlePick}
                 locked={data.locked}
                 distribution={data.distribution}
                 seedLookup={seedLookup}
@@ -296,7 +308,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   regions={data.regions}
                   picks={picks}
                   results={data.results}
-                  onPick={makePick}
+                  onPick={handlePick}
                   locked={data.locked}
                   side="right"
                   distribution={data.distribution}
@@ -314,7 +326,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   regions={data.regions}
                   picks={picks}
                   results={data.results}
-                  onPick={makePick}
+                  onPick={handlePick}
                   locked={data.locked}
                   side="left"
                   distribution={data.distribution}
@@ -331,7 +343,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   regions={data.regions}
                   picks={picks}
                   results={data.results}
-                  onPick={makePick}
+                  onPick={handlePick}
                   locked={data.locked}
                   side="right"
                   distribution={data.distribution}

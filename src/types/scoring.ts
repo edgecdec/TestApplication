@@ -52,6 +52,7 @@ export interface LeaderboardEntry extends BracketScore {
   paid?: boolean;
   /** Rank change from previous round: positive = moved up, negative = moved down, null = no previous round */
   rankChange: number | null;
+  isSecondChance?: boolean;
 }
 
 export interface RecentResultItem {

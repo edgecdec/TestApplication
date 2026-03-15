@@ -80,7 +80,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
     const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
     const streak = computeStreak(picks, results);
-    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak, paid: !!b.paid };
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak, paid: !!b.paid, isSecondChance: !!b.is_second_chance };
   });
 
   // Sort: highest total first, then by tiebreaker diff (lower is better)

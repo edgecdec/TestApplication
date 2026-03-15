@@ -24,7 +24,7 @@ import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
 import type { Achievement } from "@/lib/achievements";
 import { parseBracketData } from "@/lib/bracket-utils";
-import { computeStreak } from "@/lib/scoring";
+import { computeStreak, getCurrentRound } from "@/lib/scoring";
 
 function safeParsePicks(raw: string | Record<string, string> | null | undefined): Picks {
   if (!raw) return {};
@@ -151,6 +151,23 @@ export default function DashboardPage() {
     }
   }
 
+  async function createSecondChance(tournamentId: number) {
+    const name = prompt("Second Chance bracket name:", "Second Chance");
+    if (!name) return;
+    const res = await fetch("/api/brackets/second-chance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tournament_id: tournamentId, name }),
+    });
+    if (res.ok) {
+      const { id } = await res.json();
+      router.push(`/bracket/${id}`);
+    } else {
+      const err = await res.json();
+      alert(err.error || "Failed to create second chance bracket");
+    }
+  }
+
   if (loading) {
     return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
   }
@@ -231,6 +248,9 @@ export default function DashboardPage() {
             tournaments.map((t) => {
               const myBrackets = brackets.filter((b) => b.tournament_id === t.id);
               const isLocked = new Date(t.lock_time) <= new Date();
+              const results = safeParsePicks(t.results_data);
+              const tournamentRound = getCurrentRound(results);
+              const canSecondChance = tournamentRound >= 1;
               return (
                 <div key={t.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
@@ -244,6 +264,14 @@ export default function DashboardPage() {
                           className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                         >
                           + New Bracket
+                        </button>
+                      )}
+                      {canSecondChance && (
+                        <button
+                          onClick={() => createSecondChance(t.id)}
+                          className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition"
+                        >
+                          🔄 2nd Chance
                         </button>
                       )}
                     </div>
@@ -274,6 +302,9 @@ export default function DashboardPage() {
                                     <button onClick={(e) => { e.stopPropagation(); setRenamingId(null); }} className="text-gray-400 text-xs">✕</button>
                                   </span>
                                 ) : b.name}
+                                {b.is_second_chance === 1 && (
+                                  <span className="text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-1.5 py-0.5 rounded">🔄 2nd Chance</span>
+                                )}
                                 {grades[b.id] && <BracketGrade grade={grades[b.id]} />}
                                 <StreakBadge streak={computeStreak(safeParsePicks(b.picks), safeParsePicks(t.results_data))} />
                               </span>

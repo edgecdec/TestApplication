@@ -244,6 +244,9 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
                     >
                       {e.bracketName}
                     </button>
+                    {e.isSecondChance && (
+                      <span className="ml-1 text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-1 py-0.5 rounded">2nd</span>
+                    )}
                   </MiniBracketPreview>
                   {groupId && (
                     <BracketReactions

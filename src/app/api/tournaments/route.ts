@@ -5,7 +5,7 @@ import type { Tournament } from "@/types/tournament";
 
 export async function GET() {
   const db = getDb();
-  const tournaments = db.prepare("SELECT id, name, year, lock_time, created_at FROM tournaments ORDER BY year DESC").all();
+  const tournaments = db.prepare("SELECT * FROM tournaments ORDER BY year DESC").all();
   return NextResponse.json({ tournaments });
 }
 
