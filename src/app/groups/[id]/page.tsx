@@ -8,6 +8,7 @@ import type { LeaderboardEntry } from "@/types/scoring";
 import { ROUND_NAMES, EVERYONE_GROUP_NAME } from "@/lib/bracket-constants";
 import GroupLeaderboard from "@/components/GroupLeaderboard";
 import BracketProgress from "@/components/BracketProgress";
+import GroupChat from "@/components/GroupChat";
 
 interface GroupDetail extends Group {
   member_count: number;
@@ -24,7 +25,7 @@ interface BracketWithUser extends BracketRow {
   username: string;
 }
 
-type Tab = "leaderboard" | "brackets" | "settings";
+type Tab = "leaderboard" | "brackets" | "chat" | "settings";
 
 export default function GroupDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -165,9 +166,9 @@ export default function GroupDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b">
-        {(["leaderboard", "brackets", "settings"] as const).map((t) => (
+        {(["leaderboard", "brackets", "chat", "settings"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm font-medium border-b-2 transition ${tab === t ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
-            {t === "leaderboard" ? "Leaderboard" : t === "brackets" ? "Brackets" : "Settings"}
+            {t === "leaderboard" ? "Leaderboard" : t === "brackets" ? "Brackets" : t === "chat" ? "💬 Chat" : "Settings"}
           </button>
         ))}
       </div>
@@ -235,6 +236,10 @@ export default function GroupDetailPage() {
             </div>
           )}
         </div>
+      )}
+
+      {tab === "chat" && user && (
+        <GroupChat groupId={id} currentUser={user.username} />
       )}
 
       {tab === "settings" && scoring && (

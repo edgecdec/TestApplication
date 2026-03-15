@@ -76,5 +76,15 @@ function initSchema(db: Database.Database) {
       FOREIGN KEY (group_id) REFERENCES groups(id),
       FOREIGN KEY (bracket_id) REFERENCES brackets(id)
     );
+
+    CREATE TABLE IF NOT EXISTS group_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      message TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (group_id) REFERENCES groups(id),
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
   `);
 }
