@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import type { Group, ScoringSettings } from "@/types/group";
 import type { BracketRow } from "@/types/tournament";
+import type { LeaderboardEntry } from "@/types/scoring";
 import { ROUND_NAMES, EVERYONE_GROUP_NAME } from "@/lib/bracket-constants";
+import GroupLeaderboard from "@/components/GroupLeaderboard";
 
 interface GroupDetail extends Group {
   member_count: number;
@@ -21,7 +23,7 @@ interface BracketWithUser extends BracketRow {
   username: string;
 }
 
-type Tab = "brackets" | "settings";
+type Tab = "leaderboard" | "brackets" | "settings";
 
 export default function GroupDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,11 +33,13 @@ export default function GroupDetailPage() {
   const [brackets, setBrackets] = useState<BracketWithUser[]>([]);
   const [myBrackets, setMyBrackets] = useState<BracketRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<Tab>("brackets");
+  const [tab, setTab] = useState<Tab>("leaderboard");
   const [scoring, setScoring] = useState<ScoringSettings | null>(null);
   const [maxBrackets, setMaxBrackets] = useState(1);
   const [saving, setSaving] = useState(false);
   const [addingBracketId, setAddingBracketId] = useState<number | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [actualTotal, setActualTotal] = useState<number | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -44,10 +48,11 @@ export default function GroupDetailPage() {
       const meData = await meRes.json();
       setUser(meData.user);
 
-      const [gRes, bRes, myRes] = await Promise.all([
+      const [gRes, bRes, myRes, lbRes] = await Promise.all([
         fetch(`/api/groups/${id}`),
         fetch(`/api/groups/${id}/brackets`),
         fetch("/api/brackets"),
+        fetch(`/api/groups/${id}/leaderboard`),
       ]);
 
       if (gRes.ok) {
@@ -65,6 +70,11 @@ export default function GroupDetailPage() {
       if (myRes.ok) {
         const myData = await myRes.json();
         setMyBrackets(myData.brackets ?? []);
+      }
+      if (lbRes.ok) {
+        const lbData = await lbRes.json();
+        setLeaderboard(lbData.leaderboard ?? []);
+        setActualTotal(lbData.actualTotal ?? null);
       }
       setLoading(false);
     }
@@ -142,12 +152,16 @@ export default function GroupDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b">
-        {(["brackets", "settings"] as const).map((t) => (
+        {(["leaderboard", "brackets", "settings"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm font-medium border-b-2 transition ${tab === t ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
-            {t === "brackets" ? "Brackets" : "Settings"}
+            {t === "leaderboard" ? "Leaderboard" : t === "brackets" ? "Brackets" : "Settings"}
           </button>
         ))}
       </div>
+
+      {tab === "leaderboard" && (
+        <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} />
+      )}
 
       {tab === "brackets" && (
         <div>
