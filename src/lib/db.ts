@@ -87,4 +87,10 @@ function initSchema(db: Database.Database) {
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
   `);
+
+  // Add results_updated_at column if missing (migration)
+  const cols = db.prepare("PRAGMA table_info(tournaments)").all() as { name: string }[];
+  if (!cols.some(c => c.name === "results_updated_at")) {
+    db.exec("ALTER TABLE tournaments ADD COLUMN results_updated_at TEXT");
+  }
 }

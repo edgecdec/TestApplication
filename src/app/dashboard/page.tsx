@@ -8,6 +8,7 @@ import EspnSyncButton from "@/components/EspnSyncButton";
 import BracketProgress from "@/components/BracketProgress";
 import LockCountdown from "@/components/LockCountdown";
 import PickReminderBanner from "@/components/PickReminderBanner";
+import ResultsBanner from "@/components/ResultsBanner";
 
 interface UserInfo {
   id: number;
@@ -78,6 +79,9 @@ export default function DashboardPage() {
           </p>
         </div>
       </div>
+
+      {/* Results Updated Banner */}
+      <ResultsBanner />
 
       {/* Pick Reminder Banner */}
       <PickReminderBanner brackets={brackets} tournaments={tournaments} />
