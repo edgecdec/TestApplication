@@ -209,7 +209,7 @@ export default function GroupDetailPage() {
           {group.buy_in > 0 && (
             <PoolPayoutDisplay buyIn={buyIn} payoutStructure={JSON.stringify(payout)} memberCount={group.member_count} />
           )}
-          <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} />
+          <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} groupName={group?.name} />
         </>
       )}
 

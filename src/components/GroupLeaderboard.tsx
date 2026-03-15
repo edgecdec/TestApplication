@@ -8,6 +8,7 @@ import ScoringBreakdownDialog from "@/components/ScoringBreakdownDialog";
 import HeadToHeadDialog from "@/components/HeadToHeadDialog";
 import TeamLogo from "@/components/TeamLogo";
 import StreakBadge from "@/components/StreakBadge";
+import { leaderboardToCSV, downloadCSV } from "@/lib/csv-export";
 
 type SortKey = "rank" | "total" | "maxPossible" | "bestPossibleFinish" | "correctPicks" | "tiebreaker" | "percentile" | `round-${number}`;
 
@@ -17,6 +18,7 @@ interface Props {
   entries: LeaderboardEntry[];
   actualTotal: number | null;
   groupId?: string;
+  groupName?: string;
 }
 
 function parseSortKey(key: SortKey): { type: "field"; field: keyof LeaderboardEntry } | { type: "round"; index: number } {
@@ -31,7 +33,7 @@ function getSortValue(entry: LeaderboardEntry, key: SortKey): number {
   return typeof val === "number" ? val : 0;
 }
 
-export default function GroupLeaderboard({ entries, actualTotal, groupId }: Props) {
+export default function GroupLeaderboard({ entries, actualTotal, groupId, groupName }: Props) {
   const router = useRouter();
   const [selectedBracketId, setSelectedBracketId] = useState<number | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("rank");
@@ -118,6 +120,17 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId }: Prop
         {groupId && h2hIds.length > 0 && h2hIds.length < MAX_H2H_SELECTIONS && (
           <span className="text-xs text-gray-500">Select {MAX_H2H_SELECTIONS - h2hIds.length} more to compare</span>
         )}
+        <button
+          onClick={() => {
+            const csv = leaderboardToCSV(entries);
+            const name = groupName ? groupName.replace(/[^a-zA-Z0-9]/g, "_") : "leaderboard";
+            downloadCSV(csv, `${name}_standings.csv`);
+          }}
+          className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition whitespace-nowrap"
+          title="Export leaderboard as CSV"
+        >
+          📥 Export CSV
+        </button>
       </div>
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="w-full text-sm">

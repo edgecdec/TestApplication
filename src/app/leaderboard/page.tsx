@@ -66,7 +66,7 @@ export default function LeaderboardPage() {
       {lbLoading ? (
         <p className="text-gray-400">Loading leaderboard...</p>
       ) : (
-        <GroupLeaderboard entries={entries} actualTotal={null} />
+        <GroupLeaderboard entries={entries} actualTotal={null} groupName="Overall_Leaderboard" />
       )}
     </main>
   );
