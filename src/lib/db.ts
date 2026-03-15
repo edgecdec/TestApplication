@@ -110,4 +110,10 @@ function initSchema(db: Database.Database) {
   if (!groupCols.some(c => c.name === "description")) {
     db.exec("ALTER TABLE groups ADD COLUMN description TEXT NOT NULL DEFAULT ''");
   }
+  if (!groupCols.some(c => c.name === "buy_in")) {
+    db.exec("ALTER TABLE groups ADD COLUMN buy_in REAL NOT NULL DEFAULT 0");
+  }
+  if (!groupCols.some(c => c.name === "payout_structure")) {
+    db.exec(`ALTER TABLE groups ADD COLUMN payout_structure TEXT NOT NULL DEFAULT '${JSON.stringify({ places: [100] })}'`);
+  }
 }

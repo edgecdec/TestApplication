@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import type { Group, ScoringSettings } from "@/types/group";
+import type { Group, ScoringSettings, PayoutStructure } from "@/types/group";
 import type { BracketRow } from "@/types/tournament";
 import type { LeaderboardEntry } from "@/types/scoring";
 import { ROUND_NAMES, EVERYONE_GROUP_NAME } from "@/lib/bracket-constants";
@@ -12,6 +12,9 @@ import GroupChat from "@/components/GroupChat";
 import GroupActivityFeed from "@/components/GroupActivityFeed";
 import StandingsChart from "@/components/StandingsChart";
 import InviteQRCode from "@/components/InviteQRCode";
+import PoolPayoutSettings from "@/components/PoolPayoutSettings";
+import PoolPayoutDisplay from "@/components/PoolPayoutDisplay";
+import { parsePayoutStructure } from "@/lib/payouts";
 import type { StandingsHistoryData } from "@/types/standings-history";
 
 interface GroupDetail extends Group {
@@ -43,6 +46,8 @@ export default function GroupDetailPage() {
   const [scoring, setScoring] = useState<ScoringSettings | null>(null);
   const [maxBrackets, setMaxBrackets] = useState(1);
   const [description, setDescription] = useState("");
+  const [buyIn, setBuyIn] = useState(0);
+  const [payout, setPayout] = useState<PayoutStructure>({ places: [100] });
   const [saving, setSaving] = useState(false);
   const [addingBracketId, setAddingBracketId] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -71,6 +76,8 @@ export default function GroupDetailPage() {
         setScoring(parsed);
         setMaxBrackets(g.max_brackets);
         setDescription(g.description || "");
+        setBuyIn(g.buy_in || 0);
+        setPayout(parsePayoutStructure(g.payout_structure));
       }
       if (bRes.ok) {
         const bData = await bRes.json();
@@ -136,7 +143,7 @@ export default function GroupDetailPage() {
     await fetch(`/api/groups/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets, description }),
+      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets, description, buy_in: buyIn, payout_structure: payout }),
     });
     setSaving(false);
   }
@@ -198,7 +205,12 @@ export default function GroupDetailPage() {
       </div>
 
       {tab === "leaderboard" && (
-        <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} />
+        <>
+          {group.buy_in > 0 && (
+            <PoolPayoutDisplay buyIn={buyIn} payoutStructure={JSON.stringify(payout)} memberCount={group.member_count} />
+          )}
+          <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} />
+        </>
       )}
 
       {tab === "brackets" && (
@@ -292,6 +304,7 @@ export default function GroupDetailPage() {
             <label className="block text-sm font-medium mb-1">Description <span className="text-gray-400 font-normal">(pool rules, entry fee, payout, etc.)</span></label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} disabled={!canEdit} className="w-full border rounded px-3 py-2 text-sm disabled:opacity-50" placeholder="e.g. $20 buy-in, winner takes 70%, runner-up 30%." />
           </div>
+          <PoolPayoutSettings buyIn={buyIn} setBuyIn={setBuyIn} payout={payout} setPayout={setPayout} memberCount={group.member_count} disabled={!canEdit} />
           <div>
             <label className="block text-sm font-medium mb-1">Max Brackets Per User</label>
             <select value={maxBrackets} onChange={(e) => setMaxBrackets(Number(e.target.value))} disabled={!canEdit} className="border rounded px-3 py-2 disabled:opacity-50">
