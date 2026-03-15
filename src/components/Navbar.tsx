@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
+import type { GroupSummaryItem } from "@/app/api/groups/my-summary/route";
 
 const PUBLIC_PATHS = ["/login", "/register", "/"] as const;
 
@@ -11,6 +12,12 @@ interface NavUser {
   id: number;
   username: string;
   isAdmin: boolean;
+}
+
+interface BestRank {
+  rank: number;
+  score: number;
+  groupName: string;
 }
 
 const NAV_LINKS = [
@@ -25,9 +32,28 @@ const NAV_LINKS = [
   { href: "/rules", label: "Rules" },
 ] as const;
 
+function computeBestRank(summaries: GroupSummaryItem[]): BestRank | null {
+  let best: BestRank | null = null;
+  for (const s of summaries) {
+    if (s.totalBrackets === 0 || s.myBestRank === 0) continue;
+    if (!best || s.myBestRank < best.rank || (s.myBestRank === best.rank && s.myBestScore > best.score)) {
+      best = { rank: s.myBestRank, score: s.myBestScore, groupName: s.groupName };
+    }
+  }
+  return best;
+}
+
+function rankLabel(rank: number): string {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return `#${rank}`;
+}
+
 export default function Navbar() {
   const [user, setUser] = useState<NavUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [bestRank, setBestRank] = useState<BestRank | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -37,6 +63,16 @@ export default function Navbar() {
       .then((data) => { if (data?.user) setUser(data.user); })
       .catch(() => {});
   }, [pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/groups/my-summary")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.summaries) setBestRank(computeBestRank(data.summaries));
+      })
+      .catch(() => {});
+  }, [user]);
 
   // Close menu on route change
   useEffect(() => { setMenuOpen(false); }, [pathname]);
@@ -109,6 +145,14 @@ export default function Navbar() {
           </button>
           <NotificationBell />
           <ThemeToggle />
+          {bestRank && (
+            <span
+              className="px-2 py-0.5 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-full text-xs font-semibold text-yellow-800 dark:text-yellow-300 cursor-default"
+              title={`Best rank: ${rankLabel(bestRank.rank)} in ${bestRank.groupName}`}
+            >
+              {rankLabel(bestRank.rank)} · {bestRank.score}pts
+            </span>
+          )}
           <button
             onClick={() => navigate(`/profile/${user.username}`)}
             className="text-gray-600 hover:text-blue-600 transition"
@@ -174,6 +218,11 @@ export default function Navbar() {
             </button>
           )}
           <hr className="my-1 border-gray-200" />
+          {bestRank && (
+            <div className="px-3 py-1 text-xs font-semibold text-yellow-800 dark:text-yellow-300">
+              {rankLabel(bestRank.rank)} · {bestRank.score}pts — {bestRank.groupName}
+            </div>
+          )}
           <button
             onClick={() => navigate(`/profile/${user.username}`)}
             className="text-left px-3 py-2 text-gray-600 hover:bg-gray-100 rounded transition"
