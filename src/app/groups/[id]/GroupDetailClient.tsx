@@ -55,6 +55,8 @@ export default function GroupDetailClient() {
   const [buyIn, setBuyIn] = useState(0);
   const [payout, setPayout] = useState<PayoutStructure>({ places: [100] });
   const [paymentLink, setPaymentLink] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addingBracketId, setAddingBracketId] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -86,6 +88,12 @@ export default function GroupDetailClient() {
         setBuyIn(g.buy_in || 0);
         setPayout(parsePayoutStructure(g.payout_structure));
         setPaymentLink(g.payment_link || "");
+        const ann = g.announcement || "";
+        setAnnouncement(ann);
+        if (ann) {
+          const key = `dismissed_announcement_${id}`;
+          setAnnouncementDismissed(localStorage.getItem(key) === ann);
+        }
       }
       if (bRes.ok) {
         const bData = await bRes.json();
@@ -151,7 +159,7 @@ export default function GroupDetailClient() {
     await fetch(`/api/groups/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets, description, buy_in: buyIn, payout_structure: payout, payment_link: paymentLink }),
+      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets, description, buy_in: buyIn, payout_structure: payout, payment_link: paymentLink, announcement }),
     });
     setSaving(false);
   }
@@ -174,6 +182,13 @@ export default function GroupDetailClient() {
       {group.description && (
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4 text-sm text-blue-800 dark:text-blue-200 whitespace-pre-wrap">
           📋 {group.description}
+        </div>
+      )}
+
+      {announcement && !announcementDismissed && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg p-3 mb-4 text-sm text-amber-800 dark:text-amber-200 whitespace-pre-wrap flex items-start gap-2">
+          <span className="flex-1">📌 {announcement}</span>
+          <button onClick={() => { setAnnouncementDismissed(true); localStorage.setItem(`dismissed_announcement_${id}`, announcement); }} className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 shrink-0 text-lg leading-none" aria-label="Dismiss announcement">&times;</button>
         </div>
       )}
 
@@ -367,6 +382,10 @@ export default function GroupDetailClient() {
           <div>
             <label className="block text-sm font-medium mb-1">Description <span className="text-gray-400 font-normal">(pool rules, entry fee, payout, etc.)</span></label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} disabled={!canEdit} className="w-full border rounded px-3 py-2 text-sm disabled:opacity-50" placeholder="e.g. $20 buy-in, winner takes 70%, runner-up 30%." />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">📌 Pinned Announcement <span className="text-gray-400 font-normal">(shown as a banner at the top of the group page)</span></label>
+            <textarea value={announcement} onChange={(e) => setAnnouncement(e.target.value)} rows={2} disabled={!canEdit} className="w-full border rounded px-3 py-2 text-sm disabled:opacity-50" placeholder="e.g. Payment due by Friday! Winner gets the trophy 🏆" />
           </div>
           <PoolPayoutSettings buyIn={buyIn} setBuyIn={setBuyIn} payout={payout} setPayout={setPayout} memberCount={group.member_count} disabled={!canEdit} />
           {buyIn > 0 && (

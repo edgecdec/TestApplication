@@ -41,13 +41,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const body = await req.json();
-  const { scoring_settings, max_brackets, name, description, buy_in, payout_structure, payment_link } = body;
+  const { scoring_settings, max_brackets, name, description, buy_in, payout_structure, payment_link, announcement } = body;
 
   const fields: string[] = [];
   const values: (string | number)[] = [];
 
   if (name !== undefined) { fields.push("name = ?"); values.push(name); }
   if (description !== undefined) { fields.push("description = ?"); values.push(description); }
+  if (announcement !== undefined) { fields.push("announcement = ?"); values.push(String(announcement)); }
   if (scoring_settings !== undefined) { fields.push("scoring_settings = ?"); values.push(typeof scoring_settings === "string" ? scoring_settings : JSON.stringify(scoring_settings)); }
   if (max_brackets !== undefined) { fields.push("max_brackets = ?"); values.push(max_brackets); }
   if (buy_in !== undefined) { fields.push("buy_in = ?"); values.push(Number(buy_in)); }

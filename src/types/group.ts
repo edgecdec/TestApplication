@@ -10,6 +10,7 @@ export interface Group {
   buy_in: number;
   payout_structure: string; // JSON: PayoutStructure
   payment_link: string;
+  announcement: string;
 }
 
 export interface ScoringSettings {
