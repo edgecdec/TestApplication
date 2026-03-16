@@ -46,3 +46,46 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getCurrentUser();
+  if (!user || !user.isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const tournamentId = Number(id);
+  const db = getDb();
+
+  const existing = db.prepare("SELECT id FROM tournaments WHERE id = ?").get(tournamentId) as Tournament | undefined;
+  if (!existing) {
+    return NextResponse.json({ error: "Tournament not found" }, { status: 404 });
+  }
+
+  // Get all bracket IDs for this tournament for cascade cleanup
+  const bracketIds = (db.prepare("SELECT id FROM brackets WHERE tournament_id = ?").all(tournamentId) as { id: number }[]).map(b => b.id);
+
+  const del = db.transaction(() => {
+    if (bracketIds.length > 0) {
+      const placeholders = bracketIds.map(() => "?").join(",");
+      db.prepare(`DELETE FROM bracket_reactions WHERE bracket_id IN (${placeholders})`).run(...bracketIds);
+      db.prepare(`DELETE FROM group_brackets WHERE bracket_id IN (${placeholders})`).run(...bracketIds);
+      // Delete notifications linking to deleted brackets
+      for (const bid of bracketIds) {
+        db.prepare("DELETE FROM notifications WHERE link LIKE ?").run(`%/bracket/${bid}%`);
+      }
+    }
+    // Delete bracket-related group_activity for users with brackets in this tournament
+    const userIds = (db.prepare("SELECT DISTINCT user_id FROM brackets WHERE tournament_id = ?").all(tournamentId) as { user_id: number }[]).map(u => u.user_id);
+    if (userIds.length > 0) {
+      const uPlaceholders = userIds.map(() => "?").join(",");
+      db.prepare(`DELETE FROM group_activity WHERE user_id IN (${uPlaceholders}) AND activity_type IN ('bracket_added', 'bracket_completed', 'bracket_updated')`).run(...userIds);
+    }
+    db.prepare("DELETE FROM brackets WHERE tournament_id = ?").run(tournamentId);
+    db.prepare("DELETE FROM tournaments WHERE id = ?").run(tournamentId);
+  });
+
+  del();
+
+  return NextResponse.json({ success: true });
+}

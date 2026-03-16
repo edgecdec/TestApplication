@@ -19,6 +19,8 @@ export default function TournamentList({ tournaments, onRefresh }: Props) {
   const [editLockTime, setEditLockTime] = useState("");
   const [saving, setSaving] = useState(false);
   const [dates, setDates] = useState("");
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
 
   function toggleExpand(id: number) {
     setExpandedId(expandedId === id ? null : id);
@@ -41,6 +43,20 @@ export default function TournamentList({ tournaments, onRefresh }: Props) {
       });
       if (res.ok) {
         setEditingId(null);
+        onRefresh();
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: number) {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/tournaments/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setDeletingId(null);
+        setDeleteConfirm("");
         onRefresh();
       }
     } finally {
@@ -162,6 +178,45 @@ export default function TournamentList({ tournaments, onRefresh }: Props) {
                     </div>
                   </section>
                 )}
+
+                {/* Delete tournament */}
+                <section className="border-t pt-4">
+                  {deletingId === t.id ? (
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-4">
+                      <p className="text-sm text-red-700 dark:text-red-300 mb-2">
+                        This will permanently delete <strong>{t.name}</strong> and all its brackets, picks, and group assignments. Type the tournament name to confirm:
+                      </p>
+                      <input
+                        value={deleteConfirm}
+                        onChange={(e) => setDeleteConfirm(e.target.value)}
+                        placeholder={t.name}
+                        className="w-full border border-red-300 rounded px-3 py-2 text-sm mb-2"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDelete(t.id)}
+                          disabled={saving || deleteConfirm !== t.name}
+                          className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                        >
+                          {saving ? "Deleting..." : "🗑️ Delete Forever"}
+                        </button>
+                        <button
+                          onClick={() => { setDeletingId(null); setDeleteConfirm(""); }}
+                          className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setDeletingId(t.id)}
+                      className="text-sm text-red-600 hover:underline"
+                    >
+                      🗑️ Delete Tournament
+                    </button>
+                  )}
+                </section>
               </div>
             )}
           </div>
