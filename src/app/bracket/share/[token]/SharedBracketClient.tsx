@@ -14,7 +14,7 @@ import type { RegionData } from "@/types/tournament";
 import type { Picks, Results } from "@/types/bracket";
 
 interface SharedData {
-  bracket: { id: number; name: string; picks: string; tiebreaker: number | null; username: string };
+  bracket: { id: number; name: string; picks: string; tiebreaker: number | null; username: string; notes?: string };
   tournament: { name: string; year: number; bracket_data: string; results_data: string };
 }
 
@@ -74,6 +74,13 @@ function SharedBracketView({ data, bracketRef, isMobile }: { data: SharedData; b
           <a href="/" className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition">Sign Up / Login</a>
         </div>
       </div>
+
+      {data.bracket.notes && (
+        <div className="max-w-screen-2xl mx-auto mb-3 bg-gray-50 dark:bg-gray-800 rounded p-3">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">📝 Notes</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.bracket.notes}</p>
+        </div>
+      )}
 
       {isMobile ? (
         <div className="bg-white dark:bg-gray-800 p-3 rounded">

@@ -25,6 +25,7 @@ import BracketScoringSummary from "@/components/bracket/BracketScoringSummary";
 import PickListView from "@/components/bracket/PickListView";
 import BracketSwitcher from "@/components/bracket/BracketSwitcher";
 import BracketWizard from "@/components/bracket/BracketWizard";
+import BracketNotes from "@/components/bracket/BracketNotes";
 import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
 import { buildTeamSeedMap } from "@/lib/scoring";
 
@@ -263,6 +264,8 @@ function BracketView({ data }: { data: LoadedData }) {
       </div>
 
       <BracketInsights picks={picks} regions={data.regions} distribution={data.distribution} />
+
+      <BracketNotes bracketId={data.bracket.id} initialNotes={data.bracket.notes || ""} locked={data.locked} />
 
       <BracketScoringSummary bracketId={data.bracket.id} />
 

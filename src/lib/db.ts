@@ -196,4 +196,7 @@ function initSchema(db: Database.Database) {
   if (!bracketCols.some(c => c.name === "share_token")) {
     db.exec("ALTER TABLE brackets ADD COLUMN share_token TEXT");
   }
+  if (!bracketCols.some(c => c.name === "notes")) {
+    db.exec("ALTER TABLE brackets ADD COLUMN notes TEXT NOT NULL DEFAULT ''");
+  }
 }

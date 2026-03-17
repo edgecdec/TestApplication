@@ -16,7 +16,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ tok
   if (!tournament) return NextResponse.json({ error: "Tournament not found" }, { status: 404 });
 
   return NextResponse.json({
-    bracket: { id: bracket.id, name: bracket.name, picks: bracket.picks, tiebreaker: bracket.tiebreaker, username: bracket.username },
+    bracket: { id: bracket.id, name: bracket.name, picks: bracket.picks, tiebreaker: bracket.tiebreaker, username: bracket.username, notes: bracket.notes || "" },
     tournament: { name: tournament.name, year: tournament.year, bracket_data: tournament.bracket_data, results_data: tournament.results_data },
   });
 }

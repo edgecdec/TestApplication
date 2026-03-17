@@ -41,7 +41,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const body = await req.json();
-  const { picks, tiebreaker, name } = body;
+  const { picks, tiebreaker, name, notes } = body;
 
   const fields: string[] = ["updated_at = datetime('now')"];
   const values: (string | number | null)[] = [];
@@ -49,6 +49,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (picks !== undefined) { fields.push("picks = ?"); values.push(typeof picks === "string" ? picks : JSON.stringify(picks)); }
   if (tiebreaker !== undefined) { fields.push("tiebreaker = ?"); values.push(tiebreaker); }
   if (name !== undefined) { fields.push("name = ?"); values.push(name); }
+  if (notes !== undefined) { fields.push("notes = ?"); values.push(String(notes).slice(0, 1000)); }
 
   values.push(Number(id));
   db.prepare(`UPDATE brackets SET ${fields.join(", ")} WHERE id = ?`).run(...values);
