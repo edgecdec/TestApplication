@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak, getCurrentRound, filterResultsBeforeRound, scorePicks } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak, getCurrentRound, filterResultsBeforeRound, filterResultsThroughRound, getCompletedRounds, scorePicks } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import type { ScoringSettings } from "@/types/group";
 import type { Bracket, Tournament, RegionData } from "@/types/tournament";
@@ -16,7 +16,7 @@ interface GroupRow {
   scoring_settings: string;
 }
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = getDb();
 
@@ -36,21 +36,27 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   `).all(id) as (BracketWithUser & { paid: number })[];
 
   if (brackets.length === 0) {
-    return NextResponse.json({ leaderboard: [], actualTotal: null });
+    return NextResponse.json({ leaderboard: [], actualTotal: null, completedRounds: [] });
   }
 
-  // Get the tournament for these brackets (all brackets in a group share the same tournament)
   const tournamentId = brackets[0].tournament_id;
   const tournament = db.prepare("SELECT * FROM tournaments WHERE id = ?").get(tournamentId) as Tournament | undefined;
   if (!tournament) {
-    return NextResponse.json({ leaderboard: [], actualTotal: null });
+    return NextResponse.json({ leaderboard: [], actualTotal: null, completedRounds: [] });
   }
 
   const regions: RegionData[] = parseBracketData(tournament.bracket_data);
-  const results: Results = JSON.parse(tournament.results_data);
+  const fullResults: Results = JSON.parse(tournament.results_data);
+  const completedRounds = getCompletedRounds(fullResults);
+
+  // Support ?asOfRound=N to view historical standings
+  const asOfRoundParam = req.nextUrl.searchParams.get("asOfRound");
+  const asOfRound = asOfRoundParam != null ? parseInt(asOfRoundParam, 10) : null;
+  const isHistorical = asOfRound != null && !isNaN(asOfRound);
+
+  const results: Results = isHistorical ? filterResultsThroughRound(fullResults, asOfRound) : fullResults;
   const eliminatedTeams = getEliminatedTeams(results, regions);
   const seedMap = buildTeamSeedMap(regions);
-
   const actualTotal: number | null = null;
   const totalResolved = countResolvedGames(results);
 
@@ -77,13 +83,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       picks, results, settings, regions,
       b.tiebreaker, actualTotal
     );
-    const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
+    const maxRemaining = isHistorical ? 0 : maxPossibleRemaining(picks, results, settings, eliminatedTeams);
     const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
     const streak = computeStreak(picks, results);
     return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak, paid: !!b.paid, isSecondChance: !!b.is_second_chance };
   });
 
-  // Sort: highest total first, then by tiebreaker diff (lower is better)
   scored.sort((a, b) => {
     if (b.total !== a.total) return b.total - a.total;
     if (a.tiebreakerDiff != null && b.tiebreakerDiff != null) {
@@ -96,7 +101,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const leaderScore = scored.length > 0 ? scored[0].total : 0;
 
-  // Assign ranks, eliminated status, and best possible finish
   const leaderboard: LeaderboardEntry[] = scored.map((s, i) => {
     let rank = 1;
     if (i > 0) {
@@ -110,12 +114,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const percentile = scored.length > 1
       ? Math.round(((scored.length - rank) / (scored.length - 1)) * 100)
       : 100;
-
-    // Eliminated: max possible < leader's current score
-    const eliminated = s.maxPossible < leaderScore;
-
-    // Best possible finish: count brackets whose current score already exceeds this bracket's max
-    const bestPossibleFinish = scored.filter((other) => other.total > s.maxPossible).length + 1;
+    const eliminated = isHistorical ? false : s.maxPossible < leaderScore;
+    const bestPossibleFinish = isHistorical ? rank : scored.filter((other) => other.total > s.maxPossible).length + 1;
 
     return { ...s, rank, percentile, eliminated, bestPossibleFinish, rankChange: null as number | null };
   });
@@ -143,5 +143,5 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
   }
 
-  return NextResponse.json({ leaderboard, actualTotal });
+  return NextResponse.json({ leaderboard, actualTotal, completedRounds });
 }

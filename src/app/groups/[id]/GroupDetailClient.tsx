@@ -63,6 +63,7 @@ export default function GroupDetailClient() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [actualTotal, setActualTotal] = useState<number | null>(null);
   const [standingsData, setStandingsData] = useState<StandingsHistoryData | null>(null);
+  const [completedRounds, setCompletedRounds] = useState<number[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -109,6 +110,7 @@ export default function GroupDetailClient() {
         const lbData = await lbRes.json();
         setLeaderboard(lbData.leaderboard ?? []);
         setActualTotal(lbData.actualTotal ?? null);
+        setCompletedRounds(lbData.completedRounds ?? []);
       }
 
       // Fetch standings history
@@ -274,7 +276,7 @@ export default function GroupDetailClient() {
               })()}
             </>
           )}
-          <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} groupName={group?.name} paymentLink={paymentLink} />
+          <GroupLeaderboard entries={leaderboard} actualTotal={actualTotal} groupId={id} groupName={group?.name} paymentLink={paymentLink} fetchUrl={`/api/groups/${id}/leaderboard`} completedRounds={completedRounds} />
         </>
       )}
 

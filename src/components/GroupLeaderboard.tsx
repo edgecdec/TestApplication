@@ -25,6 +25,8 @@ interface Props {
   groupId?: string;
   groupName?: string;
   paymentLink?: string;
+  fetchUrl?: string;
+  completedRounds?: number[];
 }
 
 function parseSortKey(key: SortKey): { type: "field"; field: keyof LeaderboardEntry } | { type: "round"; index: number } {
@@ -39,7 +41,7 @@ function getSortValue(entry: LeaderboardEntry, key: SortKey): number {
   return typeof val === "number" ? val : 0;
 }
 
-export default function GroupLeaderboard({ entries, actualTotal, groupId, groupName, paymentLink }: Props) {
+export default function GroupLeaderboard({ entries, actualTotal, groupId, groupName, paymentLink, fetchUrl, completedRounds }: Props) {
   const router = useRouter();
   const [selectedBracketId, setSelectedBracketId] = useState<number | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("rank");
@@ -50,6 +52,27 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
   const [copied, setCopied] = useState(false);
   const [trashCopied, setTrashCopied] = useState(false);
   const [reactions, setReactions] = useState<BracketReactionsMap>({});
+  const [asOfRound, setAsOfRound] = useState<number | null>(null);
+  const [timeMachineEntries, setTimeMachineEntries] = useState<LeaderboardEntry[] | null>(null);
+  const [tmLoading, setTmLoading] = useState(false);
+
+  // Fetch historical leaderboard when asOfRound changes
+  useEffect(() => {
+    if (asOfRound === null || !fetchUrl) {
+      setTimeMachineEntries(null);
+      return;
+    }
+    setTmLoading(true);
+    fetch(`${fetchUrl}?asOfRound=${asOfRound}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.leaderboard) setTimeMachineEntries(data.leaderboard);
+      })
+      .catch(() => {})
+      .finally(() => setTmLoading(false));
+  }, [asOfRound, fetchUrl]);
+
+  const activeEntries = timeMachineEntries ?? entries;
 
   // Fetch reactions for group leaderboards
   useEffect(() => {
@@ -97,10 +120,10 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
   }
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return entries;
+    if (!search.trim()) return activeEntries;
     const q = search.toLowerCase();
-    return entries.filter((e) => e.username.toLowerCase().includes(q) || e.bracketName.toLowerCase().includes(q));
-  }, [entries, search]);
+    return activeEntries.filter((e) => e.username.toLowerCase().includes(q) || e.bracketName.toLowerCase().includes(q));
+  }, [activeEntries, search]);
 
   const sorted = useMemo(() => {
     if (sortKey === "rank") return filtered;
@@ -118,7 +141,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
       // Default click should show highest first
     }
     return copy;
-  }, [entries, sortKey, sortAsc]);
+  }, [activeEntries, sortKey, sortAsc]);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -138,9 +161,11 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
 
   const thClass = "px-3 py-2 font-medium cursor-pointer hover:bg-gray-100 select-none whitespace-nowrap";
 
-  if (entries.length === 0) {
+  if (entries.length === 0 && !timeMachineEntries) {
     return <div className="bg-white rounded-lg shadow p-6 text-gray-500">No brackets to score yet.</div>;
   }
+
+  const hasTimeMachine = completedRounds && completedRounds.length > 1 && fetchUrl;
 
   return (
     <>
@@ -153,7 +178,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
           className="w-full max-w-xs px-3 py-2 border rounded text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"
         />
         {search && (
-          <span className="text-xs text-gray-500">{sorted.length} of {entries.length}</span>
+          <span className="text-xs text-gray-500">{sorted.length} of {activeEntries.length}</span>
         )}
         {groupId && h2hIds.length === MAX_H2H_SELECTIONS && (
           <button
@@ -168,7 +193,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
         )}
         <button
           onClick={() => {
-            const csv = leaderboardToCSV(entries);
+            const csv = leaderboardToCSV(activeEntries);
             const name = groupName ? groupName.replace(/[^a-zA-Z0-9]/g, "_") : "leaderboard";
             downloadCSV(csv, `${name}_standings.csv`);
           }}
@@ -179,7 +204,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
         </button>
         <button
           onClick={() => {
-            const text = leaderboardToText(entries, groupName);
+            const text = leaderboardToText(activeEntries, groupName);
             navigator.clipboard.writeText(text).then(() => {
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
@@ -192,7 +217,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
         </button>
         <button
           onClick={() => {
-            const text = generateTrashTalk(entries, groupName);
+            const text = generateTrashTalk(activeEntries, groupName);
             navigator.clipboard.writeText(text).then(() => {
               setTrashCopied(true);
               setTimeout(() => setTrashCopied(false), 2000);
@@ -203,6 +228,25 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
         >
           {trashCopied ? "✅ Copied!" : "🗣️ Trash Talk"}
         </button>
+        {hasTimeMachine && (
+          <select
+            value={asOfRound ?? "current"}
+            onChange={(e) => setAsOfRound(e.target.value === "current" ? null : parseInt(e.target.value, 10))}
+            className="px-3 py-2 text-sm border rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 cursor-pointer"
+            title="View standings as of a specific round"
+          >
+            <option value="current">⏱️ Current</option>
+            {completedRounds!.map((r) => (
+              <option key={r} value={r}>⏱️ After {ROUND_NAMES[r]}</option>
+            ))}
+          </select>
+        )}
+        {tmLoading && <span className="text-xs text-gray-400">Loading…</span>}
+        {asOfRound !== null && !tmLoading && (
+          <span className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+            📸 Viewing after {ROUND_NAMES[asOfRound]}
+          </span>
+        )}
       </div>
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="w-full text-sm">

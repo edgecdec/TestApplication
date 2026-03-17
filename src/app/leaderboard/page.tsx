@@ -10,6 +10,7 @@ export default function LeaderboardPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [completedRounds, setCompletedRounds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [lbLoading, setLbLoading] = useState(false);
   const router = useRouter();
@@ -35,14 +36,19 @@ export default function LeaderboardPage() {
     setLbLoading(true);
     fetch(`/api/tournaments/${selectedId}/leaderboard`)
       .then((r) => r.json())
-      .then((data) => setEntries(data.leaderboard ?? []))
-      .catch(() => setEntries([]))
+      .then((data) => {
+        setEntries(data.leaderboard ?? []);
+        setCompletedRounds(data.completedRounds ?? []);
+      })
+      .catch(() => { setEntries([]); setCompletedRounds([]); })
       .finally(() => setLbLoading(false));
   }, [selectedId]);
 
   if (loading) {
     return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
   }
+
+  const fetchUrl = selectedId != null ? `/api/tournaments/${selectedId}/leaderboard` : undefined;
 
   return (
     <main className="min-h-screen p-8 max-w-6xl mx-auto">
@@ -66,7 +72,7 @@ export default function LeaderboardPage() {
       {lbLoading ? (
         <p className="text-gray-400">Loading leaderboard...</p>
       ) : (
-        <GroupLeaderboard entries={entries} actualTotal={null} groupName="Overall_Leaderboard" />
+        <GroupLeaderboard entries={entries} actualTotal={null} groupName="Overall_Leaderboard" fetchUrl={fetchUrl} completedRounds={completedRounds} />
       )}
     </main>
   );

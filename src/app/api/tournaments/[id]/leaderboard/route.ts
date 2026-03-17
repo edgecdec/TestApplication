@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak, getCurrentRound, filterResultsBeforeRound, scorePicks } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak, getCurrentRound, filterResultsBeforeRound, filterResultsThroughRound, getCompletedRounds, scorePicks } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import { DEFAULT_SCORING, CHAMPIONSHIP_GAME_ID, REGIONS } from "@/lib/bracket-constants";
 import type { Tournament, RegionData, BracketRow } from "@/types/tournament";
 import type { LeaderboardEntry, FinalFourPick } from "@/types/scoring";
 import type { Picks, Results } from "@/types/bracket";
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = getDb();
 
@@ -17,7 +17,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   const regions: RegionData[] = parseBracketData(tournament.bracket_data);
-  const results: Results = JSON.parse(tournament.results_data);
+  const fullResults: Results = JSON.parse(tournament.results_data);
+  const completedRounds = getCompletedRounds(fullResults);
+
+  const asOfRoundParam = req.nextUrl.searchParams.get("asOfRound");
+  const asOfRound = asOfRoundParam != null ? parseInt(asOfRoundParam, 10) : null;
+  const isHistorical = asOfRound != null && !isNaN(asOfRound);
+
+  const results: Results = isHistorical ? filterResultsThroughRound(fullResults, asOfRound) : fullResults;
   const eliminatedTeams = getEliminatedTeams(results, regions);
   const seedMap = buildTeamSeedMap(regions);
   const totalResolved = countResolvedGames(results);
@@ -27,7 +34,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   ).all(id) as BracketRow[];
 
   if (brackets.length === 0) {
-    return NextResponse.json({ leaderboard: [] });
+    return NextResponse.json({ leaderboard: [], completedRounds });
   }
 
   const settings = DEFAULT_SCORING;
@@ -55,7 +62,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       picks, results, settings, regions,
       b.tiebreaker, null
     );
-    const maxRemaining = maxPossibleRemaining(picks, results, settings, eliminatedTeams);
+    const maxRemaining = isHistorical ? 0 : maxPossibleRemaining(picks, results, settings, eliminatedTeams);
     const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
     const streak = computeStreak(picks, results);
     return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak, isSecondChance: !!b.is_second_chance };
@@ -86,8 +93,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const percentile = scored.length > 1
       ? Math.round(((scored.length - rank) / (scored.length - 1)) * 100)
       : 100;
-    const eliminated = s.maxPossible < leaderScore;
-    const bestPossibleFinish = scored.filter((other) => other.total > s.maxPossible).length + 1;
+    const eliminated = isHistorical ? false : s.maxPossible < leaderScore;
+    const bestPossibleFinish = isHistorical ? rank : scored.filter((other) => other.total > s.maxPossible).length + 1;
     leaderboard.push({ ...s, rank, percentile, eliminated, bestPossibleFinish, rankChange: null });
   }
 
@@ -114,5 +121,5 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
   }
 
-  return NextResponse.json({ leaderboard });
+  return NextResponse.json({ leaderboard, completedRounds });
 }

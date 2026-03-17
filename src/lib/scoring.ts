@@ -285,3 +285,27 @@ export function filterResultsBeforeRound(results: Results, round: number): Resul
   }
   return filtered;
 }
+
+/**
+ * Filter results to include games from rounds up to and including the given round.
+ */
+export function filterResultsThroughRound(results: Results, round: number): Results {
+  const filtered: Results = {};
+  for (const [gId, winner] of Object.entries(results)) {
+    if (parseRoundFromGameId(gId) <= round) {
+      filtered[gId] = winner;
+    }
+  }
+  return filtered;
+}
+
+/**
+ * Return sorted array of round numbers (0-5) that have at least one result.
+ */
+export function getCompletedRounds(results: Results): number[] {
+  const rounds = new Set<number>();
+  for (const gId of Object.keys(results)) {
+    rounds.add(parseRoundFromGameId(gId));
+  }
+  return Array.from(rounds).sort((a, b) => a - b);
+}
