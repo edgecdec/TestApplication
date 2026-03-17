@@ -24,6 +24,7 @@ import BracketInsights from "@/components/bracket/BracketInsights";
 import BracketScoringSummary from "@/components/bracket/BracketScoringSummary";
 import PickListView from "@/components/bracket/PickListView";
 import BracketSwitcher from "@/components/bracket/BracketSwitcher";
+import BracketWizard from "@/components/bracket/BracketWizard";
 import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
 import { buildTeamSeedMap } from "@/lib/scoring";
 
@@ -111,6 +112,7 @@ function BracketView({ data }: { data: LoadedData }) {
   const isMobile = useIsMobile();
   const [teamSearch, setTeamSearch] = useState("");
   const [viewMode, setViewMode] = useState<"bracket" | "list">("bracket");
+  const [showWizard, setShowWizard] = useState(false);
   const highlightTeam = teamSearch.trim().toLowerCase() || undefined;
   const initialPicks: Picks = useMemo(() => JSON.parse(data.bracket.picks), [data.bracket.picks]);
   const { picks, tiebreaker, dirty, saving, error, lastSavedAt, makePick, bulkSetPicks, updateTiebreaker, save, undo, redo, canUndo, canRedo } = useBracketPicks({
@@ -234,6 +236,13 @@ function BracketView({ data }: { data: LoadedData }) {
               </button>
               <span className="text-[10px] text-gray-400 hidden lg:inline" title="Arrow keys to navigate, 1/2 to pick, Tab for next unfilled">⌨️ Keys</span>
               <AutofillDropdown onSelect={handleAutofill} disabled={saving} />
+              <button
+                onClick={() => setShowWizard(true)}
+                className="px-2 py-1.5 text-sm rounded border border-purple-200 text-purple-600 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/30 transition"
+                title="Step-by-step bracket fill"
+              >
+                🧙 Wizard
+              </button>
               <button
                 onClick={() => { if (confirm("Reset all picks and tiebreaker? This cannot be undone.")) { bulkSetPicks({}); updateTiebreaker(null); } }}
                 className="px-2 py-1.5 text-sm rounded border text-red-600 border-red-200 hover:bg-red-50 transition"
@@ -365,6 +374,15 @@ function BracketView({ data }: { data: LoadedData }) {
             </div>
           </div>
         </div>
+      )}
+      {showWizard && !data.locked && (
+        <BracketWizard
+          regions={data.regions}
+          picks={picks}
+          onPick={handlePick}
+          seedLookup={seedLookup}
+          onClose={() => setShowWizard(false)}
+        />
       )}
     </main>
   );
