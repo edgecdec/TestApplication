@@ -6,6 +6,7 @@ import type { Tournament } from "@/types/tournament";
 import TournamentForm from "@/components/admin/TournamentForm";
 import TournamentList from "@/components/admin/TournamentList";
 import AdminUserManagement from "@/components/admin/AdminUserManagement";
+import AdminBroadcast from "@/components/admin/AdminBroadcast";
 
 export default function AdminPage() {
   const [loading, setLoading] = useState(true);
@@ -107,6 +108,12 @@ export default function AdminPage() {
         >
           💾 Download Backup
         </a>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mt-6">
+        <h2 className="font-semibold text-lg mb-4">📢 Broadcast Notification</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Send a notification to all registered users. Appears in their notification bell.</p>
+        <AdminBroadcast />
       </div>
     </main>
   );

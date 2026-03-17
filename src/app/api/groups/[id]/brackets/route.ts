@@ -47,9 +47,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Bracket not found or not yours" }, { status: 404 });
   }
 
-  const group = db.prepare("SELECT max_brackets FROM groups WHERE id = ?").get(id) as Pick<Group, "max_brackets"> | undefined;
+  const group = db.prepare("SELECT max_brackets, submissions_locked FROM groups WHERE id = ?").get(id) as Pick<Group, "max_brackets" | "submissions_locked"> | undefined;
   if (!group) {
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+
+  if (group.submissions_locked) {
+    return NextResponse.json({ error: "Submissions are locked by the group admin" }, { status: 403 });
   }
 
   const currentCount = db.prepare(

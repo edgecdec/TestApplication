@@ -57,6 +57,7 @@ export default function GroupDetailClient() {
   const [paymentLink, setPaymentLink] = useState("");
   const [announcement, setAnnouncement] = useState("");
   const [announcementDismissed, setAnnouncementDismissed] = useState(false);
+  const [submissionsLocked, setSubmissionsLocked] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addingBracketId, setAddingBracketId] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -90,6 +91,7 @@ export default function GroupDetailClient() {
         setPaymentLink(g.payment_link || "");
         const ann = g.announcement || "";
         setAnnouncement(ann);
+        setSubmissionsLocked(!!g.submissions_locked);
         if (ann) {
           const key = `dismissed_announcement_${id}`;
           setAnnouncementDismissed(localStorage.getItem(key) === ann);
@@ -159,7 +161,7 @@ export default function GroupDetailClient() {
     await fetch(`/api/groups/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets, description, buy_in: buyIn, payout_structure: payout, payment_link: paymentLink, announcement }),
+      body: JSON.stringify({ scoring_settings: scoring, max_brackets: maxBrackets, description, buy_in: buyIn, payout_structure: payout, payment_link: paymentLink, announcement, submissions_locked: submissionsLocked }),
     });
     setSaving(false);
   }
@@ -176,6 +178,7 @@ export default function GroupDetailClient() {
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-bold">{group.name}</h1>
         {isEveryone && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Global</span>}
+        {submissionsLocked && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">🔒 Submissions Locked</span>}
       </div>
       <p className="text-sm text-gray-500 mb-4">Created by {group.creator_name} · {group.member_count} member{group.member_count !== 1 ? "s" : ""}</p>
 
@@ -283,7 +286,7 @@ export default function GroupDetailClient() {
           )}
 
           {/* Add bracket */}
-          {addableBrackets.length > 0 && (
+          {addableBrackets.length > 0 && !submissionsLocked && (
             <div className="bg-white rounded-lg shadow p-4 mb-4">
               <h3 className="text-sm font-medium mb-2">Add Your Bracket</h3>
               <div className="space-y-2">
@@ -388,6 +391,18 @@ export default function GroupDetailClient() {
             <textarea value={announcement} onChange={(e) => setAnnouncement(e.target.value)} rows={2} disabled={!canEdit} className="w-full border rounded px-3 py-2 text-sm disabled:opacity-50" placeholder="e.g. Payment due by Friday! Winner gets the trophy 🏆" />
           </div>
           <PoolPayoutSettings buyIn={buyIn} setBuyIn={setBuyIn} payout={payout} setPayout={setPayout} memberCount={group.member_count} disabled={!canEdit} />
+          {canEdit && (
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium">🔒 Lock Submissions</label>
+              <button
+                onClick={() => setSubmissionsLocked(!submissionsLocked)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${submissionsLocked ? "bg-red-500" : "bg-gray-300"}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${submissionsLocked ? "translate-x-6" : "translate-x-1"}`} />
+              </button>
+              <span className="text-xs text-gray-500">{submissionsLocked ? "Members cannot add brackets" : "Members can add brackets"}</span>
+            </div>
+          )}
           {buyIn > 0 && (
             <div>
               <label className="block text-sm font-medium mb-1">Payment Link <span className="text-gray-400 font-normal">(Venmo, PayPal, Zelle, Cash App URL)</span></label>

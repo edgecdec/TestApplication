@@ -94,3 +94,14 @@ export function notifyResultsSynced(tournamentId: number, newCount: number): voi
     "/dashboard"
   );
 }
+
+/** Notify all registered users (for admin broadcasts). */
+export function notifyAllUsers(
+  message: string,
+  link: string = ""
+): number {
+  const db = getDb();
+  const users = db.prepare("SELECT id FROM users").all() as { id: number }[];
+  notifyMany(users.map((u) => u.id), "admin_broadcast", message, link);
+  return users.length;
+}

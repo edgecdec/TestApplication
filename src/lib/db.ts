@@ -151,6 +151,9 @@ function initSchema(db: Database.Database) {
   if (!groupCols.some(c => c.name === "announcement")) {
     db.exec("ALTER TABLE groups ADD COLUMN announcement TEXT NOT NULL DEFAULT ''");
   }
+  if (!groupCols.some(c => c.name === "submissions_locked")) {
+    db.exec("ALTER TABLE groups ADD COLUMN submissions_locked INTEGER NOT NULL DEFAULT 0");
+  }
 
   // Add paid column to group_brackets if missing (migration)
   const gbCols = db.prepare("PRAGMA table_info(group_brackets)").all() as { name: string }[];

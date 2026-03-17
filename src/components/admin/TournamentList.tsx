@@ -6,6 +6,7 @@ import type { Results } from "@/types/bracket";
 import { parseBracketData } from "@/lib/bracket-utils";
 import BracketDataImport from "@/components/admin/BracketDataImport";
 import EspnSyncButton from "@/components/EspnSyncButton";
+import AdminResultsEntry from "@/components/admin/AdminResultsEntry";
 
 interface Props {
   tournaments: Tournament[];
@@ -21,6 +22,7 @@ export default function TournamentList({ tournaments, onRefresh }: Props) {
   const [dates, setDates] = useState("");
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [showManualResults, setShowManualResults] = useState<number | null>(null);
 
   function toggleExpand(id: number) {
     setExpandedId(expandedId === id ? null : id);
@@ -176,6 +178,28 @@ export default function TournamentList({ tournaments, onRefresh }: Props) {
                         </div>
                       ))}
                     </div>
+                  </section>
+                )}
+
+                {/* Manual Results Entry */}
+                {teamCount > 0 && (
+                  <section>
+                    <button
+                      onClick={() => setShowManualResults(showManualResults === t.id ? null : t.id)}
+                      className="text-sm font-semibold text-blue-600 hover:underline"
+                    >
+                      {showManualResults === t.id ? "▼ Hide" : "▶ Show"} ✏️ Manual Results Entry
+                    </button>
+                    {showManualResults === t.id && (
+                      <div className="mt-3">
+                        <AdminResultsEntry
+                          tournamentId={t.id}
+                          regions={regions}
+                          initialResults={results}
+                          onSaved={onRefresh}
+                        />
+                      </div>
+                    )}
                   </section>
                 )}
 

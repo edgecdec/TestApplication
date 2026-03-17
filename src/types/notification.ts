@@ -4,7 +4,8 @@ export type NotificationType =
   | "member_joined"
   | "member_left"
   | "bracket_locked"
-  | "round_complete";
+  | "round_complete"
+  | "admin_broadcast";
 
 export interface Notification {
   id: number;

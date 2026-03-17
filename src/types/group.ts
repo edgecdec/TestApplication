@@ -11,6 +11,7 @@ export interface Group {
   payout_structure: string; // JSON: PayoutStructure
   payment_link: string;
   announcement: string;
+  submissions_locked: number;
 }
 
 export interface ScoringSettings {
