@@ -26,6 +26,7 @@ import PickListView from "@/components/bracket/PickListView";
 import BracketSwitcher from "@/components/bracket/BracketSwitcher";
 import BracketWizard from "@/components/bracket/BracketWizard";
 import BracketNotes from "@/components/bracket/BracketNotes";
+import TeamPathModal from "@/components/bracket/TeamPathModal";
 import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
 import { buildTeamSeedMap } from "@/lib/scoring";
 
@@ -114,6 +115,7 @@ function BracketView({ data }: { data: LoadedData }) {
   const [teamSearch, setTeamSearch] = useState("");
   const [viewMode, setViewMode] = useState<"bracket" | "list">("bracket");
   const [showWizard, setShowWizard] = useState(false);
+  const [showTeamPath, setShowTeamPath] = useState(false);
   const highlightTeam = teamSearch.trim().toLowerCase() || undefined;
   const initialPicks: Picks = useMemo(() => JSON.parse(data.bracket.picks), [data.bracket.picks]);
   const { picks, tiebreaker, dirty, saving, error, lastSavedAt, makePick, bulkSetPicks, updateTiebreaker, save, undo, redo, canUndo, canRedo } = useBracketPicks({
@@ -184,6 +186,13 @@ function BracketView({ data }: { data: LoadedData }) {
               <button onClick={() => setTeamSearch("")} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">✕</button>
             )}
           </div>
+          <button
+            onClick={() => setShowTeamPath(true)}
+            className="px-2 py-1 text-xs rounded border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            title="View a team's path to the championship"
+          >
+            🛤️ Team Path
+          </button>
         </div>
         <div className="flex flex-wrap items-center gap-2 no-print">
           {error && <span className="text-red-600 text-xs">{error}</span>}
@@ -385,6 +394,13 @@ function BracketView({ data }: { data: LoadedData }) {
           onPick={handlePick}
           seedLookup={seedLookup}
           onClose={() => setShowWizard(false)}
+        />
+      )}
+      {showTeamPath && (
+        <TeamPathModal
+          regions={data.regions}
+          results={data.results}
+          onClose={() => setShowTeamPath(false)}
         />
       )}
     </main>
