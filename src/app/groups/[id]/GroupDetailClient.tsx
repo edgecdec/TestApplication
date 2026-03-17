@@ -59,6 +59,8 @@ export default function GroupDetailClient() {
   const [announcementDismissed, setAnnouncementDismissed] = useState(false);
   const [submissionsLocked, setSubmissionsLocked] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const [addingBracketId, setAddingBracketId] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [actualTotal, setActualTotal] = useState<number | null>(null);
@@ -460,6 +462,50 @@ export default function GroupDetailClient() {
             <button onClick={handleSaveSettings} disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50">
               {saving ? "Saving..." : "Save Settings"}
             </button>
+          )}
+          {canEdit && !isEveryone && (
+            <div className="border-t pt-4 mt-4">
+              <h3 className="text-sm font-medium text-red-600 mb-2">Danger Zone</h3>
+              {!deleting ? (
+                <button onClick={() => setDeleting(true)} className="px-4 py-2 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                  🗑️ Delete Group
+                </button>
+              ) : (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg p-4 space-y-3">
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    This will permanently delete <strong>{group.name}</strong> and all its brackets, messages, activity, reactions, and predictions. This cannot be undone.
+                  </p>
+                  <p className="text-sm text-red-700 dark:text-red-300">Type the group name to confirm:</p>
+                  <input
+                    type="text"
+                    value={deleteConfirmName}
+                    onChange={(e) => setDeleteConfirmName(e.target.value)}
+                    placeholder={group.name}
+                    className="w-full border border-red-300 rounded px-3 py-2 text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        const res = await fetch(`/api/groups/${id}`, { method: "DELETE" });
+                        if (res.ok) {
+                          router.push("/groups");
+                        } else {
+                          const err = await res.json();
+                          alert(err.error || "Failed to delete group");
+                        }
+                      }}
+                      disabled={deleteConfirmName !== group.name}
+                      className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Delete Forever
+                    </button>
+                    <button onClick={() => { setDeleting(false); setDeleteConfirmName(""); }} className="px-4 py-2 text-sm text-gray-600 border rounded hover:bg-gray-50 transition">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}

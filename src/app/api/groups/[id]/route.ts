@@ -65,3 +65,36 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+
+  const { id } = await params;
+  const db = getDb();
+  const group = db.prepare("SELECT * FROM groups WHERE id = ?").get(id) as Group | undefined;
+
+  if (!group) return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  if (group.created_by !== user.id && !user.isAdmin) {
+    return NextResponse.json({ error: "Only the group creator can delete this group" }, { status: 403 });
+  }
+
+  const deleteAll = db.transaction(() => {
+    // Delete prediction votes via predictions
+    const predIds = db.prepare("SELECT id FROM group_predictions WHERE group_id = ?").all(Number(id)) as { id: number }[];
+    if (predIds.length > 0) {
+      const ph = predIds.map(() => "?").join(",");
+      db.prepare(`DELETE FROM prediction_votes WHERE prediction_id IN (${ph})`).run(...predIds.map(p => p.id));
+    }
+    db.prepare("DELETE FROM group_predictions WHERE group_id = ?").run(Number(id));
+    db.prepare("DELETE FROM bracket_reactions WHERE group_id = ?").run(Number(id));
+    db.prepare("DELETE FROM group_activity WHERE group_id = ?").run(Number(id));
+    db.prepare("DELETE FROM group_messages WHERE group_id = ?").run(Number(id));
+    db.prepare("DELETE FROM group_brackets WHERE group_id = ?").run(Number(id));
+    db.prepare("DELETE FROM group_members WHERE group_id = ?").run(Number(id));
+    db.prepare("DELETE FROM groups WHERE id = ?").run(Number(id));
+  });
+
+  deleteAll();
+  return NextResponse.json({ success: true });
+}
