@@ -5,7 +5,8 @@ export type NotificationType =
   | "member_left"
   | "bracket_locked"
   | "round_complete"
-  | "admin_broadcast";
+  | "admin_broadcast"
+  | "bracket_autofilled";
 
 export interface Notification {
   id: number;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { autoFillIncompleteBrackets } from "@/lib/autofill-at-lock";
 import type { Tournament } from "@/types/tournament";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -44,7 +45,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   values.push(Number(id));
   db.prepare(`UPDATE tournaments SET ${fields.join(", ")} WHERE id = ?`).run(...values);
 
-  return NextResponse.json({ success: true });
+  // Auto-fill incomplete brackets if results were updated
+  let autoFilled = 0;
+  if (results_data !== undefined) {
+    autoFilled = autoFillIncompleteBrackets(Number(id));
+  }
+
+  return NextResponse.json({ success: true, autoFilledBrackets: autoFilled });
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

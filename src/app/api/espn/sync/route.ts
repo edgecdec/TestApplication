@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { fetchEspnScores, resolveResults } from "@/lib/espn";
 import { parseBracketData } from "@/lib/bracket-utils";
 import { notifyResultsSynced } from "@/lib/notifications";
+import { autoFillIncompleteBrackets } from "@/lib/autofill-at-lock";
 import type { Tournament, RegionData } from "@/types/tournament";
 import type { Results } from "@/types/bracket";
 
@@ -50,11 +51,15 @@ export async function POST(req: NextRequest) {
     notifyResultsSynced(tournamentId, newCount);
   }
 
+  // Auto-fill incomplete brackets after lock time
+  const autoFilled = autoFillIncompleteBrackets(tournamentId);
+
   const totalResolved = Object.keys(results).length;
   return NextResponse.json({
     success: true,
     espnGamesFound: espnGames.length,
     newResultsResolved: newCount,
     totalResultsResolved: totalResolved,
+    autoFilledBrackets: autoFilled,
   });
 }
