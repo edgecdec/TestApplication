@@ -309,3 +309,31 @@ export function getCompletedRounds(results: Results): number[] {
   }
   return Array.from(rounds).sort((a, b) => a - b);
 }
+
+/**
+ * Compute a luck score for a bracket.
+ * For each resolved game where the bracket has a pick:
+ *   expected = (pick_popularity / 100) × round_points
+ *   actual = correct ? round_points : 0
+ * Luck = sum(actual - expected). Positive = lucky, negative = unlucky.
+ * Upset bonuses are excluded for simplicity — only base points are compared.
+ */
+export function computeLuckScore(
+  picks: Picks,
+  results: Results,
+  settings: ScoringSettings,
+  distribution: Record<string, Record<string, number>>
+): number {
+  let luck = 0;
+  for (const [gId, result] of Object.entries(results)) {
+    const pick = picks[gId];
+    if (!pick) continue;
+    const round = parseRoundFromGameId(gId);
+    const roundPoints = settings.pointsPerRound[round] ?? 0;
+    const popularity = distribution[gId]?.[pick] ?? 50; // default 50% if unknown
+    const expected = (popularity / 100) * roundPoints;
+    const actual = pick === result ? roundPoints : 0;
+    luck += actual - expected;
+  }
+  return Math.round(luck * 10) / 10;
+}

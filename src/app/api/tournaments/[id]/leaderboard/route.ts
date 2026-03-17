@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak, getCurrentRound, filterResultsBeforeRound, filterResultsThroughRound, getCompletedRounds, scorePicks } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak, getCurrentRound, filterResultsBeforeRound, filterResultsThroughRound, getCompletedRounds, scorePicks, computeLuckScore } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import { DEFAULT_SCORING, CHAMPIONSHIP_GAME_ID, REGIONS } from "@/lib/bracket-constants";
 import type { Tournament, RegionData, BracketRow } from "@/types/tournament";
@@ -39,6 +39,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const settings = DEFAULT_SCORING;
 
+  // Compute pick distribution from all brackets for luck score
+  const distCounts: Record<string, Record<string, number>> = {};
+  for (const b of brackets) {
+    const p = JSON.parse(b.picks) as Picks;
+    for (const [gId, team] of Object.entries(p)) {
+      if (!distCounts[gId]) distCounts[gId] = {};
+      distCounts[gId][team] = (distCounts[gId][team] || 0) + 1;
+    }
+  }
+  const distTotal = brackets.length;
+  const distribution: Record<string, Record<string, number>> = {};
+  for (const [gId, teamCounts] of Object.entries(distCounts)) {
+    distribution[gId] = {};
+    for (const [team, count] of Object.entries(teamCounts)) {
+      distribution[gId][team] = Math.round((count / distTotal) * 100);
+    }
+  }
+
   function getFinalFourPicks(picks: Picks): FinalFourPick[] {
     return REGIONS.map((region) => {
       const team = picks[`${region}-3-0`] ?? null;
@@ -65,7 +83,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const maxRemaining = isHistorical ? 0 : maxPossibleRemaining(picks, results, settings, eliminatedTeams);
     const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
     const streak = computeStreak(picks, results);
-    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak, isSecondChance: !!b.is_second_chance };
+    const luckScore = totalResolved > 0 ? computeLuckScore(picks, results, settings, distribution) : null;
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak, isSecondChance: !!b.is_second_chance, luckScore };
   });
 
   scored.sort((a, b) => {

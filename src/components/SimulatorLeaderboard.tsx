@@ -35,7 +35,7 @@ export default function SimulatorLeaderboard({ brackets, results, settings, regi
         return { region, team, seed: team ? (seedMap.get(team) ?? null) : null, eliminated: team !== null && eliminated.has(team) };
       });
       const semifinalPicks: [string | null, string | null] = [b.picks["ff-4-0"] ?? null, b.picks["ff-4-1"] ?? null];
-      return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak };
+      return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak, luckScore: null as number | null };
     });
     scores.sort((a, b) => {
       if (b.total !== a.total) return b.total - a.total;

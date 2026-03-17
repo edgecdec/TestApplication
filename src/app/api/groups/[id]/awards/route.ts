@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scorePicks, buildTeamSeedMap, computeStreak, filterResultsThroughRound, getCompletedRounds } from "@/lib/scoring";
+import { scorePicks, buildTeamSeedMap, computeStreak, filterResultsThroughRound, getCompletedRounds, computeLuckScore } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams, gameId, gamesInRound, buildR64Matchups } from "@/lib/bracket-utils";
 import type { ScoringSettings } from "@/types/group";
 import type { Bracket, Tournament, RegionData } from "@/types/tournament";
@@ -71,6 +71,25 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     username: b.username,
     picks: JSON.parse(b.picks) as Picks,
   }));
+
+  // Compute pick distribution from all tournament brackets for luck awards
+  const allBracketRows = db.prepare("SELECT picks FROM brackets WHERE tournament_id = ?").all(brackets[0].tournament_id) as { picks: string }[];
+  const distCounts: Record<string, Record<string, number>> = {};
+  for (const row of allBracketRows) {
+    const p = JSON.parse(row.picks) as Picks;
+    for (const [gId, team] of Object.entries(p)) {
+      if (!distCounts[gId]) distCounts[gId] = {};
+      distCounts[gId][team] = (distCounts[gId][team] || 0) + 1;
+    }
+  }
+  const distTotal = allBracketRows.length;
+  const distribution: Record<string, Record<string, number>> = {};
+  for (const [gId, teamCounts] of Object.entries(distCounts)) {
+    distribution[gId] = {};
+    for (const [team, count] of Object.entries(teamCounts)) {
+      distribution[gId][team] = Math.round((count / distTotal) * 100);
+    }
+  }
 
   const scored = bracketData.map((b) => {
     const rounds = scorePicks(b.picks, results, settings, regions);
@@ -206,6 +225,25 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (sortedByUpsets.length > 0 && sortedByUpsets[0].upsets > 0) {
     const best = sortedByUpsets[0];
     awards.push({ id: "biggest_gambler", emoji: "🎲", name: "Biggest Gambler", description: "Most upset picks in the bracket", winner: winner(best.name, best.id, best.username, `${best.upsets} upsets picked`) });
+  }
+
+  // 🍀 Luckiest — highest luck score
+  // 😤 Unluckiest — lowest luck score
+  if (Object.keys(results).length > 0) {
+    const luckData = bracketData.map((b) => ({
+      ...b,
+      luck: computeLuckScore(b.picks, results, settings, distribution),
+    }));
+    const sortedByLuck = [...luckData].sort((a, b) => b.luck - a.luck);
+    if (sortedByLuck.length > 0 && sortedByLuck[0].luck > 0) {
+      const best = sortedByLuck[0];
+      awards.push({ id: "luckiest", emoji: "🍀", name: "Luckiest", description: "Highest luck score — got contrarian picks right", winner: winner(best.name, best.id, best.username, `+${best.luck}`) });
+    }
+    const sortedByUnluck = [...luckData].sort((a, b) => a.luck - b.luck);
+    if (sortedByUnluck.length > 0 && sortedByUnluck[0].luck < 0) {
+      const worst = sortedByUnluck[0];
+      awards.push({ id: "unluckiest", emoji: "😤", name: "Unluckiest", description: "Lowest luck score — popular picks went wrong", winner: winner(worst.name, worst.id, worst.username, `${worst.luck}`) });
+    }
   }
 
   return NextResponse.json({ awards });

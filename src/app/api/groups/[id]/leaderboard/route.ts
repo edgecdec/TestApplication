@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak, getCurrentRound, filterResultsBeforeRound, filterResultsThroughRound, getCompletedRounds, scorePicks } from "@/lib/scoring";
+import { scoreBracket, maxPossibleRemaining, buildTeamSeedMap, countResolvedGames, computeStreak, getCurrentRound, filterResultsBeforeRound, filterResultsThroughRound, getCompletedRounds, scorePicks, computeLuckScore } from "@/lib/scoring";
 import { parseBracketData, getEliminatedTeams } from "@/lib/bracket-utils";
 import type { ScoringSettings } from "@/types/group";
 import type { Bracket, Tournament, RegionData } from "@/types/tournament";
@@ -60,6 +60,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const actualTotal: number | null = null;
   const totalResolved = countResolvedGames(results);
 
+  // Compute pick distribution from all tournament brackets for luck score
+  const allBracketRows = db.prepare("SELECT picks FROM brackets WHERE tournament_id = ?").all(tournamentId) as { picks: string }[];
+  const distCounts: Record<string, Record<string, number>> = {};
+  for (const row of allBracketRows) {
+    const p = JSON.parse(row.picks) as Picks;
+    for (const [gId, team] of Object.entries(p)) {
+      if (!distCounts[gId]) distCounts[gId] = {};
+      distCounts[gId][team] = (distCounts[gId][team] || 0) + 1;
+    }
+  }
+  const distTotal = allBracketRows.length;
+  const distribution: Record<string, Record<string, number>> = {};
+  for (const [gId, teamCounts] of Object.entries(distCounts)) {
+    distribution[gId] = {};
+    for (const [team, count] of Object.entries(teamCounts)) {
+      distribution[gId][team] = Math.round((count / distTotal) * 100);
+    }
+  }
+
   function getFinalFourPicks(picks: Picks): FinalFourPick[] {
     return REGIONS.map((region) => {
       const team = picks[`${region}-3-0`] ?? null;
@@ -86,7 +105,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const maxRemaining = isHistorical ? 0 : maxPossibleRemaining(picks, results, settings, eliminatedTeams);
     const correctPicks = score.rounds.reduce((sum, r) => sum + r.correct, 0);
     const streak = computeStreak(picks, results);
-    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak, paid: !!b.paid, isSecondChance: !!b.is_second_chance };
+    const luckScore = totalResolved > 0 ? computeLuckScore(picks, results, settings, distribution) : null;
+    return { ...score, championPick, busted, maxPossible: score.total + maxRemaining, finalFourPicks, semifinalPicks, correctPicks, totalResolved, streak, paid: !!b.paid, isSecondChance: !!b.is_second_chance, luckScore };
   });
 
   scored.sort((a, b) => {

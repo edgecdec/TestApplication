@@ -15,7 +15,7 @@ import { leaderboardToCSV, downloadCSV } from "@/lib/csv-export";
 import { leaderboardToText } from "@/lib/standings-text";
 import { generateTrashTalk } from "@/lib/trash-talk";
 
-type SortKey = "rank" | "total" | "maxPossible" | "bestPossibleFinish" | "correctPicks" | "tiebreaker" | "percentile" | `round-${number}`;
+type SortKey = "rank" | "total" | "maxPossible" | "bestPossibleFinish" | "correctPicks" | "tiebreaker" | "percentile" | "luckScore" | `round-${number}`;
 
 const MAX_H2H_SELECTIONS = 2;
 
@@ -261,6 +261,7 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
               <th className={`text-right ${thClass}`} onClick={() => handleSort("total")}>Total{arrow("total")}</th>
               <th className={`text-right ${thClass}`} onClick={() => handleSort("correctPicks")} title="Correct picks out of resolved games">Correct{arrow("correctPicks")}</th>
               <th className="text-right px-3 py-2 font-medium whitespace-nowrap" title="Pick streak">Streak</th>
+              <th className={`text-right ${thClass}`} onClick={() => handleSort("luckScore")} title="Luck score: actual minus expected score based on pick popularity. Positive = lucky, negative = unlucky.">🍀{arrow("luckScore")}</th>
               <th className={`text-right ${thClass}`} onClick={() => handleSort("maxPossible")} title="Maximum possible score if all remaining alive picks win">Max{arrow("maxPossible")}</th>
               <th className={`text-right ${thClass}`} onClick={() => handleSort("bestPossibleFinish")} title="Best rank this bracket can still achieve">Best{arrow("bestPossibleFinish")}</th>
               {ROUND_NAMES.map((rn, i) => (
@@ -381,6 +382,13 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
                 </td>
                 <td className="px-3 py-2 text-right">
                   <StreakBadge streak={e.streak} />
+                </td>
+                <td className="px-3 py-2 text-right text-xs font-medium whitespace-nowrap" title={e.luckScore != null ? `Luck: ${e.luckScore > 0 ? "+" : ""}${e.luckScore}` : "No data"}>
+                  {e.luckScore != null ? (
+                    <span className={e.luckScore > 0 ? "text-green-600" : e.luckScore < 0 ? "text-red-500" : "text-gray-400"}>
+                      {e.luckScore > 0 ? "+" : ""}{e.luckScore}
+                    </span>
+                  ) : "—"}
                 </td>
                 <td className="px-3 py-2 text-right text-gray-500" title="Max possible score">
                   {e.maxPossible}

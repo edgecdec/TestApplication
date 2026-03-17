@@ -11,7 +11,7 @@ function escapeCSV(val: string): string {
 export function leaderboardToCSV(entries: LeaderboardEntry[]): string {
   const headers = [
     "Rank", "Username", "Bracket", "Champion", "Total", "Correct", "Max Possible",
-    "Best Finish", ...ROUND_NAMES, "Tiebreaker", "Percentile",
+    "Best Finish", "Luck", ...ROUND_NAMES, "Tiebreaker", "Percentile",
   ];
 
   const rows = entries.map((e) => [
@@ -23,6 +23,7 @@ export function leaderboardToCSV(entries: LeaderboardEntry[]): string {
     `${e.correctPicks}/${e.totalResolved}`,
     String(e.maxPossible),
     String(e.bestPossibleFinish),
+    e.luckScore != null ? String(e.luckScore) : "",
     ...e.rounds.map((r) => String(r.points)),
     e.tiebreaker != null ? String(e.tiebreaker) : "",
     String(e.percentile),

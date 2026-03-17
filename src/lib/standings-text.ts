@@ -17,8 +17,9 @@ export function leaderboardToText(entries: LeaderboardEntry[], groupName?: strin
     const medal = e.rank <= MEDALS.length ? MEDALS[e.rank - 1] : `${e.rank}.`;
     const champ = e.championPick ? ` | 🏆 ${e.championPick}${e.busted ? " 💀" : ""}` : "";
     const streak = e.streak > 0 ? ` | 🔥${e.streak}` : e.streak < 0 ? ` | ❄️${Math.abs(e.streak)}` : "";
+    const luck = e.luckScore != null && e.luckScore !== 0 ? ` | 🍀${e.luckScore > 0 ? "+" : ""}${e.luckScore}` : "";
     const eliminated = e.eliminated ? " 🚫" : "";
-    lines.push(`${medal} ${e.bracketName} (${e.username}) — ${e.total} pts${champ}${streak}${eliminated}`);
+    lines.push(`${medal} ${e.bracketName} (${e.username}) — ${e.total} pts${champ}${streak}${luck}${eliminated}`);
   }
 
   return lines.join("\n");

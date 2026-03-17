@@ -51,6 +51,16 @@ const GENERIC_CLOSERS = [
   "The tournament doesn't end until someone cuts down the nets. 🏀✂️",
 ];
 
+const LUCKY_TAUNTS = [
+  (name: string, luck: number) => `🍀 ${name} has a luck score of +${luck}. Skill? Nah. Pure horseshoes. 🐴`,
+  (name: string, luck: number) => `${name} is +${luck} on luck. Even their wrong picks somehow work out. 🍀`,
+];
+
+const UNLUCKY_BURNS = [
+  (name: string, luck: number) => `${name} is ${luck} on luck. The universe is actively working against them. 😤`,
+  (name: string, luck: number) => `${name} at ${luck} luck — they made the right calls, the teams just didn't cooperate. 🫠`,
+];
+
 function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -105,6 +115,19 @@ export function generateTrashTalk(entries: LeaderboardEntry[], groupName?: strin
     const diff = entries[0].total - entries[1].total;
     if (diff > 0 && diff <= 10) {
       lines.push(pick(CLOSE_RACE)(entries[0].bracketName, entries[1].bracketName, diff));
+    }
+  }
+
+  // Luckiest bracket
+  const withLuck = entries.filter((e) => e.luckScore != null && e.luckScore !== 0);
+  if (withLuck.length > 0) {
+    const luckiest = withLuck.reduce((a, b) => (a.luckScore! > b.luckScore! ? a : b));
+    const unluckiest = withLuck.reduce((a, b) => (a.luckScore! < b.luckScore! ? a : b));
+    if (luckiest.luckScore! > 5) {
+      lines.push(pick(LUCKY_TAUNTS)(luckiest.bracketName, Math.round(luckiest.luckScore!)));
+    }
+    if (unluckiest.luckScore! < -5) {
+      lines.push(pick(UNLUCKY_BURNS)(unluckiest.bracketName, Math.round(unluckiest.luckScore!)));
     }
   }
 
