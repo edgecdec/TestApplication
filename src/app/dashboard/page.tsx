@@ -20,6 +20,7 @@ import BracketAchievements from "@/components/BracketAchievements";
 import MyPicksTonight from "@/components/MyPicksTonight";
 import AddToCalendarButton from "@/components/AddToCalendarButton";
 import GamesThatMatter from "@/components/GamesThatMatter";
+import OnboardingChecklist from "@/components/OnboardingChecklist";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
@@ -48,6 +49,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [renamingId, setRenamingId] = useState<number | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [hasGroups, setHasGroups] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -57,9 +59,10 @@ export default function DashboardPage() {
       const meData = await meRes.json();
       if (meData?.user) setUser(meData.user);
 
-      const [tRes, bRes] = await Promise.all([
+      const [tRes, bRes, gSumRes] = await Promise.all([
         fetch("/api/tournaments"),
         fetch("/api/brackets"),
+        fetch("/api/groups/my-summary"),
       ]);
       let loadedTournaments: Tournament[] = [];
       if (tRes.ok) {
@@ -70,6 +73,10 @@ export default function DashboardPage() {
       if (bRes.ok) {
         const bData = await bRes.json();
         setBrackets(bData.brackets ?? []);
+      }
+      if (gSumRes.ok) {
+        const gData = await gSumRes.json();
+        setHasGroups((gData.summaries ?? []).length > 0);
       }
 
       // Fetch grades for each tournament
@@ -191,6 +198,7 @@ export default function DashboardPage() {
       {/* Full-width banners */}
       <ResultsBanner />
       <PickReminderBanner brackets={brackets} tournaments={tournaments} />
+      <OnboardingChecklist brackets={brackets} hasGroups={hasGroups} hasTournaments={tournaments.length > 0} />
 
       {/* Two-column grid: on mobile, right column (scores) stacks on top */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
