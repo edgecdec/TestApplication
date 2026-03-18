@@ -28,6 +28,7 @@ import BracketWizard from "@/components/bracket/BracketWizard";
 import BracketNotes from "@/components/bracket/BracketNotes";
 import TeamPathModal from "@/components/bracket/TeamPathModal";
 import BracketHistory from "@/components/bracket/BracketHistory";
+import ImportPicksDialog from "@/components/bracket/ImportPicksDialog";
 import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
 import { useAutoSync } from "@/hooks/useAutoSync";
 import { buildTeamSeedMap } from "@/lib/scoring";
@@ -122,6 +123,7 @@ function BracketView({ data }: { data: LoadedData }) {
   const [showWizard, setShowWizard] = useState(false);
   const [showTeamPath, setShowTeamPath] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const highlightTeam = teamSearch.trim().toLowerCase() || undefined;
   const initialPicks: Picks = useMemo(() => JSON.parse(data.bracket.picks), [data.bracket.picks]);
   const { picks, tiebreaker, dirty, saving, error, lastSavedAt, makePick, bulkSetPicks, updateTiebreaker, save, undo, redo, canUndo, canRedo } = useBracketPicks({
@@ -270,6 +272,13 @@ function BracketView({ data }: { data: LoadedData }) {
                 title="Step-by-step bracket fill"
               >
                 🧙 Wizard
+              </button>
+              <button
+                onClick={() => setShowImport(true)}
+                className="px-2 py-1.5 text-sm rounded border border-green-200 text-green-600 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/30 transition"
+                title="Import picks from text"
+              >
+                📋 Import
               </button>
               <button
                 onClick={() => { if (confirm("Reset all picks and tiebreaker? This cannot be undone.")) { bulkSetPicks({}); updateTiebreaker(null); } }}
@@ -427,6 +436,14 @@ function BracketView({ data }: { data: LoadedData }) {
         <BracketHistory
           bracketId={data.bracket.id}
           onClose={() => setShowHistory(false)}
+        />
+      )}
+      {showImport && !data.locked && (
+        <ImportPicksDialog
+          regions={data.regions}
+          existingPicks={picks}
+          onImport={bulkSetPicks}
+          onClose={() => setShowImport(false)}
         />
       )}
     </main>
