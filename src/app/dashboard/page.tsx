@@ -20,6 +20,7 @@ import BracketAchievements from "@/components/BracketAchievements";
 import MyPicksTonight from "@/components/MyPicksTonight";
 import AddToCalendarButton from "@/components/AddToCalendarButton";
 import GamesThatMatter from "@/components/GamesThatMatter";
+import RootingGuide from "@/components/RootingGuide";
 import OnboardingChecklist from "@/components/OnboardingChecklist";
 import SpoilerGuard from "@/components/SpoilerGuard";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
@@ -243,6 +244,9 @@ export default function DashboardPage() {
 
           {/* Games That Matter */}
           <GamesThatMatter />
+
+          {/* Rooting Guide */}
+          <RootingGuide />
 
           {/* Recent Results */}
           {tournaments.map((t) => (

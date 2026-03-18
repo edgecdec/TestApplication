@@ -125,6 +125,7 @@ check_api "$BASE/api/brackets/achievements?tournament_id=1" "GET /api/brackets/a
 check_api "$BASE/api/brackets/grades?tournament_id=1" "GET /api/brackets/grades" "any"
 check_api "$BASE/api/brackets/recent-results?tournament_id=1" "GET /api/brackets/recent-results" "any"
 check_api "$BASE/api/brackets/games-that-matter" "GET /api/brackets/games-that-matter" "any"
+check_api "$BASE/api/brackets/rooting-guide" "GET /api/brackets/rooting-guide" "any"
 check_api "$BASE/api/brackets/head-to-head?bracket_a=1&bracket_b=2&tournament_id=1" "GET /api/brackets/head-to-head" "any"
 check_api "$BASE/api/brackets/1" "GET /api/brackets/1" "any"
 check_auth "$BASE/api/brackets/2/history" "GET /api/brackets/2/history"
