@@ -100,6 +100,7 @@ check_auth "$BASE/groups/1" "Group Detail /groups/1"
 check_auth "$BASE/groups/1/compare" "Group Compare /groups/1/compare"
 check_auth "$BASE/groups/1/whopicked" "Who Picked /groups/1/whopicked"
 check_auth "$BASE/groups/1/recap" "Round Recap /groups/1/recap"
+check_auth "$BASE/groups/1/pool-recap" "Pool Recap /groups/1/pool-recap"
 check_auth "$BASE/simulator/1" "Simulator /simulator/1"
 check_auth "$BASE/join/invalid" "Join /join/invalid"
 
