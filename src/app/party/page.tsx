@@ -6,6 +6,7 @@ import type { EspnGameResult } from "@/types/espn";
 import type { LeaderboardEntry } from "@/types/scoring";
 import type { GroupRow } from "@/types/group";
 import TeamLogo from "@/components/TeamLogo";
+import { useAutoSync } from "@/hooks/useAutoSync";
 
 const REFRESH_INTERVAL_MS = 30_000;
 
@@ -16,6 +17,7 @@ interface PartyGroup {
 
 export default function PartyPage() {
   const router = useRouter();
+  useAutoSync();
   const [games, setGames] = useState<EspnGameResult[]>([]);
   const [groups, setGroups] = useState<PartyGroup[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);

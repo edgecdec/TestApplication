@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import type { EspnGameResult } from "@/types/espn";
+import { useSpoilerFree } from "@/contexts/SpoilerContext";
 
 const POLL_INTERVAL_MS = 60_000; // refresh every 60 seconds
 
@@ -9,6 +10,7 @@ export default function LiveScores() {
   const [games, setGames] = useState<EspnGameResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { spoilerFree } = useSpoilerFree();
 
   const fetchScores = useCallback(async () => {
     try {
@@ -31,6 +33,7 @@ export default function LiveScores() {
     return () => clearInterval(interval);
   }, [fetchScores]);
 
+  if (spoilerFree) return <p className="text-gray-400 text-sm">🙈 Scores hidden — spoiler-free mode</p>;
   if (loading) return <p className="text-gray-400 text-sm">Loading scores...</p>;
   if (error) return <p className="text-red-500 text-sm">{error}</p>;
   if (games.length === 0) return <p className="text-gray-400 text-sm">No games today.</p>;

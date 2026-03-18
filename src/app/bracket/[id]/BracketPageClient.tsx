@@ -28,7 +28,9 @@ import BracketWizard from "@/components/bracket/BracketWizard";
 import BracketNotes from "@/components/bracket/BracketNotes";
 import TeamPathModal from "@/components/bracket/TeamPathModal";
 import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
+import { useAutoSync } from "@/hooks/useAutoSync";
 import { buildTeamSeedMap } from "@/lib/scoring";
+import { useSpoilerFree } from "@/contexts/SpoilerContext";
 
 interface LoadedData {
   bracket: Bracket;
@@ -46,6 +48,7 @@ export default function BracketPageClient() {
   const router = useRouter();
   const bracketId = Number(params.id);
   const [data, setData] = useState<LoadedData | null>(null);
+  useAutoSync();
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -112,6 +115,7 @@ function BracketView({ data }: { data: LoadedData }) {
   const router = useRouter();
   const bracketRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const { spoilerFree } = useSpoilerFree();
   const [teamSearch, setTeamSearch] = useState("");
   const [viewMode, setViewMode] = useState<"bracket" | "list">("bracket");
   const [showWizard, setShowWizard] = useState(false);
@@ -141,6 +145,9 @@ function BracketView({ data }: { data: LoadedData }) {
   const seedLookup: Record<string, number> = {};
   const seedMap = buildTeamSeedMap(data.regions);
   seedMap.forEach((seed, name) => { seedLookup[name] = seed; });
+
+  // In spoiler-free mode, hide results so ✅/❌ indicators don't show
+  const displayResults: Results = spoilerFree ? {} : data.results;
 
   function handleAutofill(mode: AutofillMode) {
     const filled = generateAutofill(mode, data.regions, picks);
@@ -278,21 +285,23 @@ function BracketView({ data }: { data: LoadedData }) {
 
       <BracketScoringSummary bracketId={data.bracket.id} />
 
-      <div className="max-w-screen-2xl mx-auto mb-3 no-print">
-        <details className="bg-gray-50 dark:bg-gray-800 rounded p-2">
-          <summary className="text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer">📺 Live Scores</summary>
-          <div className="mt-2"><LiveScores /></div>
-        </details>
-      </div>
+      {!spoilerFree && (
+        <div className="max-w-screen-2xl mx-auto mb-3 no-print">
+          <details className="bg-gray-50 dark:bg-gray-800 rounded p-2">
+            <summary className="text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer">📺 Live Scores</summary>
+            <div className="mt-2"><LiveScores /></div>
+          </details>
+        </div>
+      )}
 
       {viewMode === "list" ? (
-        <PickListView regions={data.regions} picks={picks} results={data.results} seedLookup={seedLookup} />
+        <PickListView regions={data.regions} picks={picks} results={displayResults} seedLookup={seedLookup} />
       ) : isMobile ? (
         <div className="bg-white dark:bg-gray-800 p-3 rounded">
           <MobileBracket
             regions={data.regions}
             picks={picks}
-            results={data.results}
+            results={displayResults}
             onPick={handlePick}
             locked={data.locked}
             distribution={data.distribution}
@@ -309,7 +318,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   region={REGIONS[0]}
                   regions={data.regions}
                   picks={picks}
-                  results={data.results}
+                  results={displayResults}
                   onPick={handlePick}
                   locked={data.locked}
                   side="left"
@@ -323,7 +332,7 @@ function BracketView({ data }: { data: LoadedData }) {
               <FinalFour
                 regions={data.regions}
                 picks={picks}
-                results={data.results}
+                results={displayResults}
                 onPick={handlePick}
                 locked={data.locked}
                 distribution={data.distribution}
@@ -337,7 +346,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   region={REGIONS[1]}
                   regions={data.regions}
                   picks={picks}
-                  results={data.results}
+                  results={displayResults}
                   onPick={handlePick}
                   locked={data.locked}
                   side="right"
@@ -355,7 +364,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   region={REGIONS[2]}
                   regions={data.regions}
                   picks={picks}
-                  results={data.results}
+                  results={displayResults}
                   onPick={handlePick}
                   locked={data.locked}
                   side="left"
@@ -372,7 +381,7 @@ function BracketView({ data }: { data: LoadedData }) {
                   region={REGIONS[3]}
                   regions={data.regions}
                   picks={picks}
-                  results={data.results}
+                  results={displayResults}
                   onPick={handlePick}
                   locked={data.locked}
                   side="right"
@@ -399,7 +408,7 @@ function BracketView({ data }: { data: LoadedData }) {
       {showTeamPath && (
         <TeamPathModal
           regions={data.regions}
-          results={data.results}
+          results={displayResults}
           onClose={() => setShowTeamPath(false)}
         />
       )}

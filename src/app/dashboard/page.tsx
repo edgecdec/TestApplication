@@ -21,12 +21,15 @@ import MyPicksTonight from "@/components/MyPicksTonight";
 import AddToCalendarButton from "@/components/AddToCalendarButton";
 import GamesThatMatter from "@/components/GamesThatMatter";
 import OnboardingChecklist from "@/components/OnboardingChecklist";
+import SpoilerGuard from "@/components/SpoilerGuard";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
 import type { Achievement } from "@/lib/achievements";
 import { parseBracketData } from "@/lib/bracket-utils";
 import { computeStreak, getCurrentRound } from "@/lib/scoring";
+import { useAutoSync } from "@/hooks/useAutoSync";
+import { useSpoilerFree } from "@/contexts/SpoilerContext";
 
 function safeParsePicks(raw: string | Record<string, string> | null | undefined): Picks {
   if (!raw) return {};
@@ -51,6 +54,8 @@ export default function DashboardPage() {
   const [renameValue, setRenameValue] = useState("");
   const [hasGroups, setHasGroups] = useState(false);
   const router = useRouter();
+  useAutoSync();
+  const { spoilerFree } = useSpoilerFree();
 
   useEffect(() => {
     async function load() {
@@ -204,6 +209,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* RIGHT column — time-sensitive content (appears first on mobile via order) */}
         <div className="order-1 lg:order-2 lg:col-span-2 space-y-4">
+          <SpoilerGuard label="🙈 Scores & results hidden — spoiler-free mode is on">
           {/* Tournament Progress */}
           {tournaments.map((t) => {
             const results = JSON.parse(t.results_data || "{}");
@@ -241,12 +247,15 @@ export default function DashboardPage() {
           {tournaments.map((t) => (
             <RecentResults key={`recent-${t.id}`} tournamentId={t.id} />
           ))}
+          </SpoilerGuard>
         </div>
 
         {/* LEFT column — groups + brackets */}
         <div className="order-2 lg:order-1 lg:col-span-3 space-y-4">
           {/* My Groups Summary */}
-          <MyGroupsSummary />
+          <SpoilerGuard label="🙈 Group standings hidden — spoiler-free mode is on">
+            <MyGroupsSummary />
+          </SpoilerGuard>
 
           {/* Tournaments & Brackets */}
           {tournaments.length === 0 ? (
@@ -315,8 +324,8 @@ export default function DashboardPage() {
                                 {b.is_second_chance === 1 && (
                                   <span className="text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-1.5 py-0.5 rounded">🔄 2nd Chance</span>
                                 )}
-                                {grades[b.id] && <BracketGrade grade={grades[b.id]} />}
-                                <StreakBadge streak={computeStreak(safeParsePicks(b.picks), safeParsePicks(t.results_data))} />
+                                {!spoilerFree && grades[b.id] && <BracketGrade grade={grades[b.id]} />}
+                                {!spoilerFree && <StreakBadge streak={computeStreak(safeParsePicks(b.picks), safeParsePicks(t.results_data))} />}
                               </span>
                               <span className="text-xs text-gray-400">
                                 Updated {new Date(b.updated_at).toLocaleDateString()}
@@ -324,12 +333,16 @@ export default function DashboardPage() {
                             </div>
                             <BracketProgress picks={b.picks} />
                             <BracketMiniSummary picks={b.picks} />
-                            <BracketHealth
-                              picks={safeParsePicks(b.picks)}
-                              results={safeParsePicks(t.results_data)}
-                              regions={parseBracketData(t.bracket_data)}
-                            />
-                            <BracketAchievements achievements={achievements[b.id] ?? []} />
+                            {!spoilerFree && (
+                              <>
+                                <BracketHealth
+                                  picks={safeParsePicks(b.picks)}
+                                  results={safeParsePicks(t.results_data)}
+                                  regions={parseBracketData(t.bracket_data)}
+                                />
+                                <BracketAchievements achievements={achievements[b.id] ?? []} />
+                              </>
+                            )}
                           </button>
                           {!isLocked && (
                             <div className="flex flex-col gap-1">

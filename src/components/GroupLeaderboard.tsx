@@ -14,6 +14,7 @@ import BracketReactions from "@/components/BracketReactions";
 import { leaderboardToCSV, downloadCSV } from "@/lib/csv-export";
 import { leaderboardToText } from "@/lib/standings-text";
 import { generateTrashTalk } from "@/lib/trash-talk";
+import { useSpoilerFree } from "@/contexts/SpoilerContext";
 
 type SortKey = "rank" | "total" | "maxPossible" | "bestPossibleFinish" | "correctPicks" | "tiebreaker" | "percentile" | "luckScore" | `round-${number}`;
 
@@ -43,6 +44,7 @@ function getSortValue(entry: LeaderboardEntry, key: SortKey): number {
 
 export default function GroupLeaderboard({ entries, actualTotal, groupId, groupName, paymentLink, fetchUrl, completedRounds }: Props) {
   const router = useRouter();
+  const { spoilerFree } = useSpoilerFree();
   const [selectedBracketId, setSelectedBracketId] = useState<number | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortAsc, setSortAsc] = useState(true);
@@ -166,6 +168,14 @@ export default function GroupLeaderboard({ entries, actualTotal, groupId, groupN
   }
 
   const hasTimeMachine = completedRounds && completedRounds.length > 1 && fetchUrl;
+
+  if (spoilerFree) {
+    return (
+      <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 p-8 text-center text-sm text-gray-400 dark:text-gray-500">
+        🙈 Leaderboard hidden — spoiler-free mode is on
+      </div>
+    );
+  }
 
   return (
     <>

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
+import SpoilerToggle from "@/components/SpoilerToggle";
+import { useSpoilerFree } from "@/contexts/SpoilerContext";
 import type { GroupSummaryItem } from "@/app/api/groups/my-summary/route";
 
 const PUBLIC_PATHS = ["/login", "/register", "/"] as const;
@@ -56,6 +58,7 @@ export default function Navbar() {
   const [bestRank, setBestRank] = useState<BestRank | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const { spoilerFree } = useSpoilerFree();
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -144,8 +147,9 @@ export default function Navbar() {
             <kbd className="ml-1 text-[10px] bg-gray-200 dark:bg-gray-600 px-1 rounded">⌘K</kbd>
           </button>
           <NotificationBell />
+          <SpoilerToggle />
           <ThemeToggle />
-          {bestRank && (
+          {bestRank && !spoilerFree && (
             <span
               className="px-2 py-0.5 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-full text-xs font-semibold text-yellow-800 dark:text-yellow-300 cursor-default"
               title={`Best rank: ${rankLabel(bestRank.rank)} in ${bestRank.groupName}`}
@@ -170,6 +174,7 @@ export default function Navbar() {
         {/* Mobile: theme toggle + hamburger */}
         <div className="flex md:hidden items-center gap-2">
           <NotificationBell />
+          <SpoilerToggle />
           <ThemeToggle />
           <button
             onClick={() => setMenuOpen((v) => !v)}
@@ -218,7 +223,7 @@ export default function Navbar() {
             </button>
           )}
           <hr className="my-1 border-gray-200" />
-          {bestRank && (
+          {bestRank && !spoilerFree && (
             <div className="px-3 py-1 text-xs font-semibold text-yellow-800 dark:text-yellow-300">
               {rankLabel(bestRank.rank)} · {bestRank.score}pts — {bestRank.groupName}
             </div>

@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import CommandPalette from "@/components/CommandPalette";
 import KeyboardShortcutsHelp from "@/components/KeyboardShortcutsHelp";
+import ClientProviders from "@/components/ClientProviders";
 
 const APP_TITLE = "March Madness Picker";
 const APP_DESCRIPTION = "Fill out your NCAA March Madness bracket and compete with friends";
@@ -40,10 +41,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-screen bg-gray-50 text-gray-900">
-        <Navbar />
-        <CommandPalette />
-        <KeyboardShortcutsHelp />
-        {children}
+        <ClientProviders>
+          <Navbar />
+          <CommandPalette />
+          <KeyboardShortcutsHelp />
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

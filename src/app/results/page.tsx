@@ -9,6 +9,7 @@ import ExportButton from "@/components/bracket/ExportButton";
 import PrintButton from "@/components/bracket/PrintButton";
 import { parseBracketData } from "@/lib/bracket-utils";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useSpoilerFree } from "@/contexts/SpoilerContext";
 import type { RegionData, Tournament, Bracket } from "@/types/tournament";
 import type { Results, Picks } from "@/types/bracket";
 
@@ -22,6 +23,7 @@ export default function ResultsPage() {
   const [userPicks, setUserPicks] = useState<Picks | undefined>(undefined);
   const bracketRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const { spoilerFree } = useSpoilerFree();
 
   useEffect(() => {
     async function load() {
@@ -65,6 +67,15 @@ export default function ResultsPage() {
 
   if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading results...</p></main>;
   if (error) return <main className="flex min-h-screen items-center justify-center"><p className="text-red-600">{error}</p></main>;
+  if (spoilerFree) return (
+    <main className="min-h-screen p-8 flex items-center justify-center">
+      <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 p-12 text-center text-gray-400 dark:text-gray-500">
+        <p className="text-3xl mb-2">🙈</p>
+        <p className="text-lg font-medium">Results hidden</p>
+        <p className="text-sm mt-1">Spoiler-free mode is on. Toggle it off in the navbar to view results.</p>
+      </div>
+    </main>
+  );
 
   const resolvedCount = Object.keys(results).length;
 

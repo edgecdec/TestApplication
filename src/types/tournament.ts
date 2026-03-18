@@ -5,6 +5,7 @@ export interface Tournament {
   bracket_data: string; // JSON: RegionData[]
   results_data: string; // JSON: Record<string, string> (gameId -> winnerName)
   lock_time: string;
+  results_updated_at: string | null;
   created_at: string;
 }
 
