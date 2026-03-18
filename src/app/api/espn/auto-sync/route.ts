@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { fetchEspnScores, resolveResults } from "@/lib/espn";
 import { parseBracketData } from "@/lib/bracket-utils";
-import { notifyResultsSynced } from "@/lib/notifications";
+import { notifyResultsSynced, notifyRankChanges } from "@/lib/notifications";
 import { autoFillIncompleteBrackets } from "@/lib/autofill-at-lock";
 import type { Tournament, RegionData } from "@/types/tournament";
 import type { Results } from "@/types/bracket";
@@ -55,6 +55,7 @@ export async function POST() {
       "UPDATE tournaments SET results_data = ? WHERE id = ?"
     ).run(JSON.stringify(results), tournament.id);
     notifyResultsSynced(tournament.id, newCount);
+    notifyRankChanges(tournament.id);
   }
 
   const autoFilled = autoFillIncompleteBrackets(tournament.id);

@@ -1,7 +1,13 @@
 import { getDb } from "@/lib/db";
+import { scorePicks, getCurrentRound, filterResultsBeforeRound } from "@/lib/scoring";
+import { parseBracketData } from "@/lib/bracket-utils";
 import type { NotificationType } from "@/types/notification";
+import type { Picks, Results } from "@/types/bracket";
+import type { ScoringSettings } from "@/types/group";
+import type { RegionData, Tournament } from "@/types/tournament";
 
 const NOTIFICATIONS_LIMIT = 50;
+const MIN_RANK_CHANGE = 2;
 
 /** Create a notification for a single user. */
 export function notify(
@@ -104,4 +110,95 @@ export function notifyAllUsers(
   const users = db.prepare("SELECT id FROM users").all() as { id: number }[];
   notifyMany(users.map((u) => u.id), "admin_broadcast", message, link);
   return users.length;
+}
+
+interface RankedBracket {
+  bracketId: number;
+  userId: number;
+  total: number;
+  rank: number;
+}
+
+/** Compute simple ranked list from brackets + results. */
+function rankBrackets(
+  brackets: { id: number; user_id: number; picks: string }[],
+  results: Results,
+  settings: ScoringSettings,
+  regions: RegionData[]
+): RankedBracket[] {
+  const scored = brackets.map((b) => {
+    const picks: Picks = JSON.parse(b.picks);
+    const total = scorePicks(picks, results, settings, regions).reduce((s, r) => s + r.points, 0);
+    return { bracketId: b.id, userId: b.user_id, total, rank: 0 };
+  });
+  scored.sort((a, b) => b.total - a.total);
+  for (let i = 0; i < scored.length; i++) {
+    scored[i].rank = i > 0 && scored[i].total === scored[i - 1].total
+      ? scored[i - 1].rank
+      : i + 1;
+  }
+  return scored;
+}
+
+/**
+ * After results sync, compute rank changes per group and notify users
+ * who moved up or down by MIN_RANK_CHANGE or more positions.
+ */
+export function notifyRankChanges(tournamentId: number): number {
+  const db = getDb();
+  const tournament = db.prepare("SELECT * FROM tournaments WHERE id = ?").get(tournamentId) as Tournament | undefined;
+  if (!tournament) return 0;
+
+  const regions: RegionData[] = parseBracketData(tournament.bracket_data);
+  if (regions.length === 0) return 0;
+
+  const results: Results = JSON.parse(tournament.results_data || "{}");
+  const currentRound = getCurrentRound(results);
+  if (currentRound < 0) return 0;
+
+  const prevResults = filterResultsBeforeRound(results, currentRound);
+  // Skip if no previous results to compare against
+  if (Object.keys(prevResults).length === 0 && currentRound === 0) return 0;
+
+  // Get all groups that have brackets in this tournament
+  const groups = db.prepare(`
+    SELECT DISTINCT g.id, g.name, g.scoring_settings
+    FROM groups g
+    JOIN group_brackets gb ON gb.group_id = g.id
+    JOIN brackets b ON b.id = gb.bracket_id
+    WHERE b.tournament_id = ?
+  `).all(tournamentId) as { id: number; name: string; scoring_settings: string }[];
+
+  let totalNotifications = 0;
+
+  for (const group of groups) {
+    const settings: ScoringSettings = JSON.parse(group.scoring_settings);
+    const brackets = db.prepare(`
+      SELECT b.id, b.user_id, b.picks
+      FROM group_brackets gb
+      JOIN brackets b ON b.id = gb.bracket_id
+      WHERE gb.group_id = ? AND b.tournament_id = ?
+    `).all(group.id, tournamentId) as { id: number; user_id: number; picks: string }[];
+
+    if (brackets.length < 2) continue;
+
+    const currentRanks = rankBrackets(brackets, results, settings, regions);
+    const prevRanks = rankBrackets(brackets, prevResults, settings, regions);
+    const prevRankMap = new Map(prevRanks.map((r) => [r.bracketId, r.rank]));
+
+    for (const entry of currentRanks) {
+      const prevRank = prevRankMap.get(entry.bracketId);
+      if (prevRank == null) continue;
+      const change = prevRank - entry.rank; // positive = moved up
+      if (Math.abs(change) < MIN_RANK_CHANGE) continue;
+
+      const arrow = change > 0 ? "📈" : "📉";
+      const direction = change > 0 ? "up" : "down";
+      const msg = `${arrow} You moved ${direction} to #${entry.rank} in ${group.name}!`;
+      notify(entry.userId, "rank_change", msg, `/groups/${group.id}`);
+      totalNotifications++;
+    }
+  }
+
+  return totalNotifications;
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { autoFillIncompleteBrackets } from "@/lib/autofill-at-lock";
+import { notifyRankChanges } from "@/lib/notifications";
 import type { Tournament } from "@/types/tournament";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -49,6 +50,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   let autoFilled = 0;
   if (results_data !== undefined) {
     autoFilled = autoFillIncompleteBrackets(Number(id));
+    notifyRankChanges(Number(id));
   }
 
   return NextResponse.json({ success: true, autoFilledBrackets: autoFilled });
