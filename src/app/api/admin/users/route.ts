@@ -12,11 +12,26 @@ interface UserListRow {
   bracket_count: number;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user?.isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+  const q = req.nextUrl.searchParams.get("q")?.trim();
   const db = getDb();
+
+  if (q) {
+    const users = db.prepare(`
+      SELECT u.id, u.username, u.is_admin, u.created_at,
+             COUNT(b.id) AS bracket_count
+      FROM users u
+      LEFT JOIN brackets b ON b.user_id = u.id
+      WHERE u.username LIKE ?
+      GROUP BY u.id
+      ORDER BY u.username ASC
+    `).all(`%${q}%`) as UserListRow[];
+    return NextResponse.json({ users });
+  }
+
   const users = db.prepare(`
     SELECT u.id, u.username, u.is_admin, u.created_at,
            COUNT(b.id) AS bracket_count

@@ -7,6 +7,7 @@ import TournamentForm from "@/components/admin/TournamentForm";
 import TournamentList from "@/components/admin/TournamentList";
 import AdminUserManagement from "@/components/admin/AdminUserManagement";
 import AdminBroadcast from "@/components/admin/AdminBroadcast";
+import AdminAddUserToGroup from "@/components/admin/AdminAddUserToGroup";
 
 export default function AdminPage() {
   const [loading, setLoading] = useState(true);
@@ -114,6 +115,12 @@ export default function AdminPage() {
         <h2 className="font-semibold text-lg mb-4">📢 Broadcast Notification</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Send a notification to all registered users. Appears in their notification bell.</p>
         <AdminBroadcast />
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mt-6">
+        <h2 className="font-semibold text-lg mb-4">👥 Add User to Group</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Search for a user, select a group, and optionally assign their brackets.</p>
+        <AdminAddUserToGroup />
       </div>
     </main>
   );
