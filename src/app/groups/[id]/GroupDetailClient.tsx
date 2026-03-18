@@ -22,6 +22,7 @@ import MemberBracketStatus from "@/components/MemberBracketStatus";
 import MemberManager from "@/components/MemberManager";
 import GroupPropBets from "@/components/GroupPropBets";
 import GroupAwards from "@/components/GroupAwards";
+import GroupPickSheet from "@/components/GroupPickSheet";
 import { parsePayoutStructure } from "@/lib/payouts";
 import type { StandingsHistoryData } from "@/types/standings-history";
 
@@ -40,7 +41,7 @@ interface BracketWithUser extends BracketRow {
   username: string;
 }
 
-type Tab = "leaderboard" | "brackets" | "standings" | "similarity" | "awards" | "activity" | "props" | "chat" | "settings";
+type Tab = "leaderboard" | "brackets" | "picksheet" | "standings" | "similarity" | "awards" | "activity" | "props" | "chat" | "settings";
 
 export default function GroupDetailClient() {
   const { id } = useParams<{ id: string }>();
@@ -257,9 +258,9 @@ export default function GroupDetailClient() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b overflow-x-auto">
-        {(["leaderboard", "brackets", "standings", "similarity", "awards", "activity", "props", "chat", "settings"] as const).map((t) => (
+        {(["leaderboard", "brackets", "picksheet", "standings", "similarity", "awards", "activity", "props", "chat", "settings"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap ${tab === t ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
-            {t === "leaderboard" ? "Leaderboard" : t === "brackets" ? "Brackets" : t === "standings" ? "📈 Standings" : t === "similarity" ? "🔀 Similarity" : t === "awards" ? "🏅 Awards" : t === "activity" ? "📰 Activity" : t === "props" ? "🎲 Props" : t === "chat" ? "💬 Chat" : "Settings"}
+            {t === "leaderboard" ? "Leaderboard" : t === "brackets" ? "Brackets" : t === "picksheet" ? "📋 Pick Sheet" : t === "standings" ? "📈 Standings" : t === "similarity" ? "🔀 Similarity" : t === "awards" ? "🏅 Awards" : t === "activity" ? "📰 Activity" : t === "props" ? "🎲 Props" : t === "chat" ? "💬 Chat" : "Settings"}
           </button>
         ))}
       </div>
@@ -362,6 +363,14 @@ export default function GroupDetailClient() {
           ) : (
             <p className="text-gray-400 text-sm">Loading standings data...</p>
           )}
+        </div>
+      )}
+
+      {tab === "picksheet" && (
+        <div className="bg-white rounded-lg shadow p-4 dark:bg-gray-900">
+          <h3 className="text-sm font-medium mb-2">📋 Pick Sheet</h3>
+          <p className="text-xs text-gray-500 mb-4">All picks for every game, side-by-side. Green = correct, red = wrong.</p>
+          <GroupPickSheet groupId={id} />
         </div>
       )}
 
