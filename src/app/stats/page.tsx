@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useRouter } from "next/navigation";
 import { ROUND_NAMES } from "@/lib/bracket-constants";
 import TeamLogo from "@/components/TeamLogo";
@@ -37,7 +38,7 @@ export default function StatsPage() {
     load();
   }, [router]);
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  if (loading) return <LoadingSkeleton />;
 
   return (
     <main className="min-h-screen p-8 max-w-2xl mx-auto">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useRouter, useParams } from "next/navigation";
 
 interface GroupPreview {
@@ -49,7 +50,7 @@ export default function JoinGroupPage() {
     }
   }
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  if (loading) return <LoadingSkeleton />;
 
   if (error || !group) {
     return (

@@ -22,6 +22,7 @@ import AddToCalendarButton from "@/components/AddToCalendarButton";
 import GamesThatMatter from "@/components/GamesThatMatter";
 import OnboardingChecklist from "@/components/OnboardingChecklist";
 import SpoilerGuard from "@/components/SpoilerGuard";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import type { RegionData } from "@/types/tournament";
 import type { Picks } from "@/types/bracket";
 import type { BracketGradeInfo } from "@/lib/grading";
@@ -182,7 +183,7 @@ export default function DashboardPage() {
   }
 
   if (loading) {
-    return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+    return <LoadingSkeleton />;
   }
   if (!user) return null;
 

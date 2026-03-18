@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useRouter, useParams } from "next/navigation";
 import type { Group, ScoringSettings, PayoutStructure } from "@/types/group";
 import type { BracketRow } from "@/types/tournament";
@@ -171,7 +172,7 @@ export default function GroupDetailClient() {
     setSaving(false);
   }
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  if (loading) return <LoadingSkeleton />;
   if (!group || !user) return <main className="p-8"><p>Group not found.</p></main>;
 
   const bracketIdsInGroup = new Set(brackets.map((b) => b.id));

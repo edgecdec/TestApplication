@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useRouter } from "next/navigation";
 import type { GroupRow, ScoringSettings } from "@/types/group";
 import { DEFAULT_SCORING, ROUND_NAMES, EVERYONE_GROUP_NAME } from "@/lib/bracket-constants";
@@ -49,7 +50,7 @@ export default function GroupsPage() {
     setCreating(false);
   }
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  if (loading) return <LoadingSkeleton />;
 
   return (
     <main className="min-h-screen p-8 max-w-2xl mx-auto">

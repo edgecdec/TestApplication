@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useParams, useRouter } from "next/navigation";
 import { REGIONS } from "@/lib/bracket-constants";
 import { COMPARISON_COLORS, MAX_COMPARISON_BRACKETS } from "@/lib/comparison-constants";
@@ -35,7 +36,7 @@ export default function ComparePage() {
     load();
   }, [id]);
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  if (loading) return <LoadingSkeleton />;
   if (error || !data) return (
     <main className="flex min-h-screen items-center justify-center flex-col gap-4">
       <p className="text-red-600">{error}</p>

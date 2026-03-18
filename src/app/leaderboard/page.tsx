@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useRouter } from "next/navigation";
 import type { Tournament } from "@/types/tournament";
 import type { LeaderboardEntry } from "@/types/scoring";
@@ -45,7 +46,7 @@ export default function LeaderboardPage() {
   }, [selectedId]);
 
   if (loading) {
-    return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+    return <LoadingSkeleton />;
   }
 
   const fetchUrl = selectedId != null ? `/api/tournaments/${selectedId}/leaderboard` : undefined;

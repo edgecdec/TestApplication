@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useParams, useRouter } from "next/navigation";
 import type { ProfileData } from "@/types/profile";
 import { ROUND_NAMES } from "@/lib/bracket-constants";
@@ -40,7 +41,7 @@ export default function ProfileClient() {
   }
 
   if (!profile) {
-    return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+    return <LoadingSkeleton />;
   }
 
   return (

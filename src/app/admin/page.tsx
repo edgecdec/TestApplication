@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useRouter } from "next/navigation";
 import type { Tournament } from "@/types/tournament";
 import TournamentForm from "@/components/admin/TournamentForm";
@@ -61,7 +62,7 @@ export default function AdminPage() {
   }
 
   if (loading) {
-    return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+    return <LoadingSkeleton />;
   }
   if (!isAdmin) return null;
 

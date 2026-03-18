@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useParams, useRouter } from "next/navigation";
 import type { RoundRecap } from "@/types/recap";
 import TeamLogo from "@/components/TeamLogo";
@@ -28,7 +29,7 @@ export default function RoundRecapPage() {
     load();
   }, [id, router]);
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  if (loading) return <LoadingSkeleton />;
 
   if (rounds.length === 0) {
     return (

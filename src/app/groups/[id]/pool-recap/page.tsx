@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useParams, useRouter } from "next/navigation";
 import type { LeaderboardEntry } from "@/types/scoring";
 import type { Award } from "@/types/awards";
@@ -127,7 +128,7 @@ export default function PoolRecapPage() {
     navigator.clipboard.writeText(text);
   }
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  if (loading) return <LoadingSkeleton />;
 
   if (leaderboard.length === 0) {
     return (

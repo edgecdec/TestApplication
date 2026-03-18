@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useRouter } from "next/navigation";
 import type { Tournament, RegionData, TeamSeed } from "@/types/tournament";
 import type { Results } from "@/types/bracket";
@@ -28,7 +29,7 @@ export default function WhosLeftPage() {
     load();
   }, [router]);
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></main>;
+  if (loading) return <LoadingSkeleton />;
   if (!tournament) return <main className="p-8 max-w-4xl mx-auto"><p className="text-gray-500">No tournament found.</p></main>;
 
   const regions = parseBracketData(tournament.bracket_data);
