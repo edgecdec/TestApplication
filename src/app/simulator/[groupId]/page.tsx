@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { REGIONS } from "@/lib/bracket-constants";
 import SimulatorRegion from "@/components/bracket/SimulatorRegion";
 import SimulatorFinalFour from "@/components/bracket/SimulatorFinalFour";
 import SimulatorLeaderboard from "@/components/SimulatorLeaderboard";
+import MonteCarloTable from "@/components/MonteCarloTable";
 import { useSimulatorResults } from "@/hooks/useSimulatorResults";
+import { useMonteCarlo } from "@/hooks/useMonteCarlo";
 import type { SimulatorData } from "@/types/simulator";
 
 export default function SimulatorPage() {
@@ -44,6 +46,19 @@ function SimulatorView({ data }: { data: SimulatorData }) {
   const router = useRouter();
   const { mergedResults, hypothetical, setResult, resetHypothetical } = useSimulatorResults(data.results);
   const hypotheticalCount = Object.keys(hypothetical).length;
+
+  const mcEntries = useMemo(
+    () => data.brackets.map((b) => ({ key: `${b.username}|${b.bracketName}`, picks: b.picks })),
+    [data.brackets]
+  );
+
+  const { mcResults, progress, running, totalSims } = useMonteCarlo(
+    mcEntries,
+    data.results,
+    hypothetical,
+    data.regions,
+    data.scoringSettings,
+  );
 
   return (
     <main className="min-h-screen flex">
@@ -83,14 +98,19 @@ function SimulatorView({ data }: { data: SimulatorData }) {
       </div>
 
       {/* Leaderboard sidebar */}
-      <div className="w-64 border-l bg-gray-50 p-3 flex flex-col">
-        <h2 className="text-sm font-bold mb-2">📊 Live Leaderboard</h2>
-        <SimulatorLeaderboard
-          brackets={data.brackets}
-          results={mergedResults}
-          settings={data.scoringSettings}
-          regions={data.regions}
-        />
+      <div className="w-64 border-l bg-gray-50 p-3 flex flex-col gap-4">
+        <div>
+          <h2 className="text-sm font-bold mb-2">📊 Live Leaderboard</h2>
+          <SimulatorLeaderboard
+            brackets={data.brackets}
+            results={mergedResults}
+            settings={data.scoringSettings}
+            regions={data.regions}
+          />
+        </div>
+        <div className="border-t pt-3">
+          <MonteCarloTable results={mcResults} progress={progress} running={running} totalSims={totalSims} />
+        </div>
       </div>
     </main>
   );
