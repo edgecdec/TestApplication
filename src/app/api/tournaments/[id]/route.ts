@@ -88,6 +88,11 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
       const uPlaceholders = userIds.map(() => "?").join(",");
       db.prepare(`DELETE FROM group_activity WHERE user_id IN (${uPlaceholders}) AND activity_type IN ('bracket_added', 'bracket_completed', 'bracket_updated')`).run(...userIds);
     }
+    // Delete bracket history for all brackets in this tournament
+    if (bracketIds.length > 0) {
+      const bhPlaceholders = bracketIds.map(() => "?").join(",");
+      db.prepare(`DELETE FROM bracket_history WHERE bracket_id IN (${bhPlaceholders})`).run(...bracketIds);
+    }
     db.prepare("DELETE FROM brackets WHERE tournament_id = ?").run(tournamentId);
     db.prepare("DELETE FROM tournaments WHERE id = ?").run(tournamentId);
   });

@@ -27,6 +27,7 @@ import BracketSwitcher from "@/components/bracket/BracketSwitcher";
 import BracketWizard from "@/components/bracket/BracketWizard";
 import BracketNotes from "@/components/bracket/BracketNotes";
 import TeamPathModal from "@/components/bracket/TeamPathModal";
+import BracketHistory from "@/components/bracket/BracketHistory";
 import { useBracketKeyboard } from "@/hooks/useBracketKeyboard";
 import { useAutoSync } from "@/hooks/useAutoSync";
 import { buildTeamSeedMap } from "@/lib/scoring";
@@ -120,6 +121,7 @@ function BracketView({ data }: { data: LoadedData }) {
   const [viewMode, setViewMode] = useState<"bracket" | "list">("bracket");
   const [showWizard, setShowWizard] = useState(false);
   const [showTeamPath, setShowTeamPath] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const highlightTeam = teamSearch.trim().toLowerCase() || undefined;
   const initialPicks: Picks = useMemo(() => JSON.parse(data.bracket.picks), [data.bracket.picks]);
   const { picks, tiebreaker, dirty, saving, error, lastSavedAt, makePick, bulkSetPicks, updateTiebreaker, save, undo, redo, canUndo, canRedo } = useBracketPicks({
@@ -200,6 +202,15 @@ function BracketView({ data }: { data: LoadedData }) {
           >
             🛤️ Team Path
           </button>
+          {data.isOwner && (
+            <button
+              onClick={() => setShowHistory(true)}
+              className="px-2 py-1 text-xs rounded border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              title="View pick change history"
+            >
+              📜 History
+            </button>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2 no-print">
           {error && <span className="text-red-600 text-xs">{error}</span>}
@@ -410,6 +421,12 @@ function BracketView({ data }: { data: LoadedData }) {
           regions={data.regions}
           results={displayResults}
           onClose={() => setShowTeamPath(false)}
+        />
+      )}
+      {showHistory && (
+        <BracketHistory
+          bracketId={data.bracket.id}
+          onClose={() => setShowHistory(false)}
         />
       )}
     </main>

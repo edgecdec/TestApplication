@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { logBracketActivityToGroups } from "@/lib/activity";
 import { TOTAL_GAMES } from "@/lib/bracket-constants";
+import { saveBracketSnapshot } from "@/lib/bracket-history";
 import type { Bracket } from "@/types/tournament";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -54,6 +55,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   values.push(Number(id));
   db.prepare(`UPDATE brackets SET ${fields.join(", ")} WHERE id = ?`).run(...values);
 
+  // Save pick history snapshot when picks or tiebreaker change
+  if (picks !== undefined || tiebreaker !== undefined) {
+    const picksStr = picks !== undefined
+      ? (typeof picks === "string" ? picks : JSON.stringify(picks))
+      : bracket.picks;
+    const tbVal = tiebreaker !== undefined ? tiebreaker : bracket.tiebreaker;
+    saveBracketSnapshot(Number(id), picksStr, tbVal);
+  }
+
   // Log activity to groups this bracket belongs to
   if (picks !== undefined) {
     const parsedPicks = typeof picks === "string" ? JSON.parse(picks) : picks;
@@ -87,6 +97,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "Not authorized" }, { status: 403 });
   }
 
+  db.prepare("DELETE FROM bracket_history WHERE bracket_id = ?").run(id);
   db.prepare("DELETE FROM group_brackets WHERE bracket_id = ?").run(id);
   db.prepare("DELETE FROM brackets WHERE id = ?").run(id);
 

@@ -199,4 +199,17 @@ function initSchema(db: Database.Database) {
   if (!bracketCols.some(c => c.name === "notes")) {
     db.exec("ALTER TABLE brackets ADD COLUMN notes TEXT NOT NULL DEFAULT ''");
   }
+
+  // Bracket pick history / changelog
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS bracket_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bracket_id INTEGER NOT NULL,
+      picks TEXT NOT NULL,
+      tiebreaker INTEGER,
+      changed_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (bracket_id) REFERENCES brackets(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_bracket_history_bracket ON bracket_history(bracket_id, changed_at DESC);
+  `);
 }

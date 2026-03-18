@@ -21,3 +21,17 @@ export interface Results {
 export interface PickDistribution {
   [gameId: string]: Record<string, number>;
 }
+
+export interface BracketHistoryEntry {
+  id: number;
+  bracket_id: number;
+  picks: string;
+  tiebreaker: number | null;
+  changed_at: string;
+}
+
+export interface PickChange {
+  gameId: string;
+  from: string | null;
+  to: string | null;
+}
