@@ -23,6 +23,7 @@ export default function SharedBracketClient() {
   const [data, setData] = useState<SharedData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const bracketRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
@@ -32,6 +33,7 @@ export default function SharedBracketClient() {
       .then((d: SharedData) => setData(d))
       .catch(() => setError("Bracket not found or link is invalid."))
       .finally(() => setLoading(false));
+    fetch("/api/auth/me").then((r) => { if (r.ok) setIsLoggedIn(true); });
   }, [token]);
 
   if (loading) return <main className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading bracket…</p></main>;
@@ -42,10 +44,40 @@ export default function SharedBracketClient() {
     </main>
   );
 
-  return <SharedBracketView data={data} bracketRef={bracketRef} isMobile={isMobile} />;
+  return <SharedBracketView data={data} bracketRef={bracketRef} isMobile={isMobile} isLoggedIn={isLoggedIn} token={token} />;
 }
 
-function SharedBracketView({ data, bracketRef, isMobile }: { data: SharedData; bracketRef: React.RefObject<HTMLDivElement | null>; isMobile: boolean }) {
+function UseAsTemplateButton({ token }: { token: string }) {
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const handleClick = async () => {
+    if (busy || done) return;
+    setBusy(true);
+    const res = await fetch("/api/brackets/from-template", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ share_token: token }),
+    });
+    if (res.ok) {
+      const { id } = await res.json();
+      setDone(true);
+      window.location.href = `/bracket/${id}`;
+    } else {
+      const err = await res.json().catch(() => ({ error: "Failed" }));
+      alert(err.error || "Could not create bracket from template");
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button onClick={handleClick} disabled={busy || done} className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition disabled:opacity-50">
+      {busy ? "Creating…" : done ? "Created!" : "📋 Use as Template"}
+    </button>
+  );
+}
+
+function SharedBracketView({ data, bracketRef, isMobile, isLoggedIn, token }: { data: SharedData; bracketRef: React.RefObject<HTMLDivElement | null>; isMobile: boolean; isLoggedIn: boolean; token: string }) {
   const regions: RegionData[] = useMemo(() => parseBracketData(data.tournament.bracket_data), [data.tournament.bracket_data]);
   const picks: Picks = useMemo(() => {
     try { return typeof data.bracket.picks === "string" ? JSON.parse(data.bracket.picks) : data.bracket.picks; }
@@ -71,7 +103,8 @@ function SharedBracketView({ data, bracketRef, isMobile }: { data: SharedData; b
           )}
           {!isMobile && <ExportButton bracketRef={bracketRef} bracketName={data.bracket.name} />}
           {!isMobile && <PrintButton />}
-          <a href="/" className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition">Sign Up / Login</a>
+          {isLoggedIn && <UseAsTemplateButton token={token} />}
+          {!isLoggedIn && <a href="/" className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition">Sign Up / Login</a>}
         </div>
       </div>
 
