@@ -78,6 +78,7 @@ echo "--- Public Pages ---"
 check "$BASE" "Homepage /"
 check "$BASE/login" "Login /login"
 check "$BASE/register" "Register /register"
+check "$BASE/forgot-password" "Forgot Password /forgot-password"
 check "$BASE/rules" "Rules /rules"
 
 echo ""

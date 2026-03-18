@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { getDb } from "@/lib/db";
 import { signToken } from "@/lib/auth";
 import { ensureEveryoneGroup } from "@/lib/everyone-group";
+import { generateRecoveryCode } from "@/lib/recovery";
 import {
   BCRYPT_ROUNDS,
   JWT_COOKIE_NAME,
@@ -10,9 +11,15 @@ import {
   USERNAME_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
 } from "@/lib/constants";
-import type { UserRow, AuthResponse } from "@/types/auth";
+import type { UserRow } from "@/types/auth";
 
-export async function POST(req: NextRequest): Promise<NextResponse<AuthResponse>> {
+interface RegisterResponse {
+  user?: { id: number; username: string; isAdmin: boolean };
+  recoveryCode?: string;
+  error?: string;
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse<RegisterResponse>> {
   const body = await req.json().catch(() => null);
   if (!body || typeof body.username !== "string" || typeof body.password !== "string") {
     return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
@@ -50,15 +57,18 @@ export async function POST(req: NextRequest): Promise<NextResponse<AuthResponse>
   }
 
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  const recoveryCode = generateRecoveryCode();
+  const recoveryHash = await bcrypt.hash(recoveryCode, BCRYPT_ROUNDS);
 
   // First user becomes admin
   const userCount = (db.prepare("SELECT COUNT(*) as count FROM users").get() as { count: number }).count;
   const isAdmin = userCount === 0 ? 1 : 0;
 
-  const result = db.prepare("INSERT INTO users (username, password_hash, is_admin) VALUES (?, ?, ?)").run(
+  const result = db.prepare("INSERT INTO users (username, password_hash, is_admin, recovery_hash) VALUES (?, ?, ?, ?)").run(
     username,
     passwordHash,
-    isAdmin
+    isAdmin,
+    recoveryHash,
   );
 
   const token = signToken({
@@ -71,6 +81,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<AuthResponse>
 
   const response = NextResponse.json({
     user: { id: Number(result.lastInsertRowid), username, isAdmin: isAdmin === 1 },
+    recoveryCode,
   });
 
   response.cookies.set(JWT_COOKIE_NAME, token, {

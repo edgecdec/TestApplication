@@ -212,4 +212,10 @@ function initSchema(db: Database.Database) {
     );
     CREATE INDEX IF NOT EXISTS idx_bracket_history_bracket ON bracket_history(bracket_id, changed_at DESC);
   `);
+
+  // Add recovery_hash column to users if missing (migration)
+  const userCols = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
+  if (!userCols.some(c => c.name === "recovery_hash")) {
+    db.exec("ALTER TABLE users ADD COLUMN recovery_hash TEXT");
+  }
 }
